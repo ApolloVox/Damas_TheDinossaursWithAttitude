@@ -39,9 +39,18 @@ typedef struct JogsPoss
 {
 	struct jogada *esquerda;
 	struct jogada *direita;
-	int casa;
+	int casa[2];
 }*jogada;
 	
+jogada ListarJogadas(int **coord)
+{
+	jogada Lista = (jogada)malloc(sizeof(struct JogsPoss));
+	Lista->casa[0] = (*coord)[0];
+	Lista->casa[1] = (*coord)[1];
+
+	jogada act = Lista, ant = Lista;
+	while()
+}
 /*typedef struct Peça
 {
 	int coord[2];
