@@ -1,0 +1,3 @@
+﻿  Damas.cpp
+c:\users\user\desktop\ipca\c#\damas\damas\damas.cpp(50): warning C4091: 'typedef ': ignored on left of 'Jogador' when no variable is declared
+  Damas.vcxproj -> C:\Users\User\Desktop\IPCA\C#\Damas\Debug\Damas.exe
