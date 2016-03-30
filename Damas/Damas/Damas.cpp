@@ -30,23 +30,24 @@ typedef struct tabuleiro
 
 typedef struct Lista
 {
-	Lista *anterior;
-	Lista *seguinte;
-	jogada *jog;
+	struct Lista *anterior;
+	struct Lista *seguinte;
+	struct jogada *jog;
 }*ListJogs;
 
 typedef struct JogsPoss
 {
-	
+	struct jogada *esquerda;
+	struct jogada *direita;
+	int casa;
 }*jogada;
-
+	
 /*typedef struct Peça
 {
 	int coord[2];
 	bool dama = false;
 }*peça;
 */
-typedef struct Jogador{};
 
 /*ListJogs AddJog(ListJogs apt, int *origem, int **destino)
 {
@@ -127,14 +128,10 @@ void MapaInicio(tab board)
 	}
 }
 
-void MapaArv(TabArv board)
-{
-
-}
 
 int main()
 {
-	tab tabu = (tab)malloc(sizeof(tabuleiro));
+	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
 	MapaInicio(tabu);
 	drawBoard(tabu);
 	getchar();
