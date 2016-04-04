@@ -1,6 +1,7 @@
 // Damas.cpp : Defines the entry point for the console application.
 //
 
+#include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
 	
@@ -48,10 +49,8 @@ jogada ListarJogadas(int **coord)
 	Lista->casa[1] = (*coord)[1];
 
 	jogada act = Lista, ant = Lista;
-	while (1 == 0) { printf(0); }
+	while()
 }
-
-
 /*typedef struct Peça
 {
 	int coord[2];
