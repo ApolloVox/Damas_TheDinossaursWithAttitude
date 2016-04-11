@@ -24,8 +24,7 @@ typedef struct TabArv
 
 typedef struct tabuleiro
 {
-	char taboo[8][8];
-	int jog; //0->livre, 1->jog1, 2->jog2
+	char taboo[8][8];	
 }*tab;
 
 typedef struct Lista
@@ -42,6 +41,38 @@ typedef struct JogsPoss
 	int casa[2];
 }*jogada;
 	
+typedef struct lastBoard
+{
+	char state[8][8];
+	struct lastBoard *seguinte;
+}*ultimoTab;
+
+
+
+ultimoTab saveLast(ultimoTab last ,tab board)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			last->state[i][j] = board->taboo[i][j];
+		}
+	}
+	return last;
+}
+
+tab retroceder(ultimoTab last, tab board)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			board->taboo[i][j] = last->state[i][j];
+		}
+	}
+	return board;
+}
+ 
 void ListarJogadas(int **coord)
 {
 	jogada Lista = (jogada)malloc(sizeof(struct JogsPoss));
@@ -217,6 +248,19 @@ void drawBoard(tab tabuleiro)
 	}
 	printf("-----------------\n 0/1/2/3/4/5/6/7\n\n");
 }
+void drawBoard2(ultimoTab tabuleiro)
+{	
+	for (int i = 0; i < 8; i++)
+	{
+		printf("|");
+		for (int j = 0; j < 8; j++)
+		{
+			printf("%c|", tabuleiro->state[i][j]);
+		}
+		printf(" %d\n", i);
+	}
+	printf("-----------------\n 0/1/2/3/4/5/6/7\n\n");
+}
 
 void MapaInicio(tab board)
 {
@@ -266,14 +310,20 @@ void MapaInicio(tab board)
 int main()
 {
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
+	ultimoTab lt = (ultimoTab)malloc(sizeof(struct lastBoard));
 	MapaInicio(tabu);
 	drawBoard(tabu);
+	lt = saveLast(lt, tabu);
+	drawBoard2(lt);
+	tabu->taboo[2][2] = 'b';
+	drawBoard(tabu);
+	tabu = retroceder(lt, tabu);
 	int coord[2];
-	printf("Indique as coordenadas da peça que quer jogar\n");
-
+	printf("Indique as coordenadas da peça que quer jogar\n");				
+	
+	drawBoard(tabu);	
 	jogadas(tabu, 'p', 2,2,0);
 
-	
 
 
 	getchar();
