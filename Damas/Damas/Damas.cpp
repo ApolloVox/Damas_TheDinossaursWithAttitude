@@ -6,13 +6,13 @@
 #include <stdlib.h>
 	
 
-/*typedef struct peça
+typedef struct jogador
 {
-	int jog;
-	//localização
-	int posicao[2];
-}*Peça;
-*/
+	int retroceder;
+	//int peçasComidas;
+	char peca;
+}*jog;
+
 typedef struct TabArv
 {
 	struct TabArv *AntEsq;
@@ -46,8 +46,6 @@ typedef struct lastBoard
 	char state[8][8];
 	struct lastBoard *seguinte;
 }*ultimoTab;
-
-
 
 ultimoTab saveLast(ultimoTab last ,tab board)
 {
@@ -83,13 +81,14 @@ void ListarJogadas(int **coord)
 	while (1 == 0) { printf(0); }
 }
 
-void jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu uma peça 1, se não comeu 0
+void jogadas(tab board, char jog, int linha, int coluna, tabarv tb,int come) //se comeu uma peça 1, se não comeu 0
 {
-	if (board->taboo[linha][coluna]==0) printf("Casa nao e jogavel");
-	else if (jog != board->taboo[linha][coluna]) printf("Peca nao e do jogador.");
+	if ((board->taboo[linha][coluna]=='0') && (come == 0)) printf("Casa nao e jogavel");
+	else if ((jog != board->taboo[linha][coluna]) && (come == 0)) printf("Peca nao e do jogador.");
 	else
 	{
-		printf("Jogadas possiveis da peça %c em [%d,%d]:\n", jog, linha, coluna);
+		if(come == 0)
+			printf("Jogadas possiveis da peça %c em [%d,%d]:\n", jog, linha, coluna);
 		//Jogador Branco
 		if (jog == 'b')
 		{
@@ -98,38 +97,37 @@ void jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu um
 			else
 			{
 				if ((come == 0) && (board->taboo[linha - 1][coluna - 1] == '0')) printf("-Para [%d,%d]\n", linha - 1, coluna - 1);
-				else if ((board->taboo[linha - 1][coluna - 1] == 'p') && (linha - 2 >= 0) && (coluna - 2 > 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
+				else if ((board->taboo[linha - 1][coluna - 1] == 'p') && (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
 				{
-					if (come = 0)
+					if (come == 0)
 					{
 						printf("-Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha - 1, coluna - 1, linha - 2, coluna - 2);
-						jogadas(board, jog, linha - 2, coluna - 2, 1);
+						jogadas(board, jog, linha - 2, coluna - 2,tb, 1);
 					}
 					else if (come != 0)
 					{
 						for (int i = 0; i < come; i++) printf("\t");
 						printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha - 1, coluna - 1, linha - 2, coluna - 2);
-						jogadas(board, jog, linha - 2, coluna - 2, come++);
+						jogadas(board, jog, linha - 2, coluna - 2,tb, come++);
 					}
 				}
-				for (int i = 0; i < come; i++) printf("\t");
-				printf("OU\n");
+
 			}
 			//Direita
-			if ((linha + 1 > 7) || (coluna - 1 < 0) || (board->taboo[linha + 1][coluna - 1] == 'b')) printf("");
-			else if ((come == 0) && (board->taboo[linha + 1][coluna - 1] == '0')) printf("-Para [%d,%d]\n", linha + 1, coluna - 1);
-			else if ((board->taboo[linha + 1][coluna - 1] == 'p') && (linha + 2 < 8) && (coluna + 2 > 0) && (board->taboo[linha + 2][coluna - 2] == '0'))
+			if ((linha - 1 > 7) || (coluna + 1 < 0) || (board->taboo[linha - 1][coluna + 1] == 'b')) printf("");
+			else if ((come == 0) && (board->taboo[linha - 1][coluna + 1] == '0')) printf("-Para [%d,%d]\n", linha - 1, coluna + 1);
+			else if ((board->taboo[linha - 1][coluna + 1] == 'p') && (linha - 2 < 8) && (coluna + 2 >= 0) && (board->taboo[linha - 2][coluna + 2] == '0'))
 			{
-				if (come = 0)
+				if (come == 0)
 				{
-					printf("-Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna - 1, linha + 2, coluna - 2);
-					jogadas(board, jog, linha + 2, coluna - 2, 1);
+					printf("-Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha - 1, coluna + 1, linha - 2, coluna + 2);
+					jogadas(board, jog, linha - 2, coluna + 2,tb, 1);
 				}
 				else if (come != 0)
 				{
 					for (int i = 0; i < come; i++) printf("\t");
-					printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna - 1, linha + 2, coluna - 2);
-					jogadas(board, jog, linha + 2, coluna - 2, 1);
+					printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna - 1, linha - 2, coluna + 2);
+					jogadas(board, jog, linha - 2, coluna + 2,tb, come++);
 				}
 			}
 
@@ -138,26 +136,24 @@ void jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu um
 		if (jog == 'p')
 		{
 			//Esquerda
-			if ((linha - 1 < 0) || (coluna + 1 > 7) || (board->taboo[linha - 1][coluna + 1] == 'p')) printf("");
+			if ((linha + 1 < 0) || (coluna - 1 > 7) || (board->taboo[linha + 1][coluna - 1] == 'p')) printf("");
 			else
 			{
-				if ((come == 0) && (board->taboo[linha - 1][coluna + 1] == '0')) printf("-Para [%d,%d]\n", linha - 1, coluna + 1);
-				else if ((board->taboo[linha - 1][coluna + 1] == 'b') && (linha - 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha - 2][coluna + 2] == '0'))
+				if ((come == 0) && (board->taboo[linha + 1][coluna - 1] == '0')) printf("-Para [%d,%d]\n", linha + 1, coluna - 1);
+				else if ((board->taboo[linha + 1][coluna - 1] == 'b') && (linha + 2 >= 0) && (coluna - 2 < 8) && (board->taboo[linha + 2][coluna - 2] == '0'))
 				{
-					if (come = 0)
+					if (come == 0)
 					{
-						printf("-Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha - 1, coluna + 1, linha - 2, coluna + 2);
-						jogadas(board, jog, linha - 2, coluna + 2, 1);
+						printf("-Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna - 1, linha + 2, coluna - 2);
+						jogadas(board, jog, linha + 2, coluna - 2,tb, 1);
 					}
 					else if (come != 0)
 					{
 						for (int i = 0; i < come; i++) printf("\t");
-						printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha - 1, coluna + 1, linha - 2, coluna + 2);
-						jogadas(board, jog, linha - 2, coluna + 2, come++);
+						printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna - 1, linha + 2, coluna - 2);
+						jogadas(board, jog, linha + 2, coluna - 2,tb, come++);
 					}
-				}
-				for (int i = 0; i < come; i++) printf("\t");
-				printf("OU\n");
+				}				
 			}
 			//Direita
 			if ((linha + 1 > 7) || (coluna + 1 > 7) || (board->taboo[linha + 1][coluna + 1] == 'p')) printf("Nada\n");
@@ -166,16 +162,16 @@ void jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu um
 				if ((come == 0) && (board->taboo[linha + 1][coluna + 1] == '0')) printf("-Para [%d,%d]\n", linha + 1, coluna + 1);
 				else if ((board->taboo[linha + 1][coluna + 1] == 'b') && (linha + 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha + 2][coluna + 2] == '0'))
 				{
-					if (come = 0)
+					if (come == 0)
 					{
 						printf("-Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna + 1, linha + 2, coluna + 2);
-						jogadas(board, jog, linha + 2, coluna + 2, 1);
+						jogadas(board, jog, linha + 2, coluna + 2,tb, 1);
 					}
 					else if (come != 0)
 					{
 						for (int i = 0; i < come; i++) printf("\t");
 						printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna + 1, linha + 2, coluna + 2);
-						jogadas(board, jog, linha + 2, coluna + 2, come++);
+						jogadas(board, jog, linha + 2, coluna + 2,tb, come++);
 					}
 				}
 			}
@@ -267,11 +263,11 @@ void MapaInicio(tab board)
 	char b[8][8] = {
 	{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
 	{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
-	{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
-	{ '0', '0', '0', '0', '0', '0', '0', '0' },
-	{ '0', '0', '0', '0', '0', '0', '0', '0' },
+	{ '0', '0', '0', 'p', 'p', '0', 'p', '0' },
+	{ '0', 'p', '0', '0', '0', '0', '0', '0' },
+	{ '0', '0', '0', '0', '0', 'p', '0', '0' },
 	{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' },
-	{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
+	{ '0', 'b', '0', 'b', '0', '0', '0', '0' },
 	{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' }
 	};
 
@@ -281,48 +277,39 @@ void MapaInicio(tab board)
 		{
 			board->taboo[i][j] = b[i][j];
 		}
-	}
-
-	/*
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			if ((((i == 0) || (i == 2)) && (j % 2 == 0)) //filas 0 e 2
-				|| ((i == 1) && (j % 2 == 1)))			 //fila1
-			{
-				board->taboo[i][j] = 'p';
-			}
-
-			else if ((((i == 5) || (i == 7)) && (j % 2 != 0)) //filas 5 e 7
-				|| ((i == 6) && (j % 2 == 0)))			     //fila 6
-			{
-				board->taboo[i][j] = 'b';
-			}
-
-			else board->taboo[i][j] = '0';
-		}
-	}
-*/
+	}	
 }
 
 
 int main()
 {
+	jog jogs[2];
+	
+	char aux[2] = { 'p','b' };
+	int i;	
+	for (i = 0; i < 2; i++)
+	{
+		jogs[i] = (jog)malloc(sizeof(struct jogador));
+		jogs[i]->retroceder = 3;
+		jogs[i]->peca = aux[i];
+	}
+
+	tabarv tb = (tabarv)malloc(sizeof(struct TabArv));
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
-	ultimoTab lt = (ultimoTab)malloc(sizeof(struct lastBoard));
+	ultimoTab lt = (ultimoTab)malloc(sizeof(struct lastBoard));	
 	MapaInicio(tabu);
-	drawBoard(tabu);
-	lt = saveLast(lt, tabu);
+
+	/*drawBoard(tabu);*/
+	/*lt = saveLast(lt, tabu);
 	drawBoard2(lt);
 	tabu->taboo[2][2] = 'b';
 	drawBoard(tabu);
 	tabu = retroceder(lt, tabu);
-	int coord[2];
+	int coord[2];*/
 	printf("Indique as coordenadas da peça que quer jogar\n");				
 	
 	drawBoard(tabu);	
-	jogadas(tabu, 'p', 2,2,0);
+	jogadas(tabu, 'b', 5,6,tb,0);
 
 
 
