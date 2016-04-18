@@ -19,7 +19,7 @@ typedef struct TabArv
 	struct TabArv *AntDir;
 	struct TabArv *SegEsq;
 	struct TabArv *SegDir;
-	int casa; //0->vazia, 1->jog1, 2->jog2
+	int casa[2]; //0->vazia, 1->jog1, 2->jog2
 }*tabarv;
 
 typedef struct tabuleiro
@@ -108,10 +108,9 @@ void jogadas(tab board, char jog, int linha, int coluna, tabarv tb,int come) //s
 					{
 						for (int i = 0; i < come; i++) printf("\t");
 						printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha - 1, coluna - 1, linha - 2, coluna - 2);
-						jogadas(board, jog, linha - 2, coluna - 2,tb, come++);
+						jogadas(board, jog, linha - 2, coluna - 2,tb, come+1);
 					}
 				}
-
 			}
 			//Direita
 			if ((linha - 1 > 7) || (coluna + 1 < 0) || (board->taboo[linha - 1][coluna + 1] == 'b')) printf("");
@@ -127,10 +126,9 @@ void jogadas(tab board, char jog, int linha, int coluna, tabarv tb,int come) //s
 				{
 					for (int i = 0; i < come; i++) printf("\t");
 					printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna - 1, linha - 2, coluna + 2);
-					jogadas(board, jog, linha - 2, coluna + 2,tb, come++);
+					jogadas(board, jog, linha - 2, coluna + 2,tb, come+1);
 				}
 			}
-
 		}
 		//Jogador preto
 		if (jog == 'p')
@@ -151,7 +149,7 @@ void jogadas(tab board, char jog, int linha, int coluna, tabarv tb,int come) //s
 					{
 						for (int i = 0; i < come; i++) printf("\t");
 						printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna - 1, linha + 2, coluna - 2);
-						jogadas(board, jog, linha + 2, coluna - 2,tb, come++);
+						jogadas(board, jog, linha + 2, coluna - 2,tb, come+1);
 					}
 				}				
 			}
@@ -171,11 +169,10 @@ void jogadas(tab board, char jog, int linha, int coluna, tabarv tb,int come) //s
 					{
 						for (int i = 0; i < come; i++) printf("\t");
 						printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna + 1, linha + 2, coluna + 2);
-						jogadas(board, jog, linha + 2, coluna + 2,tb, come++);
+						jogadas(board, jog, linha + 2, coluna + 2,tb, come+1);
 					}
 				}
 			}
-
 		}
 	}
 }
@@ -263,11 +260,11 @@ void MapaInicio(tab board)
 	char b[8][8] = {
 	{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
 	{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
-	{ '0', '0', '0', 'p', 'p', '0', 'p', '0' },
+	{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
 	{ '0', 'p', '0', '0', '0', '0', '0', '0' },
-	{ '0', '0', '0', '0', '0', 'p', '0', '0' },
+	{ '0', '0', '0', '0', '0', '0', '0', '0' },
 	{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' },
-	{ '0', 'b', '0', 'b', '0', '0', '0', '0' },
+	{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
 	{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' }
 	};
 
@@ -309,7 +306,7 @@ int main()
 	printf("Indique as coordenadas da peça que quer jogar\n");				
 	
 	drawBoard(tabu);	
-	jogadas(tabu, 'b', 5,6,tb,0);
+	jogadas(tabu, 'b', 7,7,tb,0);
 
 
 
