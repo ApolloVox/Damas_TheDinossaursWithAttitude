@@ -7,8 +7,11 @@
 
 #include "targetver.h"
 
-#include <stdio.h>
-#include <tchar.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+#define _CRT_SECURE_NO_WARNINGS
+#pragma warnings disable:(4496)
 
 
 
