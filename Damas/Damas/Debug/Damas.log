@@ -1,5 +1,4 @@
 ﻿  Damas.cpp
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(392): warning C4477: 'fscanf' : format string '%d' requires an argument of type 'int *', but variadic argument 1 has type 'int'
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(437): warning C4047: 'function': 'int' differs in levels of indirection from 'int *'
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(437): warning C4024: 'loadBoard': different types for formal and actual parameter 2
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(447): warning C4047: 'function': 'int' differs in levels of indirection from 'int *'
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(447): warning C4024: 'loadBoard': different types for formal and actual parameter 2
   Damas.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\Damas\Debug\Damas.exe

@@ -287,9 +287,9 @@ int exists(char *fname)
 {
 	FILE *file;	
 
-	char* name = concat(fname,".txt");
+	char* name = concat(fname,".bin");
 
-	if (file = fopen(name, "r"))
+	if (file = fopen(name, "rb"))
 	{
 		fclose(file);
 		return 1;
@@ -312,18 +312,20 @@ void saveFile(tab board,int idJog)
 			scanf("%d", &op);
 			if (op == 1)
 			{
-				char * fileName = concat(str, ".txt");
+				char * fileName = concat(str, ".bin");
 				FILE *newfile;
-				newfile = fopen(fileName, "w");
+				newfile = fopen(fileName, "wb");
 				for (int i = 0; i < 8; i++)
 				{
 					for (int j = 0; j < 8; j++)
 					{
 						char cAux = board->taboo[i][j];
-						fprintf(newfile, "%c\n", cAux);
+						fwrite(&cAux, sizeof(char), 1, newfile);
+						//fprintf(newfile, "%c\n", cAux);
 					}
 				}
-				fprintf(newfile, "%d\n", idJog);
+				//fprintf(newfile, "%d\n", idJog);
+				fwrite(&idJog, sizeof(int), 1, newfile);
 				fclose(newfile);
 				puts("Save efetuado com sucesso !!");
 				getchar();
@@ -343,18 +345,20 @@ void saveFile(tab board,int idJog)
 		}
 		else
 		{
-			char * fileName = concat(str, ".txt");
+			char * fileName = concat(str, ".bin");
 			FILE *newfile;
-			newfile = fopen(fileName, "w");
+			newfile = fopen(fileName, "wb");
 			for (int i = 0; i < 8; i++)
 			{
 				for (int j = 0; j < 8; j++)
 				{
 					char cAux = board->taboo[i][j];
-					fprintf(newfile, "%c\n", cAux);
+					fwrite(&cAux, sizeof(char), 1, newfile);
+					//fprintf(newfile, "%c\n", cAux); //.txt
 				}
 			}
-			fprintf(newfile, "%d\n", idJog);
+			//fprintf(newfile, "%d\n", idJog);//.txt
+			fwrite(&idJog, sizeof(int), 1, newfile);//binario
 			fclose(newfile);
 			puts("Save efetuado com sucesso !!");
 			getchar();
@@ -377,19 +381,22 @@ void loadBoard(tab board,int idJog)
 		if (exists(str) == 1)
 		{
 			puts("FICHEIRO EXISTE");
-			char * fileName = concat(str, ".txt");
+			char * fileName = concat(str, ".bin");
 			FILE *newfile;
-			newfile = fopen(fileName, "r");
+			newfile = fopen(fileName, "rb");
 			for (int i = 0; i < 8; i++)
 			{
 				for (int j = 0; j < 8; j++)
 				{
 					char cAux2;
-					fscanf(newfile, "%c\n", &cAux2);
+					fread(&cAux2, sizeof(char), 1, newfile);//binario
+					//fscanf(newfile, "%c\n", &cAux2);//.txt
 					board->taboo[i][j] = cAux2;
 				}
 			}
-			fscanf(newfile, "%d\n", idJog);//it Works
+			fread(&idJog, sizeof(int), 1, newfile);//binario
+			//fscanf(newfile, "%d\n", idJog);//it Works - //.txt
+			fclose(newfile);
 			break;
 		}
 		else
@@ -414,7 +421,7 @@ int main()
 	FILE *save;
 
 	jog jogs[2];
-	int jogId = 4;
+	int jogId = 9;
 	char aux[2] = { 'p','b' };
 	int i;	
 	for (i = 0; i < 2; i++)
@@ -427,6 +434,9 @@ int main()
 	tabarv tb = (tabarv)malloc(sizeof(struct TabArv));
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
 	ultimoTab lt = (ultimoTab)malloc(sizeof(struct lastBoard));
+	MapaInicio(tabu);	
+	tabu->taboo[2][2] = 'v';
+	saveFile(tabu, jogId);
 	int opMenu = MENU();
 	if (opMenu == 2)
 	{
