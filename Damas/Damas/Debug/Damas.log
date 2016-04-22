@@ -1,5 +1,11 @@
 ﻿  Damas.cpp
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(458): warning C4047: 'function': 'int' differs in levels of indirection from 'int *'
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(458): warning C4024: 'loadGameFile': different types for formal and actual parameter 2
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(431): warning C4101: 'save': unreferenced local variable
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(187): warning C4047: 'function': 'int' differs in levels of indirection from 'tabarv'
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(187): warning C4024: 'jogadas': different types for formal and actual parameter 5
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(187): warning C4020: 'jogadas': too many actual parameters
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(193): warning C4047: 'function': 'int' differs in levels of indirection from 'tabarv'
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(193): warning C4024: 'jogadas': different types for formal and actual parameter 5
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(193): warning C4020: 'jogadas': too many actual parameters
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(470): warning C4101: 'save': unreferenced local variable
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(199): warning C4715: 'jogadas': not all control paths return a value
+  LINK : C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\Damas\Debug\Damas.exe not found or not built by the last incremental link; performing full link
   Damas.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\Damas\Debug\Damas.exe
