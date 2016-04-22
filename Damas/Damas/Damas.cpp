@@ -45,7 +45,7 @@ typedef struct lastBoard
 	struct lastBoard *seguinte;
 }*ultimoTab;
 
-ultimoTab saveLast(ultimoTab last ,tab board)
+ultimoTab saveLastBoard(ultimoTab last ,tab board)
 {
 	for (int i = 0; i < 8; i++)
 	{
@@ -296,8 +296,9 @@ int exists(char *fname)
 	}
 	return 0;
 }
-void saveFile(tab board,int idJog)
+void saveGameFile(tab board,int idJog)
 {
+	fseek(stdin, 0, SEEK_END);
 	char str[100];
 	int op = 0,bk = 0;	
 	do
@@ -308,7 +309,7 @@ void saveFile(tab board,int idJog)
 		system("cls");
 		if (exists(str) == 1)
 		{
-			puts("Ficheiro ja existe...\n-1 Substituir\n-2 Nao salvar\n-3 Inserir novo nome");
+			puts("Ficheiro ja existe...\n-1 Substituir\n-2 Inserir novo nome\n-3 Nao salvar");
 			scanf("%d", &op);
 			if (op == 1)
 			{
@@ -331,11 +332,10 @@ void saveFile(tab board,int idJog)
 				getchar();
 				break;
 			}
-			else if(op == 2)
+			else if(op == 3)
 			{
 				puts("Terminado !!");
-				getchar();
-				getchar();
+				getchar();				
 				break;
 			}
 			else
@@ -367,17 +367,16 @@ void saveFile(tab board,int idJog)
 		getchar();
 	} while (exists(str) == 1 || bk == 1);	
 }
-void loadBoard(tab board,int idJog)
+int loadGameFile(tab board,int idJog)
 {
-
+	fseek(stdin, 0, SEEK_END);
 	char str[100];
 	int op = 0, bk = 0;
 	do
 	{
 		system("cls");
 		puts("Insira um nome para o ficheiro : ");
-		scanf("%[^\n]%*c", str);		
-
+		scanf("%[^\n]%*c", str);			
 		if (exists(str) == 1)
 		{
 			puts("FICHEIRO EXISTE");
@@ -397,18 +396,29 @@ void loadBoard(tab board,int idJog)
 			fread(&idJog, sizeof(int), 1, newfile);//binario
 			//fscanf(newfile, "%d\n", idJog);//it Works - //.txt
 			fclose(newfile);
+			getchar();
 			break;
 		}
 		else
 		{
-			bk = 1;
+			int op;
+			puts("Ficheiro nao existe !!\n1-Tentar de novo\n2-Comecar novo jogo");
+			scanf("%d", &op);
+			if (op == 2)
+			{
+				return 1;
+				bk = 1;
+			}			
 		}
+
 		getchar();
-	} while (exists(str) == 1 || bk == 1);
+	} while (exists(str) == 0 || bk == 1);
+	return 0;
 }
 
 int MENU()
 {
+	system("cls");
 	puts("BEM VINDO AO JOGO DAS DAMAS !!");
 	puts("Precione : \n1-Continuar Jogo\n2-Novo Jogo");
 	int op;
@@ -421,7 +431,7 @@ int main()
 	FILE *save;
 
 	jog jogs[2];
-	int jogId = 9;
+	int jogId = 123;
 	char aux[2] = { 'p','b' };
 	int i;	
 	for (i = 0; i < 2; i++)
@@ -436,15 +446,20 @@ int main()
 	ultimoTab lt = (ultimoTab)malloc(sizeof(struct lastBoard));
 	MapaInicio(tabu);	
 	tabu->taboo[2][2] = 'v';
-	saveFile(tabu, jogId);
-	int opMenu = MENU();
+	saveGameFile(tabu, jogId);
+	tabu->taboo[2][2] = 'z';		
+	int opMenu = MENU();	
 	if (opMenu == 2)
 	{
-		MapaInicio(tabu);
+		MapaInicio(tabu);		
 	}
 	else
 	{
-		loadBoard(tabu,&jogId);
+		int a = loadGameFile(tabu,&jogId);
+		if (a == 1)
+		{
+			MapaInicio(tabu);
+		}
 	}	
 
 	/*drawBoard(tabu);*/
@@ -454,40 +469,13 @@ int main()
 	drawBoard(tabu);
 	tabu = retroceder(lt, tabu);
 	int coord[2];*/
-	printf("Indique as coordenadas da peça que quer jogar\n");				
+	/*printf("Indique as coordenadas da peça que quer jogar\n");				
 	
 	drawBoard(tabu);	
-	jogadas(tabu, 'b', 7,7,tb,0);
+	jogadas(tabu, 'b', 7,7,tb,0);*/
 
-	/*saveFile(tabu,jogId);*/	
-
-	save = fopen("save.ade", "w");
-	/*for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			char cAux = tabu->taboo[i][j];
-			fprintf(save, "%c\n",cAux);
-		}
-	}
-	fprintf(save, "%d", 2);
-	fclose(save);
-
-	save = fopen("save.ade", "r");
-	int countAux = 0;	
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			char cAux2;
-			fscanf(save, "%c\n", &cAux2);		
-			tabu->taboo[i][j] = cAux2;
-		}
-	}*/
 	drawBoard(tabu);
 	
 	printf("Existe - %d\nJogId - %d", exists("yolo"),jogId);
-	getchar();
-	getchar();
+	getchar();	
 }
-
