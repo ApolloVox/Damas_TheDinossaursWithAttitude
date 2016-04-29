@@ -86,6 +86,8 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 		//Jogador Branco
 		if (jog == 'b')
 		{
+			tb->SegDir = NULL;
+			tb->SegEsq = NULL;
 			//Esquerda
 			if ((linha - 1 < 0) || (coluna - 1 < 0) || (board->taboo[linha - 1][coluna - 1] == 'b'))
 			{
@@ -107,8 +109,12 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 
 				else if ((board->taboo[linha - 1][coluna - 1] == 'p') && (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
 				{
-					tb->AntEsq=jogadas(board, jog, linha - 2, coluna - 2, come + 1);
+					tb->AntEsq = jogadas(board, jog, linha - 2, coluna - 2, come + 1);
 					tb->AntEsq->SegDir = tb;
+				}
+				else
+				{
+					tb->AntEsq = NULL;
 				}
 			}
 			//Direita
@@ -133,10 +139,13 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 				tb->AntDir = jogadas(board, jog, linha - 2, coluna + 2, come + 1);
 				tb->AntDir->SegEsq = tb;
 			}
+			else tb->AntDir = NULL;
 		}
 		//Jogador preto
 		if (jog == 'p')
 		{
+			tb->AntDir = NULL;
+			tb->AntEsq = NULL;
 			//Esquerda
 			if ((linha + 1 < 0) || (coluna - 1 > 7) || (board->taboo[linha + 1][coluna - 1] == 'p')) tb->SegEsq = NULL;
 			else
@@ -156,14 +165,16 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 				else if ((board->taboo[linha + 1][coluna - 1] == 'b') && (linha + 2 >= 0) && (coluna - 2 < 8) && (board->taboo[linha + 2][coluna - 2] == '0'))
 				{
 					tb->SegEsq = jogadas(board, jog, linha + 2, coluna - 2, come + 1);
-					tb->SegEsq->AntDir= tb;
-				}				
+					tb->SegEsq->AntDir = tb;
+				}
+
+				else tb->SegEsq = NULL;
 			}
 			//Direita
 			if ((linha + 1 > 7) || (coluna + 1 > 7) || (board->taboo[linha + 1][coluna + 1] == 'p')) tb->SegDir = NULL;
 			else
 			{
-				if ((come == 0) && (board->taboo[linha + 1][coluna + 1] == '0')) 
+				if ((come == 0) && (board->taboo[linha + 1][coluna + 1] == '0'))
 				{
 					tb->SegDir = (tabarv)malloc(sizeof(struct TabArv));
 					tb->SegDir->AntDir = NULL;
@@ -179,8 +190,28 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 					tb->SegDir = jogadas(board, jog, linha + 2, coluna + 2, come + 1);
 					tb->SegDir->AntEsq = tb;
 				}
+				else tb->SegDir = NULL;
 			}
 		}
+		return tb;
+	}
+}
+
+void caminhos(tabarv tb)
+{
+	if (tb != NULL)
+	{
+		if (tb->AntEsq != NULL && tb->AntEsq->comestivel > tb->comestivel)
+			caminhos(tb->AntEsq);
+		if (tb->AntDir != NULL && tb->AntDir->comestivel > tb->comestivel)
+			caminhos(tb->AntDir);
+		int i;
+		for (i = 0; i < tb->comestivel; i++) printf("\t");
+		printf("[%d,%d]\n", tb->casa[0], tb->casa[1]);
+		if (tb->SegEsq != NULL && tb->SegEsq->comestivel>tb->comestivel)
+			caminhos(tb->SegEsq);
+		if (tb->SegDir != NULL && tb->SegDir->comestivel > tb->comestivel)
+			caminhos(tb->SegDir);
 	}
 }
 
@@ -254,9 +285,9 @@ void MapaInicio(tab board)
 	{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
 	{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
 	{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
-	{ '0', 'p', '0', '0', '0', '0', '0', '0' },
+	{ '0', '0', '0', 'b', '0', '0', '0', '0' },
 	{ '0', '0', '0', '0', '0', '0', '0', '0' },
-	{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' },
+	{ 'b', '0', 'b', 'b', 'b', 'b', 'b', '0' },
 	{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
 	{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' }
 	};
@@ -451,10 +482,12 @@ int main()
 		jogs[i]->retroceder = 3;
 		jogs[i]->peca = aux[i];
 	}
-	tabarv tb = (tabarv)malloc(sizeof(struct TabArv));
+	
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
 
 	MapaInicio(tabu);
+	tabarv tb = jogadas(tabu, 'p', 2, 2, 0);
+	caminhos(tb);
 	/*tabu->taboo[2][2] = 'a';
 	saveGameFile(tabu, jogId, retr1, retr2);
 	tabu->taboo[2][2] = 'a';
@@ -486,7 +519,7 @@ int main()
 
 	drawBoard(tabu);
 
-	printf("Existe - %d\nJogId - %d\nJog1 retr - %d\nJog2 retr - %d", existe("a"), jogId, retr1, retr2);
+	/*printf("Existe - %d\nJogId - %d\nJog1 retr - %d\nJog2 retr - %d", existe("a"), jogId, retr1, retr2);*/
 	while (getchar() != '\n');
 	getchar();
 }

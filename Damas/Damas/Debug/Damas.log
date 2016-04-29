@@ -1,4 +1,3 @@
 ﻿  Damas.cpp
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(442): warning C4101: 'save': unreferenced local variable
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(185): warning C4715: 'jogadas': not all control paths return a value
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damas\damas\damas.cpp(473): warning C4101: 'save': unreferenced local variable
   Damas.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\Damas\Debug\Damas.exe
