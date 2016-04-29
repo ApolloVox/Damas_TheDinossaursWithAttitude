@@ -23,52 +23,33 @@ typedef struct TabArv
 
 typedef struct tabuleiro
 {
-	char taboo[8][8];	
+	char taboo[8][8];
+	struct tabuleiro *segunte;
 }*tab;
 
-typedef struct Lista
-{
-	struct Lista *anterior;
-	struct Lista *seguinte;
-	struct jogada *jog;
-}*ListJogs;
+//typedef struct Lista
+//{
+//	struct Lista *anterior;
+//	struct Lista *seguinte;
+//	struct jogada *jog;
+//}*ListJogs;
 
 typedef struct JogsPoss
 {
 	struct jogada *esquerda;
 	struct jogada *direita;
 	int casa[2];
-}*jogada;
-	
-typedef struct lastBoard
-{
-	char state[8][8];
-	struct lastBoard *seguinte;
-}*ultimoTab;
+}*jogada;	
 
-ultimoTab saveLastBoard(ultimoTab last ,tab board)
-{
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			last->state[i][j] = board->taboo[i][j];
-		}
-	}
-	return last;
-}
-
-tab retroceder(ultimoTab last, tab board)
-{
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			board->taboo[i][j] = last->state[i][j];
-		}
-	}
-	return board;
-}
+//tab saveLastBoard(tab board)
+//{
+//
+//}
+//
+//tab retroceder(tab board)
+//{
+//	
+//}
  
 void ListarJogadas(int **coord)
 {
@@ -82,7 +63,11 @@ void ListarJogadas(int **coord)
 
 tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu uma peça 1, se não comeu 0
 {
-	if ((board->taboo[linha][coluna] == '0') && (come == 0))
+	if (come == 5)
+	{
+		return NULL;
+	}
+	else if ((board->taboo[linha][coluna] == '0') && (come == 0))
 	{
 		printf("Casa nao e jogavel\n");
 		return NULL;
@@ -175,23 +160,24 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 				}				
 			}
 			//Direita
-			if ((linha + 1 > 7) || (coluna + 1 > 7) || (board->taboo[linha + 1][coluna + 1] == 'p')) printf("Nada\n");
+			if ((linha + 1 > 7) || (coluna + 1 > 7) || (board->taboo[linha + 1][coluna + 1] == 'p')) tb->SegDir = NULL;
 			else
 			{
-				if ((come == 0) && (board->taboo[linha + 1][coluna + 1] == '0')) printf("-Para [%d,%d]\n", linha + 1, coluna + 1);
+				if ((come == 0) && (board->taboo[linha + 1][coluna + 1] == '0')) 
+				{
+					tb->SegDir = (tabarv)malloc(sizeof(struct TabArv));
+					tb->SegDir->AntDir = NULL;
+					tb->SegDir->SegDir = NULL;
+					tb->SegDir->SegEsq = NULL;
+					tb->SegDir->AntEsq = tb;
+					tb->SegDir->casa[0] = linha + 1;
+					tb->SegDir->casa[1] = coluna + 1;
+					tb->SegDir->comestivel = 0;
+				}
 				else if ((board->taboo[linha + 1][coluna + 1] == 'b') && (linha + 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha + 2][coluna + 2] == '0'))
 				{
-					if (come == 0)
-					{
-						printf("-Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna + 1, linha + 2, coluna + 2);
-						jogadas(board, jog, linha + 2, coluna + 2,tb, 1);
-					}
-					else if (come != 0)
-					{
-						for (int i = 0; i < come; i++) printf("\t");
-						printf("+Comer a peca em [%d,%d] e ir para [%d,%d]\n", linha + 1, coluna + 1, linha + 2, coluna + 2);
-						jogadas(board, jog, linha + 2, coluna + 2,tb, come+1);
-					}
+					tb->SegDir = jogadas(board, jog, linha + 2, coluna + 2, come + 1);
+					tb->SegDir->AntEsq = tb;
 				}
 			}
 		}
@@ -262,20 +248,6 @@ void drawBoard(tab tabuleiro)
 	}
 	printf("-----------------\n 0/1/2/3/4/5/6/7\n\n");
 }
-void drawBoard2(ultimoTab tabuleiro)
-{	
-	for (int i = 0; i < 8; i++)
-	{
-		printf("|");
-		for (int j = 0; j < 8; j++)
-		{
-			printf("%c|", tabuleiro->state[i][j]);
-		}
-		printf(" %d\n", i);
-	}
-	printf("-----------------\n 0/1/2/3/4/5/6/7\n\n");
-}
-
 void MapaInicio(tab board)
 {
 	char b[8][8] = {
@@ -481,9 +453,9 @@ int main()
 	}
 	tabarv tb = (tabarv)malloc(sizeof(struct TabArv));
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
-	ultimoTab lt = (ultimoTab)malloc(sizeof(struct lastBoard));
+
 	MapaInicio(tabu);
-	tabu->taboo[2][2] = 'a';
+	/*tabu->taboo[2][2] = 'a';
 	saveGameFile(tabu, jogId, retr1, retr2);
 	tabu->taboo[2][2] = 'a';
 	int opMenu = MENU();
@@ -498,7 +470,7 @@ int main()
 		{
 			MapaInicio(tabu);
 		}
-	}
+	}*/
 
 	/*drawBoard(tabu);*/
 	/*lt = saveLast(lt, tabu);
