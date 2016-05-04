@@ -543,7 +543,7 @@ int main()
 	/*tabarv tb = jogadas(tabu, 'b', 6, 5, 0);
 	caminhos(tb);	*/
 	//tabu->taboo[2][2] = 'a';
-	saveGameFile(tabu, jogId, retr1, retr2);
+	/*saveGameFile(tabu, jogId, retr1, retr2);
 	
 	tabu->taboo[2][2] = 'a';
 	int opMenu = MENU();
@@ -559,7 +559,7 @@ int main()
 			MapaInicio(tabu);
 		}
 	}
-
+*/
 	/*drawBoard(tabu);*/
 	/*lt = saveLast(lt, tabu);
 	drawBoard2(lt);
