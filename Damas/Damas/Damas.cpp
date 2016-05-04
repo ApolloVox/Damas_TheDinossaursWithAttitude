@@ -208,7 +208,7 @@ void caminhos(tabarv tb)
 		int i;
 		for (i = 0; i < tb->comestivel; i++) printf("\t");
 		printf("[%d,%d]\n", tb->casa[0], tb->casa[1]);
-		if (tb->SegEsq != NULL && tb->SegEsq->comestivel>tb->comestivel)
+		if (tb->SegEsq != NULL && tb->SegEsq->comestivel > tb->comestivel)
 			caminhos(tb->SegEsq);
 		if (tb->SegDir != NULL && tb->SegDir->comestivel > tb->comestivel)
 			caminhos(tb->SegDir);
@@ -325,7 +325,8 @@ int existe(char *fname)
 void saveGameFile(tab board, int idJog, int r1, int r2)
 {
 	fseek(stdin, 0, SEEK_END);
-	char str[100];
+	int i, j;
+	char str[100];	
 	int op = 0, bk = 0;
 	do
 	{
@@ -343,9 +344,9 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 				char * fileName = concat(str, ".bin");
 				FILE *newfile;
 				newfile = fopen(fileName, "wb");
-				for (int i = 0; i < 8; i++)
+				for (i = 0; i < 8; i++)
 				{
-					for (int j = 0; j < 8; j++)
+					for (j = 0; j < 8; j++)
 					{
 						char cAux = board->taboo[i][j];
 						fwrite(&cAux, sizeof(char), 1, newfile);
@@ -379,16 +380,29 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 			char * fileName = concat(str, ".bin");
 			FILE *newfile;
 			newfile = fopen(fileName, "wb");
-			for (int i = 0; i < 8; i++)
+			for (i = 0; i < 8; i++)
 			{
-				for (int j = 0; j < 8; j++)
+				//for (int j = 0; j < 8; j++)
+				//{
+				//	char cAux = board->taboo[i][j];
+				//	fwrite(&cAux, sizeof(char), 1, newfile);
+				//	//fprintf(newfile, "%c\n", cAux); //.txt
+				//}
+
+				for (j = 0; j < 8; j++)
 				{
 					char cAux = board->taboo[i][j];
-					fwrite(&cAux, sizeof(char), 1, newfile);
-					//fprintf(newfile, "%c\n", cAux); //.txt
+					int iAux;
+					if (cAux == 'p')
+						iAux = 0;
+					else if (cAux == '0')
+						iAux = 1;
+					else if (cAux == 'b')
+						iAux = 2;
+					else iAux = 200;
+					fwrite(&iAux, sizeof(int), 1, newfile); //.bin
 				}
-			}
-			//fprintf(newfile, "%d\n", idJog);//.txt			
+			}			
 			fwrite(&idJog, sizeof(int), 1, newfile);//binario
 			fwrite(&r1, sizeof(int), 1, newfile);
 			fwrite(&r2, sizeof(int), 1, newfile);
@@ -403,7 +417,9 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 {
 	fseek(stdin, 0, SEEK_END);
+	int i, j,stop = 0;
 	char str[100];
+	char chAux[3] = { 'p','0','b'}; //Tamanho temporário
 	int op = 0, bk = 0;
 	do
 	{
@@ -416,29 +432,69 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 			char * fileName = concat(str, ".bin");
 			FILE *newfile;
 			newfile = fopen(fileName, "rb");
-			for (int i = 0; i < 8; i++)
+			for (i = 0; i < 8; i++)
 			{
-				for (int j = 0; j < 8; j++)
+				//for (int j = 0; j < 8; j++)
+				//{
+				//	char cAux;
+				//	fread(&cAux, sizeof(char), 1, newfile);//binario
+				//										   
+				//	board->taboo[i][j] = cAux;
+				//}
+				for (j = 0; j < 8; j++)
 				{
-					char cAux;
-					fread(&cAux, sizeof(char), 1, newfile);//binario
-														   //fscanf(newfile, "%c\n", &cAux2);//.txt
-					board->taboo[i][j] = cAux;
-				}
+					int cAux;
+					fread(&cAux, sizeof(int), 1, newfile);//binario
+					
+					if (cAux == 0 || cAux == 1 || cAux == 2 || cAux == 3)
+					{
+						board->taboo[i][j] = chAux[cAux];
+					}
+					else
+					{
+						j = 8;
+						i = 8;
+						stop = 1;
+					}					
+				}								
 			}
-			int id, rr, rrr;
-			fread(&id, sizeof(int), 1, newfile);//binario
-			fread(&rr, sizeof(int), 1, newfile);
-			fread(&rrr, sizeof(int), 1, newfile);
-			*idJog = id;
-			*r1 = rr;
-			*r2 = rrr;
-			//fscanf(newfile, "%d\n", idJog);//it Works - //.txt
-			fclose(newfile);
-			while (getchar() != '\n');
-			getchar();
-			system("cls");
-			break;
+			if (stop == 0)
+			{
+				int id, rr, rrr;
+				fread(&id, sizeof(int), 1, newfile);//binario
+				fread(&rr, sizeof(int), 1, newfile);
+				fread(&rrr, sizeof(int), 1, newfile);
+				if ((id >= 1 && id <= 2) ||
+					(rr <= 3 && rr >= 0) ||
+					(rrr <= 3 && rrr >= 0))
+				{
+					*idJog = id;
+					*r1 = rr;
+					*r2 = rrr;
+					fclose(newfile);
+					while (getchar() != '\n');
+					getchar();
+					system("cls");
+					stop = 0;
+					break;					
+				}
+				else { stop = 1;}
+				
+			}
+
+			if (stop == 1)
+			{			
+				system("cls");
+				int op;
+				puts("FICHEIRO NAO VALIDO !!\n1-Tentar de novo\n2-Comecar novo jogo");
+				scanf("%d", &op);
+				if (op == 2)
+				{
+					system("cls");
+					return 1;					
+				}
+				else bk = 1;
+			}			
 		}
 		else
 		{
@@ -448,12 +504,13 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 			scanf("%d", &op);
 			if (op == 2)
 			{
-				return 1;
 				system("cls");
+				return 1;				
 			}
 			else bk = 1;
 		}
-
+		stop = 0;
+		system("cls");
 	} while (bk == 1);
 	return 0;
 }
@@ -469,11 +526,9 @@ int MENU()
 	return op;
 }
 int main()
-{
-	FILE *save;
-
+{	
 	jog jogs[2];
-	int jogId = 123, retr1 = 2, retr2 = 3;
+	int jogId = 1, retr1 = 2, retr2 = 3;
 	char aux[2] = { 'p','b' };
 	int i;
 	for (i = 0; i < 2; i++)
@@ -481,15 +536,15 @@ int main()
 		jogs[i] = (jog)malloc(sizeof(struct jogador));
 		jogs[i]->retroceder = 3;
 		jogs[i]->peca = aux[i];
-	}
-	
+	}	
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
 
 	MapaInicio(tabu);
-	tabarv tb = jogadas(tabu, 'p', 2, 2, 0);
-	caminhos(tb);
-	/*tabu->taboo[2][2] = 'a';
+	/*tabarv tb = jogadas(tabu, 'b', 6, 5, 0);
+	caminhos(tb);	*/
+	//tabu->taboo[2][2] = 'a';
 	saveGameFile(tabu, jogId, retr1, retr2);
+	
 	tabu->taboo[2][2] = 'a';
 	int opMenu = MENU();
 	if (opMenu == 1)
@@ -503,7 +558,7 @@ int main()
 		{
 			MapaInicio(tabu);
 		}
-	}*/
+	}
 
 	/*drawBoard(tabu);*/
 	/*lt = saveLast(lt, tabu);
