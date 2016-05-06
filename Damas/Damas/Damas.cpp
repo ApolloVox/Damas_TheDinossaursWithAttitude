@@ -197,20 +197,37 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 	}
 }
 
+//verificar se nos movimentos possiveis existe algum comer possivel
+int maxComestivel(tabarv tb)
+{
+	if ((tb->AntDir != NULL) && (tb->AntDir->comestivel > tb->comestivel)) return tb->AntDir->comestivel;
+	if ((tb->AntEsq != NULL) && (tb->AntEsq->comestivel > tb->comestivel)) return tb->AntEsq->comestivel;
+	if ((tb->SegDir != NULL) && (tb->SegDir->comestivel > tb->comestivel)) return tb->SegDir->comestivel;
+	if ((tb->SegEsq != NULL) && (tb->SegEsq->comestivel > tb->comestivel)) return tb->SegEsq->comestivel;
+
+	return tb->comestivel;
+}
+
+
+//print dos caminhos possiveis
 void caminhos(tabarv tb)
 {
 	if (tb != NULL)
 	{
-		if (tb->AntEsq != NULL && tb->AntEsq->comestivel > tb->comestivel)
+		int comes = maxComestivel(tb);
+
+		if (tb->AntEsq != NULL && tb->AntEsq->comestivel >=comes)
 			caminhos(tb->AntEsq);
-		if (tb->AntDir != NULL && tb->AntDir->comestivel > tb->comestivel)
+		if (tb->AntDir != NULL && tb->AntDir->comestivel >=comes)
 			caminhos(tb->AntDir);
+
 		int i;
-		for (i = 0; i < tb->comestivel; i++) printf("\t");
+		for (i = 0; i < tb->comestivel; i++) printf("\t");			//tabs para ficar agradavel à vista as jogadas possiveis
 		printf("[%d,%d]\n", tb->casa[0], tb->casa[1]);
-		if (tb->SegEsq != NULL && tb->SegEsq->comestivel > tb->comestivel)
+		
+		if (tb->SegEsq != NULL && tb->SegEsq->comestivel >=comes)
 			caminhos(tb->SegEsq);
-		if (tb->SegDir != NULL && tb->SegDir->comestivel > tb->comestivel)
+		if (tb->SegDir != NULL && tb->SegDir->comestivel >=comes)
 			caminhos(tb->SegDir);
 	}
 }
