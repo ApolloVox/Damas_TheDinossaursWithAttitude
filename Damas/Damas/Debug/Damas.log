@@ -1,6 +1,0 @@
-﻿  stdafx.cpp
-c:\users\user\documents\github\damas_thedinossaurswithattitude\damas\damas\stdafx.h(13): warning C4005: '_CRT_SECURE_NO_WARNINGS': macro redefinition
-  c:\users\user\documents\github\damas_thedinossaurswithattitude\damas\damas\stdafx.h(13): note: command-line arguments:  see previous definition of '_CRT_SECURE_NO_WARNINGS'
-c:\users\user\documents\github\damas_thedinossaurswithattitude\damas\damas\stdafx.h(14): warning C4068: unknown pragma
-  Damas.cpp
-  Damas.vcxproj -> C:\Users\User\Documents\GitHub\Damas_TheDinossaursWithAttitude\Damas\Debug\Damas.exe
