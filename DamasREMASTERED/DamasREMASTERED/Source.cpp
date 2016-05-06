@@ -175,36 +175,88 @@ int maxComestivel(tabarv tb)
 
 
 //print dos caminhos possiveis
-void caminhos(tabarv tb)
+void printCaminhos(tabarv tb)
 {
 	if (tb != NULL)
 	{
 		int comes = maxComestivel(tb);
 
 		if (tb->AntEsq != NULL && tb->AntEsq->comestivel >= comes)
-			caminhos(tb->AntEsq);
+			printCaminhos(tb->AntEsq);
 		if (tb->AntDir != NULL && tb->AntDir->comestivel >= comes)
-			caminhos(tb->AntDir);
+			printCaminhos(tb->AntDir);
 
 		int i;
 		for (i = 0; i < tb->comestivel; i++) printf("\t");			//tabs para ficar agradavel à vista as jogadas possiveis
 		printf("[%d,%d]\n", tb->casa[0], tb->casa[1]);
 
 		if (tb->SegEsq != NULL && tb->SegEsq->comestivel >= comes)
-			caminhos(tb->SegEsq);
+			printCaminhos(tb->SegEsq);
 		if (tb->SegDir != NULL && tb->SegDir->comestivel >= comes)
-			caminhos(tb->SegDir);
+			printCaminhos(tb->SegDir);
 	}
 }
 
-void moverPeca(tabarv tb)
+//array que contem o caminho todo
+int caminho[5];
+
+void escolheCaminho(tabarv tb)
 {
-	int direc;
-	scanf("%d", &direc);
-	switch (direc)
+	int direc = -1, i = 0;
+	printCaminhos(tb);
+	printf("Indique o caminho da peça por ordem (Ex: 1(Enter)2(Enter)0(Enter)");
+	do
 	{
-	default:
-		break;
+		scanf("%d", direc);
+		caminho[i] = direc;
+		i++;
+	} while ((direc < 5) && (direc > 0) && (i < 5));
+}
+
+void moverPeca(tab board, tabarv tb, char jog)
+{
+	board->taboo[tb->casa[0]][tb->casa[1]] = '0';
+	int i = 0;
+	
+	while ((caminho[i] < 5) && (caminho[i] > 0) && (i < 5))
+	{
+		switch (caminho[i])
+		{
+			//AntEsq
+		case 1:
+		{
+			if (tb->AntEsq->comestivel > 0) board->taboo[tb->casa[0] - 1][tb->casa[1] - 1] = '0';
+			board->taboo[tb->AntEsq->casa[0]][tb->AntEsq->casa[1]] = jog;
+			tb = tb->AntEsq;
+			break;
+		}
+		case 2:
+		{
+			if (tb->AntDir->comestivel > 0) board->taboo[tb->casa[0] - 1][tb->casa[1] + 1] = '0';
+			board->taboo[tb->AntDir->casa[0]][tb->AntDir->casa[1]] = jog;
+			tb = tb->AntEsq;
+			break;
+		}
+		case 3:
+		{
+			if (tb->SegEsq->comestivel > 0) board->taboo[tb->casa[0] + 1][tb->casa[1] - 1] = '0';
+			board->taboo[tb->SegEsq->casa[0]][tb->SegEsq->casa[1]] = jog;
+			tb = tb->AntEsq;
+			break;
+		}
+		case 4:
+		{
+			if (tb->SegDir->comestivel > 0) board->taboo[tb->casa[0] + 1][tb->casa[1] + 1] = '0';
+			board->taboo[tb->SegDir->casa[0]][tb->SegDir->casa[1]] = jog;
+			tb = tb->AntEsq;
+			break;
+		}
+		default:
+		{
+			printf("Não funcemina assim tente de novo.");
+			break;
+		}
+		}
 	}
 }
 /*typedef struct Peça
