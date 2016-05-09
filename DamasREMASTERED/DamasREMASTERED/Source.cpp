@@ -344,21 +344,10 @@ void MapaInicio(tab board)
 	}
 }
 
-char* concat(char *s1, char *s2)
-{
-	char *result = malloc(strlen(s1) + strlen(s2) + 1);
-
-	strcpy(result, s1);
-	strcat(result, s2);
-	return result;
-}
 int existe(char *fname)
 {
 	FILE *file;
-
-	char* name = concat(fname, ".bin");
-
-	if (file = fopen(name, "rb"))
+	if (file = fopen(fname, "rb"))
 	{
 		fclose(file);
 		return 1;
@@ -370,6 +359,7 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 	fseek(stdin, 0, SEEK_END);
 	int i, j;
 	char str[100];
+	char *fileName;
 	int op = 0, bk = 0;
 	do
 	{
@@ -377,14 +367,14 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 		system("cls");
 		puts("Insira um nome para o ficheiro : ");
 		scanf("%[^\n]s", str);
+		fileName = strcat(str, ".bin");
 		system("cls");
-		if (existe(str) == 1)
+		if (existe(fileName) == 1)
 		{
 			puts("Ficheiro ja existe...\n-1 Substituir\n-2 Inserir novo nome\n-3 Nao salvar");
 			scanf("%d", &op);
 			if (op == 1)
 			{
-				char * fileName = concat(str, ".bin");
 				FILE *newfile;
 				newfile = fopen(fileName, "wb");
 				for (i = 0; i < 8; i++)
@@ -392,11 +382,17 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 					for (j = 0; j < 8; j++)
 					{
 						char cAux = board->taboo[i][j];
-						fwrite(&cAux, sizeof(char), 1, newfile);
-						//fprintf(newfile, "%c\n", cAux);//.txt
+						int iAux;
+						if (cAux == 'p')
+							iAux = 0;
+						else if (cAux == '0')
+							iAux = 1;
+						else if (cAux == 'b')
+							iAux = 2;
+						else iAux = 200;
+						fwrite(&iAux, sizeof(int), 1, newfile); //.bin
 					}
 				}
-				//fprintf(newfile, "%d\n", idJog);//.txt
 				fwrite(&idJog, sizeof(int), 1, newfile);
 				fwrite(&r1, sizeof(int), 1, newfile);
 				fwrite(&r2, sizeof(int), 1, newfile);
@@ -420,7 +416,6 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 		}
 		else
 		{
-			char * fileName = concat(str, ".bin");
 			FILE *newfile;
 			newfile = fopen(fileName, "wb");
 			for (i = 0; i < 8; i++)
@@ -455,6 +450,7 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 			getchar();
 			break;
 		}
+		fileName = "";
 	} while (bk == 1);
 }
 int loadGameFile(tab board, int *idJog, int *r1, int *r2)
@@ -462,6 +458,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 	fseek(stdin, 0, SEEK_END);
 	int i, j, stop = 0;
 	char str[100];
+	char *fileName;
 	char chAux[3] = { 'p','0','b' }; //Tamanho temporário
 	int op = 0, bk = 0;
 	do
@@ -469,25 +466,18 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 		system("cls");
 		puts("Insira um nome para o ficheiro : ");
 		scanf("%s", str);
+		fileName = strcat(str, ".bin");
 		if (existe(str) == 1)
 		{
 			puts("FICHEIRO EXISTE");
-			char * fileName = concat(str, ".bin");
 			FILE *newfile;
 			newfile = fopen(fileName, "rb");
 			for (i = 0; i < 8; i++)
 			{
-				//for (int j = 0; j < 8; j++)
-				//{
-				//	char cAux;
-				//	fread(&cAux, sizeof(char), 1, newfile);//binario
-				//										   
-				//	board->taboo[i][j] = cAux;
-				//}
 				for (j = 0; j < 8; j++)
 				{
 					int cAux;
-					fread(&cAux, sizeof(int), 1, newfile);//binario
+					fread(&cAux, sizeof(int), 1, newfile);
 
 					if (cAux == 0 || cAux == 1 || cAux == 2 || cAux == 3)
 					{
@@ -504,7 +494,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 			if (stop == 0)
 			{
 				int id, rr, rrr;
-				fread(&id, sizeof(int), 1, newfile);//binario
+				fread(&id, sizeof(int), 1, newfile);
 				fread(&rr, sizeof(int), 1, newfile);
 				fread(&rrr, sizeof(int), 1, newfile);
 				if ((id >= 1 && id <= 2) ||
@@ -620,3 +610,4 @@ int main()
 	/*printf("Existe - %d\nJogId - %d\nJog1 retr - %d\nJog2 retr - %d", existe("a"), jogId, retr1, retr2);*/
 	while (getchar() != '\n');
 	getchar();
+}

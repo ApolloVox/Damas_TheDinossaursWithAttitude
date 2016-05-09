@@ -1,0 +1,4 @@
+﻿  Source.cpp
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(210): warning C4477: 'scanf' : format string '%d' requires an argument of type 'int *', but variadic argument 1 has type 'int'
+  DamasREMASTERED.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.exe
+  DamasREMASTERED.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.pdb (Partial PDB)
