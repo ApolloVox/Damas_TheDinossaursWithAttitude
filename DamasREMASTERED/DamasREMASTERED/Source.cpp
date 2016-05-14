@@ -3,13 +3,6 @@
 #include<stdio.h>
 #include<string.h>
 
-typedef struct jogador
-{
-	int retroceder;
-	//int peçasComidas;
-	char peca;
-}*jog;
-
 typedef struct TabArv
 {
 	struct TabArv *AntEsq;
@@ -316,10 +309,11 @@ return novo;
 */
 void drawBoard(tab tabuleiro)
 {
-	for (int i = 0; i < 8; i++)
+	int i, j;
+	for (i = 0; i < 8; i++)
 	{
 		printf("|");
-		for (int j = 0; j < 8; j++)
+		for (j = 0; j < 8; j++)
 		{
 			printf("%c|", tabuleiro->taboo[i][j]);
 		}
@@ -331,15 +325,24 @@ void MapaInicio(tab board)
 {
 	char b[8][8] = {
 		{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
-		{ '0', '0', '0', 'p', '0', 'p', '0', 'p' },
+		{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
 		{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
 		{ '0', '0', '0', '0', '0', '0', '0', '0' },
-		{ '0', '0', '0', '0', 'p', '0', '0', '0' },
-		{ 'b', '0', 'b', 'b', 'b', 'b', 'b', '0' },
+		{ '0', '0', '0', '0', '0', '0', '0', '0' },
+		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' },
 		{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
 		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' }
 	};
-
+	/*char b[8][8] = {
+		{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
+		{ '0', '0', '0', 'p', '0', 'p', '0', 'p' },
+		{ 'p', '0', 'P', '0', 'p', '0', 'p', '0' },
+		{ '0', '0', '0', '0', '0', '0', '0', '0' },
+		{ '0', '0', '0', '0', 'p', '0', '0', '0' },
+		{ 'b', '0', 'B', 'b', 'b', 'b', 'b', '0' },
+		{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
+		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' }
+	};*/
 	for (int i = 0; i < 8; i++)	
 		for (int j = 0; j < 8; j++)		
 			board->taboo[i][j] = b[i][j];	
@@ -347,9 +350,10 @@ void MapaInicio(tab board)
 
 tab saveLastBoard(tab board)
 {
+	int i, j;
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
-	for (int i = 0; i < 8; i++)
-		for (int j = 0; j < 8; j++)
+	for (i = 0; i < 8; i++)
+		for (j = 0; j < 8; j++)
 			tabu->taboo[i][j] = board->taboo[i][j];
 	tabu->anterior = NULL;
 	board->anterior = tabu;
@@ -406,6 +410,10 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 							iAux = 1;
 						else if (cAux == 'b')
 							iAux = 2;
+						else if (cAux == 'B')
+							iAux = 3;
+						else if (cAux == 'P')
+							iAux = 4;
 						else iAux = 200;
 						fwrite(&iAux, sizeof(int), 1, newfile); //.bin
 					}
@@ -422,6 +430,10 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 							iAux = 1;
 						else if (cAux == 'b')
 							iAux = 2;
+						else if (cAux == 'B')
+							iAux = 3;
+						else if (cAux == 'P')
+							iAux = 4;
 						else iAux = 200;
 						fwrite(&iAux, sizeof(int), 1, newfile); //.bin
 					}
@@ -463,6 +475,10 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 						iAux = 1;
 					else if (cAux == 'b')
 						iAux = 2;
+					else if (cAux == 'B')
+						iAux = 3;
+					else if (cAux == 'P')
+						iAux = 4;
 					else iAux = 200;
 					fwrite(&iAux, sizeof(int), 1, newfile); //.bin
 				}
@@ -479,6 +495,10 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 						iAux = 1;
 					else if (cAux == 'b')
 						iAux = 2;
+					else if (cAux == 'B')
+						iAux = 3;
+					else if (cAux == 'P')
+						iAux = 4;
 					else iAux = 200;
 					fwrite(&iAux, sizeof(int), 1, newfile); //.bin
 				}
@@ -501,7 +521,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 	int i, j, stop = 0;
 	char str[100];
 	char *fileName;
-	char chAux[3] = { 'p','0','b' }; //Tamanho temporário
+	char chAux[5] = { 'p','0','b','B','P'}; //Tamanho temporário
 	int op = 0, bk = 0;
 	do
 	{
@@ -521,7 +541,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 					int cAux;
 					fread(&cAux, sizeof(int), 1, newfile);
 
-					if (cAux == 0 || cAux == 1 || cAux == 2 || cAux == 3)
+					if (cAux >= 0 || cAux <= 5)
 					{
 						board->taboo[i][j] = chAux[cAux];
 					}
@@ -539,7 +559,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 					int cAux;
 					fread(&cAux, sizeof(int), 1, newfile);
 
-					if (cAux == 0 || cAux == 1 || cAux == 2 || cAux == 3)
+					if (cAux >= 0 || cAux <= 5)
 					{
 						board->anterior->taboo[i][j] = chAux[cAux];
 					}
@@ -557,7 +577,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 				fread(&id, sizeof(int), 1, newfile);
 				fread(&rr, sizeof(int), 1, newfile);
 				fread(&rrr, sizeof(int), 1, newfile);
-				if ((id >= 1 && id <= 2) ||
+				if ((id >= 0 && id <= 1) ||
 					(rr <= 3 && rr >= 0) ||
 					(rrr <= 3 && rrr >= 0))
 				{
@@ -612,47 +632,95 @@ int MENU()
 {
 	system("cls");
 	puts("BEM VINDO AO JOGO DAS DAMAS !!");
-	puts("Precione : \n1-Novo Jogo\n2-Continuar Jogo");
+	puts("\nPrecione : \n1-Novo Jogo\n2-Continuar Jogo");
 	int op;
 	scanf("%d", &op);
 	system("cls");
 	return op;
 }
 int main()
-{
-	jog jogs[2];
-	int jogId = 1, retr1 = 2, retr2 = 3;
-	char aux[2] = { 'p','b' };
-	int i;
-	for (i = 0; i < 2; i++)
-	{
-		jogs[i] = (jog)malloc(sizeof(struct jogador));
-		jogs[i]->retroceder = 3;
-		jogs[i]->peca = aux[i];
-	}
+{	
+	int jogId = 0;
+	int retr[2] = { 3,3};
+	char charsPoss[2][2] = { { 'b','B' },
+						     { 'p','P' } };
+	char opChar;
+	int i = 0;
+
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
 
-	MapaInicio(tabu);
-	/*tabarv tb = jogadas(tabu, 'b', 6, 5, 0);*/
-
-	//tabu->taboo[2][2] = 'a';
-	/*saveGameFile(tabu, jogId, retr1, retr2);
-
-	tabu->taboo[2][2] = 'a';
 	int opMenu = MENU();
 	if (opMenu == 1)
 	{
-	MapaInicio(tabu);
+		MapaInicio(tabu);
+		saveLastBoard(tabu);
 	}
 	else
 	{
-	int a = loadGameFile(tabu, &jogId, &retr1, &retr2);
-	if (a == 1)
+		int a = loadGameFile(tabu, &jogId, &retr[0], &retr[1]);
+		if (a == 1)
+		{
+			MapaInicio(tabu);
+			saveLastBoard(tabu);
+		}
+	}
+	while (true)
 	{
-	MapaInicio(tabu);
+		fseek(stdin, 0, SEEK_END);
+		fflush(stdin);
+		system("cls");
+		printf("\nJogador %d (%c/%c)e a sua vez.", jogId + 1,charsPoss[jogId][0],charsPoss[jogId][1]);
+		printf("\nQuer anular a jogada anterior do adversario?(s/S)\n");
+		scanf("%c", &opChar);
+		if (opChar == 's' || opChar == 'S')
+		{
+			if (retr[jogId]>0)
+			{
+				retrocederJogada(tabu);
+				puts("Conluido.\nContinue a sua jogada");
+				fflush(stdin);
+				getchar();
+				system("cls");
+			}
+			else			
+				puts("Já nao pode anular mais jogadas ...");			
+		}
+		int x, y;
+		system("cls");
+		drawBoard(tabu);
+		do
+		{			
+			printf("\nIndique as coordenadas da peca que quer jogar\n");
+			scanf("%d", &x);
+			scanf("%d", &y);
+			if (tabu->taboo[x][y] != charsPoss[jogId][0] || tabu->taboo[x][y] != charsPoss[jogId][1])
+			{
+				puts("Nao possui essa peca...\nTente novamente...");
+				printf("\n%c",tabu->taboo[x][y]);
+				printf("\n%c || %c", charsPoss[jogId][0], charsPoss[jogId][1]);
+			}
+		} while (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1]);
+
+		tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0);
+		escolheCaminho(tb);
+		moverPeca(tabu, tb, tabu->taboo[x][y]);
+		drawBoard(tabu);
+		saveLastBoard(tabu);
+
+		if (jogId == 0)
+			jogId = 1;
+		else jogId = 0;
+		fseek(stdin, 0, SEEK_END);
+		fflush(stdin);
+		printf("\nQuer salvar o jogo num ficheiro?(s/S)\n");
+		scanf("%c", &opChar);
+		if (opChar == 's' || opChar == 'S')
+		{
+			saveGameFile(tabu, jogId, retr[0], retr[1]);
+		}
+		while (getchar() != '\n');
+		getchar();		
 	}
-	}
-	*/
 	/*drawBoard(tabu);*/
 	/*lt = saveLast(lt, tabu);
 	drawBoard2(lt);
@@ -663,21 +731,24 @@ int main()
 	/*printf("Indique as coordenadas da peça que quer jogar\n");*/
 	
 	//tabu->taboo[3][3] = 'w';
-	/*tabu = saveLastBoard(tabu);
+	/*tabu->taboo[4][4] = 'b';
+	tabu = saveLastBoard(tabu);
+	tabu->taboo[4][4] = 'p';
 	saveGameFile(tabu,jogId,retr1,retr2);
 	int a = loadGameFile(tabu, &jogId, &retr1, &retr2);
-	drawBoard(tabu->anterior);*/
-	//tabu->taboo[3][3] = 'c';
-	//drawBoard(tabu);
-	//drawBoard(tabu->anterior);
-
-	/*drawBoard(tabu);
-	tabarv tb = jogadas(tabu, 'b', 5,5,0);
-	escolheCaminho(tb);
-	drawBoard(tabu);
-	moverPeca(tabu, tb, 'b');
+	drawBoard(tabu->anterior);
 	drawBoard(tabu);*/
-	/*printf("Existe - %d\nJogId - %d\nJog1 retr - %d\nJog2 retr - %d", existe("a"), jogId, retr1, retr2);*/
+	//tabu->taboo[3][3] = 'c';
+	/*drawBoard(tabu);
+	drawBoard(tabu->anterior);*/
+
+	//drawBoard(tabu);
+	//tabarv tb = jogadas(tabu, 'b', 5,5,0);
+	//escolheCaminho(tb);
+	//drawBoard(tabu);
+	//moverPeca(tabu, tb, 'b');
+	//drawBoard(tabu);
+	/*printf("Existe - %d\nJogId - %d\nJog1 retr - %d\nJog2 retr - %d", existe("a"), jogId, retr1, retr2);*/	
 	while (getchar() != '\n');
 	getchar();
 }
