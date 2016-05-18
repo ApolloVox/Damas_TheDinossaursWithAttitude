@@ -19,6 +19,49 @@ typedef struct tabuleiro
 	struct tabuleiro *anterior;
 }*tab;
 
+tabarv jogadas(tab board, char jog, int linha, int coluna, int movimento, int come)
+{
+	tabarv tb = (tabarv)malloc(sizeof(struct TabArv));
+	tb->casa[0] = linha;
+	tb->casa[1] = coluna;
+	tb->comestivel = come;
+	if (movimento == 5)
+	{
+		tb->AntDir = NULL;
+		tb->AntEsq = NULL;
+		tb->SegEsq = NULL;
+		tb->SegDir = NULL;
+		return tb;
+	}
+
+	else if ((board->taboo[linha][coluna] == '0') && (come == 0))
+	{
+		printf("Casa nao e jogavel\n");
+		return NULL;
+	}
+
+	else if ((jog != board->taboo[linha][coluna]) && (come == 0))
+	{
+		printf("Peca nao e do jogador.\n");
+		return NULL;
+	}
+
+	else
+	{
+		if ((come == 0) && (board->taboo[linha - 1][coluna - 1] == '0'))
+		{
+			tb->AntEsq = (tabarv)malloc(sizeof(struct TabArv));
+			tb->AntEsq->AntDir = NULL;
+			tb->AntEsq->SegDir = tb;
+			tb->AntEsq->SegEsq = NULL;
+			tb->AntEsq->AntEsq = NULL;
+			tb->AntEsq->casa[0] = linha - 1;
+			tb->AntEsq->casa[1] = coluna - 1;
+			tb->AntEsq->comestivel = 0;
+		}
+	}
+
+}
 tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu uma peça 1, se não comeu 0
 {
 	if (come == 5)
@@ -637,6 +680,23 @@ int MENU()
 	scanf("%d", &op);
 	system("cls");
 	return op;
+}
+
+int Vitoria(tab board, char jog)
+{
+	int x, y;
+	tabarv tb;
+
+	for (x = 0; x < 8; x++)
+	{
+		for (y = 0; y<8; y++)
+		{
+			tb = jogadas(board, jog, x, y, 0);
+			if (movivel() == 1) return 0;
+		}
+	}
+
+	return 1;
 }
 int main()
 {	
