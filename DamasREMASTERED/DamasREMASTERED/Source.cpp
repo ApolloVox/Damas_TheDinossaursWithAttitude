@@ -17,65 +17,13 @@ typedef struct tabuleiro
 {
 	char taboo[8][8];
 	struct tabuleiro *anterior;
+	struct tabuleiro *seguinte;
 }*tab;
 
-tabarv jogadas(tab board, char jog, int linha, int coluna, int movimento, int come)
+tabarv jogadas(tab board, char peca, int linha, int coluna, int come, int move) //se comeu uma peça 1, se não comeu 0
 {
-	tabarv tb = (tabarv)malloc(sizeof(struct TabArv));
-	tb->casa[0] = linha;
-	tb->casa[1] = coluna;
-	tb->comestivel = come;
-	if (movimento == 5)
+	if (move == 5)
 	{
-		tb->AntDir = NULL;
-		tb->AntEsq = NULL;
-		tb->SegEsq = NULL;
-		tb->SegDir = NULL;
-		return tb;
-	}
-
-	else if ((board->taboo[linha][coluna] == '0') && (come == 0))
-	{
-		printf("Casa nao e jogavel\n");
-		return NULL;
-	}
-
-	else if ((jog != board->taboo[linha][coluna]) && (come == 0))
-	{
-		printf("Peca nao e do jogador.\n");
-		return NULL;
-	}
-
-	else
-	{
-		if ((come == 0) && (board->taboo[linha - 1][coluna - 1] == '0'))
-		{
-			tb->AntEsq = (tabarv)malloc(sizeof(struct TabArv));
-			tb->AntEsq->AntDir = NULL;
-			tb->AntEsq->SegDir = tb;
-			tb->AntEsq->SegEsq = NULL;
-			tb->AntEsq->AntEsq = NULL;
-			tb->AntEsq->casa[0] = linha - 1;
-			tb->AntEsq->casa[1] = coluna - 1;
-			tb->AntEsq->comestivel = 0;
-		}
-	}
-
-}
-tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu uma peça 1, se não comeu 0
-{
-	if (come == 5)
-	{
-		return NULL;
-	}
-	else if ((board->taboo[linha][coluna] == '0') && (come == 0))
-	{
-		printf("Casa nao e jogavel\n");
-		return NULL;
-	}
-	else if ((jog != board->taboo[linha][coluna]) && (come == 0))
-	{
-		printf("Peca nao e do jogador.\n");
 		return NULL;
 	}
 	else
@@ -83,36 +31,90 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 		tabarv tb = (tabarv)malloc(sizeof(struct TabArv));
 		tb->casa[0] = linha;
 		tb->casa[1] = coluna;
-		if (come == 0)		
-			tb->comestivel = -1;		
+		if (move == 0)
+			tb->comestivel = -1;
 		else tb->comestivel = come;
 		//Jogador Branco
-		if (jog == 'b')
+		if ((peca == 'b') || (peca == 'B'))
 		{
-			tb->SegDir = NULL;
-			tb->SegEsq = NULL;
+			if (peca == 'b') //Não dama
+			{
+				tb->SegDir = NULL;
+				tb->SegEsq = NULL;
+			}
+			else //Dama (Casas para trás)
+			{
+				//Esquerda
+				if ((linha + 1 >7) || (coluna - 1 < 0) ||  //Verifica se casa existe 
+					(board->taboo[linha + 1][coluna - 1] == 'b' || (board->taboo[linha + 1][coluna - 1] == 'B'))) //não está ocupda
+				{
+					tb->SegEsq = NULL;
+				}
+				else
+				{
+					if (board->taboo[linha + 1][coluna - 1] == '0')
+					{
+						tb->SegEsq = jogadas(board, peca, linha + 1, coluna - 1, come, move + 1);
+						tb->SegEsq->AntDir = tb;
+					}
+
+					else if (((board->taboo[linha + 1][coluna - 1] == 'p') || (board->taboo[linha + 1][coluna - 1] == 'P'))
+						&& (linha + 2 <8) && (coluna - 2 >= 0) && (board->taboo[linha + 2][coluna - 2] == '0'))
+					{
+						tb->SegEsq = jogadas(board, peca, linha + 2, coluna - 2, come + 1, move + 1);
+						tb->SegEsq->AntDir = tb;
+					}
+					else
+					{
+						tb->SegEsq = NULL;
+					}
+				}
+
+				//Direita
+				if ((linha + 1 >7) || (coluna + 1 >7) ||  //Verifica se casa existe 
+					(board->taboo[linha + 1][coluna + 1] == 'b' || (board->taboo[linha + 1][coluna + 1] == 'B'))) //não está ocupda
+				{
+					tb->SegDir = NULL;
+				}
+				else
+				{
+					if (board->taboo[linha + 1][coluna + 1] == '0')
+					{
+						tb->SegDir = jogadas(board, peca, linha + 1, coluna + 1, come, move + 1);
+						tb->SegDir->AntEsq = tb;
+					}
+
+					else if (((board->taboo[linha + 1][coluna + 1] == 'p') || (board->taboo[linha + 1][coluna + 1] == 'P'))
+						&& (linha + 2 <8) && (coluna + 2 <8) && (board->taboo[linha + 2][coluna + 2] == '0'))
+					{
+						tb->SegDir = jogadas(board, peca, linha + 2, coluna + 2, come + 1, move + 1);
+						tb->SegDir->AntEsq = tb;
+					}
+					else
+					{
+						tb->SegDir = NULL;
+					}
+				}
+
+			}
 			//Esquerda
-			if ((linha - 1 < 0) || (coluna - 1 < 0) || (board->taboo[linha - 1][coluna - 1] == 'b'))
+			if ((linha - 1 < 0) || (coluna - 1 < 0) ||  //Verifica se casa existe 
+				(board->taboo[linha - 1][coluna - 1] == 'b' || (board->taboo[linha - 1][coluna - 1] == 'B'))) //não está ocupda
 			{
 				tb->AntEsq = NULL;
 			}
 			else
 			{
-				if ((come == 0) && (board->taboo[linha - 1][coluna - 1] == '0'))
+				if (board->taboo[linha - 1][coluna - 1] == '0')
 				{
-					tb->AntEsq = (tabarv)malloc(sizeof(struct TabArv));
-					tb->AntEsq->AntDir = NULL;
+					tb->AntEsq = jogadas(board, peca, linha - 1, coluna - 1, come, move + 1);
 					tb->AntEsq->SegDir = tb;
-					tb->AntEsq->SegEsq = NULL;
-					tb->AntEsq->AntEsq = NULL;
-					tb->AntEsq->casa[0] = linha - 1;
-					tb->AntEsq->casa[1] = coluna - 1;
-					tb->AntEsq->comestivel = 0;
 				}
 
-				else if ((board->taboo[linha - 1][coluna - 1] == 'p') && (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
+				else if (((board->taboo[linha - 1][coluna - 1] == 'p') || (board->taboo[linha - 1][coluna - 1] == 'P'))
+					&& (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
 				{
-					tb->AntEsq = jogadas(board, jog, linha - 2, coluna - 2, come + 1);
+					tb->AntEsq = jogadas(board, peca, linha - 2, coluna - 2, come + 1, move + 1);
 					tb->AntEsq->SegDir = tb;
 				}
 				else
@@ -121,80 +123,133 @@ tabarv jogadas(tab board, char jog, int linha, int coluna, int come) //se comeu 
 				}
 			}
 			//Direita
-			if ((linha - 1 > 7) || (coluna + 1 < 0) || (board->taboo[linha - 1][coluna + 1] == 'b'))
+			if ((linha - 1 <0) || (coluna + 1 > 7) ||  //Verifica se casa existe 
+				(board->taboo[linha - 1][coluna + 1] == 'b' || (board->taboo[linha - 1][coluna + 1] == 'B')))
 			{
 				tb->AntDir = NULL;
 			}
 
-			else if ((come == 0) && (board->taboo[linha - 1][coluna + 1] == '0'))
+			else if (board->taboo[linha - 1][coluna + 1] == '0')
 			{
-				tb->AntDir = (tabarv)malloc(sizeof(struct TabArv));
-				tb->AntDir->AntDir = NULL;
+				tb->AntDir = jogadas(board, peca, linha - 1, coluna + 1, come, move + 1);
 				tb->AntDir->SegEsq = tb;
-				tb->AntDir->SegDir = NULL;
-				tb->AntDir->AntEsq = NULL;
-				tb->AntDir->casa[0] = linha - 1;
-				tb->AntDir->casa[1] = coluna + 1;
-				tb->AntDir->comestivel = 0;
 			}
-			else if ((board->taboo[linha - 1][coluna + 1] == 'p') && (linha - 2 < 8) && (coluna + 2 >= 0) && (board->taboo[linha - 2][coluna + 2] == '0'))
+			else if (((board->taboo[linha - 1][coluna + 1] == 'p') || (board->taboo[linha - 1][coluna + 1] == 'P'))
+				&& (linha - 2 >= 0) && (coluna + 2 <8) && (board->taboo[linha - 2][coluna + 2] == '0'))
 			{
-				tb->AntDir = jogadas(board, jog, linha - 2, coluna + 2, come + 1);
+				tb->AntDir = jogadas(board, peca, linha - 2, coluna + 2, come + 1, move + 1);
 				tb->AntDir->SegEsq = tb;
 			}
 			else tb->AntDir = NULL;
 		}
+
 		//Jogador preto
-		if (jog == 'p')
+		if ((peca == 'p') || (peca == 'P'))
 		{
-			tb->AntDir = NULL;
-			tb->AntEsq = NULL;
+			if (peca == 'p') //Não dama
+			{
+				tb->AntDir = NULL;
+				tb->AntEsq = NULL;
+			}
+			else //Dama (Casas para trás)
+			{
+				//Esquerda
+				if ((linha - 1 < 0) || (coluna - 1 < 0) ||  //Verifica se casa existe 
+					(board->taboo[linha - 1][coluna - 1] == 'p' || (board->taboo[linha - 1][coluna - 1] == 'P'))) //não está ocupda
+				{
+					tb->AntEsq = NULL;
+				}
+				else
+				{
+					if (board->taboo[linha - 1][coluna - 1] == '0')
+					{
+						tb->AntEsq = jogadas(board, peca, linha - 1, coluna - 1, come, move + 1);
+						tb->AntEsq->SegDir = tb;
+					}
+
+					else if (((board->taboo[linha - 1][coluna - 1] == 'b') || (board->taboo[linha - 1][coluna - 1] == 'B'))
+						&& (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
+					{
+						tb->AntEsq = jogadas(board, peca, linha - 2, coluna - 2, come + 1, move + 1);
+						tb->AntEsq->SegDir = tb;
+					}
+					else
+					{
+						tb->AntEsq = NULL;
+					}
+				}
+
+				//Direita
+				if ((linha - 1 < 0) || (coluna + 1 >7) ||  //Verifica se casa existe 
+					(board->taboo[linha - 1][coluna + 1] == 'p' || (board->taboo[linha - 1][coluna + 1] == 'P'))) //não está ocupda
+				{
+					tb->AntDir = NULL;
+				}
+				else
+				{
+					if (board->taboo[linha - 1][coluna + 1] == '0')
+					{
+						tb->AntDir = jogadas(board, peca, linha - 1, coluna + 1, come, move + 1);
+						tb->AntDir->SegEsq = tb;
+					}
+
+					else if (((board->taboo[linha - 1][coluna + 1] == 'b') || (board->taboo[linha - 1][coluna + 1] == 'B'))
+						&& (linha - 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha - 2][coluna + 2] == '0'))
+					{
+						tb->AntDir = jogadas(board, peca, linha - 2, coluna + 2, come + 1, move + 1);
+						tb->AntDir->SegEsq = tb;
+					}
+					else
+					{
+						tb->AntDir = NULL;
+					}
+				}
+
+			}
 			//Esquerda
-			if ((linha + 1 < 0) || (coluna - 1 > 7) || (board->taboo[linha + 1][coluna - 1] == 'p')) tb->SegEsq = NULL;
+			if ((linha + 1 > 7) || (coluna - 1 < 0) ||  //Verifica se casa existe 
+				(board->taboo[linha + 1][coluna - 1] == 'p' || (board->taboo[linha + 1][coluna - 1] == 'P'))) //não está ocupda
+			{
+				tb->SegEsq = NULL;
+			}
 			else
 			{
-				if ((come == 0) && (board->taboo[linha + 1][coluna - 1] == '0'))
+				if (board->taboo[linha + 1][coluna - 1] == '0')
 				{
-					tb->SegEsq = (tabarv)malloc(sizeof(struct TabArv));
-					tb->SegEsq->AntDir = tb;
-					tb->SegEsq->SegDir = NULL;
-					tb->SegEsq->SegEsq = NULL;
-					tb->SegEsq->AntEsq = NULL;
-					tb->SegEsq->casa[0] = linha + 1;
-					tb->SegEsq->casa[1] = coluna - 1;
-					tb->SegEsq->comestivel = 0;
-				}
-
-				else if ((board->taboo[linha + 1][coluna - 1] == 'b') && (linha + 2 >= 0) && (coluna - 2 < 8) && (board->taboo[linha + 2][coluna - 2] == '0'))
-				{
-					tb->SegEsq = jogadas(board, jog, linha + 2, coluna - 2, come + 1);
+					tb->SegEsq = jogadas(board, peca, linha + 1, coluna - 1, come, move + 1);
 					tb->SegEsq->AntDir = tb;
 				}
 
-				else tb->SegEsq = NULL;
+				else if (((board->taboo[linha + 1][coluna - 1] == 'b') || (board->taboo[linha + 1][coluna - 1] == 'B'))
+					&& (linha + 2 <8) && (coluna - 2 >= 0) && (board->taboo[linha + 2][coluna - 2] == '0'))
+				{
+					tb->SegEsq = jogadas(board, peca, linha + 2, coluna - 2, come + 1, move + 1);
+					tb->SegEsq->AntDir = tb;
+				}
+				else
+				{
+					tb->SegEsq = NULL;
+				}
 			}
 			//Direita
-			if ((linha + 1 > 7) || (coluna + 1 > 7) || (board->taboo[linha + 1][coluna + 1] == 'p')) tb->SegDir = NULL;
-			else
+			if ((linha + 1 >7) || (coluna + 1 > 7) ||  //Verifica se casa existe 
+				(board->taboo[linha + 1][coluna + 1] == 'p' || (board->taboo[linha + 1][coluna + 1] == 'P')))
 			{
-				if ((come == 0) && (board->taboo[linha + 1][coluna + 1] == '0'))
-				{
-					tb->SegDir = (tabarv)malloc(sizeof(struct TabArv));
-					tb->SegDir->AntDir = NULL;
-					tb->SegDir->SegDir = NULL;
-					tb->SegDir->SegEsq = NULL;
-					tb->SegDir->AntEsq = tb;
-					tb->SegDir->casa[0] = linha + 1;
-					tb->SegDir->casa[1] = coluna + 1;
-					tb->SegDir->comestivel = 0;
-				}
-				else if ((board->taboo[linha + 1][coluna + 1] == 'b') && (linha + 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha + 2][coluna + 2] == '0'))
-				{
-					tb->SegDir = jogadas(board, jog, linha + 2, coluna + 2, come + 1);
-					tb->SegDir->AntEsq = tb;
-				}
-				else tb->SegDir = NULL;
+				tb->SegDir = NULL;
 			}
+
+			else if (board->taboo[linha + 1][coluna + 1] == '0')
+			{
+				tb->SegDir = jogadas(board, peca, linha + 1, coluna + 1, come, move + 1);
+				tb->SegDir->AntEsq = tb;
+			}
+			else if (((board->taboo[linha + 1][coluna + 1] == 'b') || (board->taboo[linha + 1][coluna + 1] == 'B'))
+				&& (linha + 2 <8) && (coluna + 2 <8) && (board->taboo[linha + 2][coluna + 2] == '0'))
+			{
+				tb->SegDir = jogadas(board, peca, linha + 2, coluna + 2, come + 1, move + 1);
+				tb->SegDir->AntEsq = tb;
+			}
+			else tb->SegDir = NULL;
 		}
 		return tb;
 	}
@@ -353,6 +408,7 @@ return novo;
 void drawBoard(tab tabuleiro)
 {
 	int i, j;
+
 	for (i = 0; i < 8; i++)
 	{
 		printf("|");
@@ -366,6 +422,7 @@ void drawBoard(tab tabuleiro)
 }
 void MapaInicio(tab board)
 {
+	int i, j;
 	char b[8][8] = {
 		{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
 		{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
@@ -386,11 +443,14 @@ void MapaInicio(tab board)
 		{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
 		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' }
 	};*/
-	for (int i = 0; i < 8; i++)	
-		for (int j = 0; j < 8; j++)		
+	for (i = 0; i < 8; i++)	
+		for (j = 0; j < 8; j++)		
 			board->taboo[i][j] = b[i][j];	
 }
-
+//tab loadBoard(tab novo)
+//{	
+//	
+//}
 tab saveLastBoard(tab board)
 {
 	int i, j;
@@ -398,13 +458,14 @@ tab saveLastBoard(tab board)
 	for (i = 0; i < 8; i++)
 		for (j = 0; j < 8; j++)
 			tabu->taboo[i][j] = board->taboo[i][j];
-	tabu->anterior = NULL;
-	board->anterior = tabu;
-	return board;
+	tabu->anterior = board;	
+	tabu->seguinte = NULL;
+	board->seguinte = tabu;	
+	return tabu;
 }
 tab retrocederJogada(tab board)
 {
-	board = board->anterior;
+	board = board->anterior;	
 	return board;
 }
 
@@ -418,7 +479,7 @@ int existe(char *fname)
 	}
 	return 0;
 }
-void saveGameFile(tab board, int idJog, int r1, int r2)
+void saveGameFile(tab board, int idJog, int r1, int r2,int nJog)
 {
 	fseek(stdin, 0, SEEK_END);
 	int i, j;
@@ -441,53 +502,57 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 			{
 				FILE *newfile;
 				newfile = fopen(fileName, "wb");
-				for (i = 0; i < 8; i++)
-				{
-					for (j = 0; j < 8; j++)
+				tab tbAux = board;
+				fwrite(&nJog, sizeof(int), 1, newfile);
+				do
+				{					
+					for (i = 0; i < 8; i++)
 					{
-						char cAux = board->taboo[i][j];
-						int iAux;
-						if (cAux == 'p')
-							iAux = 0;
-						else if (cAux == '0')
-							iAux = 1;
-						else if (cAux == 'b')
-							iAux = 2;
-						else if (cAux == 'B')
-							iAux = 3;
-						else if (cAux == 'P')
-							iAux = 4;
-						else iAux = 200;
-						fwrite(&iAux, sizeof(int), 1, newfile); //.bin
+						for (j = 0; j < 8; j++)
+						{
+							char cAux = tbAux->taboo[i][j];
+							int iAux;
+							if (cAux == 'p')
+								iAux = 0;
+							else if (cAux == '0')
+								iAux = 1;
+							else if (cAux == 'b')
+								iAux = 2;
+							else if (cAux == 'B')
+								iAux = 3;
+							else if (cAux == 'P')
+								iAux = 4;
+							else iAux = 200;
+							fwrite(&iAux, sizeof(int), 1, newfile); //.bin
+						}
 					}
-				}
-				for (i = 0; i < 8; i++)
-				{
-					for (j = 0; j < 8; j++)
-					{
-						char cAux = board->anterior->taboo[i][j];
-						int iAux;
-						if (cAux == 'p')
-							iAux = 0;
-						else if (cAux == '0')
-							iAux = 1;
-						else if (cAux == 'b')
-							iAux = 2;
-						else if (cAux == 'B')
-							iAux = 3;
-						else if (cAux == 'P')
-							iAux = 4;
-						else iAux = 200;
-						fwrite(&iAux, sizeof(int), 1, newfile); //.bin
-					}
-				}
+					tbAux = tbAux->anterior;
+				} while (tbAux != NULL);
+				//for (i = 0; i < 8; i++)
+				//{
+				//	for (j = 0; j < 8; j++)
+				//	{
+				//		char cAux = board->anterior->taboo[i][j];
+				//		int iAux;
+				//		if (cAux == 'p')
+				//			iAux = 0;
+				//		else if (cAux == '0')
+				//			iAux = 1;
+				//		else if (cAux == 'b')
+				//			iAux = 2;
+				//		else if (cAux == 'B')
+				//			iAux = 3;
+				//		else if (cAux == 'P')
+				//			iAux = 4;
+				//		else iAux = 200;
+				//		fwrite(&iAux, sizeof(int), 1, newfile); //.bin
+				//	}
+				//}
 				fwrite(&idJog, sizeof(int), 1, newfile);
 				fwrite(&r1, sizeof(int), 1, newfile);
 				fwrite(&r2, sizeof(int), 1, newfile);
 				fclose(newfile);
-				puts("Save efetuado com sucesso !!");
-				while (getchar() != '\n');
-				getchar();
+				puts("Save efetuado com sucesso !!");				
 				break;
 			}
 			else if (op == 2)
@@ -506,62 +571,96 @@ void saveGameFile(tab board, int idJog, int r1, int r2)
 		{
 			FILE *newfile;
 			newfile = fopen(fileName, "wb");
-			for (i = 0; i < 8; i++)
+			tab tbAux = board;
+			do
 			{
-				for (j = 0; j < 8; j++)
+				for (i = 0; i < 8; i++)
 				{
-					char cAux = board->taboo[i][j];
-					int iAux;
-					if (cAux == 'p')
-						iAux = 0;
-					else if (cAux == '0')
-						iAux = 1;
-					else if (cAux == 'b')
-						iAux = 2;
-					else if (cAux == 'B')
-						iAux = 3;
-					else if (cAux == 'P')
-						iAux = 4;
-					else iAux = 200;
-					fwrite(&iAux, sizeof(int), 1, newfile); //.bin
+					for (j = 0; j < 8; j++)
+					{
+						char cAux = tbAux->taboo[i][j];
+						int iAux;
+						if (cAux == 'p')
+							iAux = 0;
+						else if (cAux == '0')
+							iAux = 1;
+						else if (cAux == 'b')
+							iAux = 2;
+						else if (cAux == 'B')
+							iAux = 3;
+						else if (cAux == 'P')
+							iAux = 4;
+						else iAux = 200;
+						fwrite(&iAux, sizeof(int), 1, newfile); //.bin
+					}
 				}
-			}
-			for (i = 0; i < 8; i++)
-			{
-				for (j = 0; j < 8; j++)
-				{
-					char cAux = board->anterior->taboo[i][j];
-					int iAux;
-					if (cAux == 'p')
-						iAux = 0;
-					else if (cAux == '0')
-						iAux = 1;
-					else if (cAux == 'b')
-						iAux = 2;
-					else if (cAux == 'B')
-						iAux = 3;
-					else if (cAux == 'P')
-						iAux = 4;
-					else iAux = 200;
-					fwrite(&iAux, sizeof(int), 1, newfile); //.bin
-				}
-			}
+				tbAux = tbAux->anterior;
+			} while (tbAux != NULL);
+			//for (i = 0; i < 8; i++)
+			//{
+			//	for (j = 0; j < 8; j++)
+			//	{
+			//		char cAux = board->anterior->taboo[i][j];
+			//		int iAux;
+			//		if (cAux == 'p')
+			//			iAux = 0;
+			//		else if (cAux == '0')
+			//			iAux = 1;
+			//		else if (cAux == 'b')
+			//			iAux = 2;
+			//		else if (cAux == 'B')
+			//			iAux = 3;
+			//		else if (cAux == 'P')
+			//			iAux = 4;
+			//		else iAux = 200;
+			//		fwrite(&iAux, sizeof(int), 1, newfile); //.bin
+			//	}
+			//}
 			fwrite(&idJog, sizeof(int), 1, newfile);//binario
 			fwrite(&r1, sizeof(int), 1, newfile);
 			fwrite(&r2, sizeof(int), 1, newfile);
 			fclose(newfile);
-			puts("Save efetuado com sucesso !!");
-			while (getchar() != '\n');
-			getchar();
+			puts("Save efetuado com sucesso !!");			
 			break;
 		}
 		fileName = "";
 	} while (bk == 1);
 }
-int loadGameFile(tab board, int *idJog, int *r1, int *r2)
+
+tab inserirFim(tab board, tab last)
+{
+	int i,j;
+	tab aux = board;
+	tab novo = (tab)malloc(sizeof(struct tabuleiro));
+	if (board == NULL)
+	{
+		for (i = 0; i < 8; i++)	
+			for (j = 0; i < 8; j++)			
+				novo->taboo[i][j] = last->taboo[i][j];		
+		novo->anterior = NULL;
+		novo->seguinte = NULL;
+		return novo;
+	}
+	else
+	{
+		while (board->seguinte != NULL)
+		{
+			board = board->seguinte;		
+		}
+		for (i = 0; i < 8; i++)		
+			for (j = 0; j < 8; j++)			
+				novo->taboo[i][j] = last->taboo[i][j];					
+		novo->anterior = board;
+		novo->seguinte = NULL;
+		board->seguinte = novo;
+		return novo;
+	}
+}
+
+int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 {
 	fseek(stdin, 0, SEEK_END);
-	int i, j, stop = 0;
+	int i, j, stop = 0, nj;
 	char str[100];
 	char *fileName;
 	char chAux[5] = { 'p','0','b','B','P'}; //Tamanho temporário
@@ -577,52 +676,85 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 			puts("FICHEIRO EXISTE");
 			FILE *newfile;
 			newfile = fopen(fileName, "rb");
-			for (i = 0; i < 8; i++)
+			if (feof(newfile))
 			{
-				for (j = 0; j < 8; j++)
-				{
-					int cAux;
-					fread(&cAux, sizeof(int), 1, newfile);
-
-					if (cAux >= 0 || cAux <= 5)
-					{
-						board->taboo[i][j] = chAux[cAux];
-					}
-					else
-					{
-						j = 8;
-						i = 8;
-						stop = 1;
-					}
-				}
-			}for (i = 0; i < 8; i++)
-			{
-				for (j = 0; j < 8; j++)
-				{
-					int cAux;
-					fread(&cAux, sizeof(int), 1, newfile);
-
-					if (cAux >= 0 || cAux <= 5)
-					{
-						board->anterior->taboo[i][j] = chAux[cAux];
-					}
-					else
-					{
-						j = 8;
-						i = 8;
-						stop = 1;
-					}
-				}
+				stop = 1;
+				break;
 			}
-			if (stop == 0)
+			else
+			{				
+				fread(&nj, sizeof(int), 1, newfile);
+				*nJog = nj;
+			}			
+			tab tabu2 = (tab)malloc(sizeof(struct tabuleiro));
+			tabu2->anterior = NULL;
+			tabu2->seguinte = NULL;
+			int count = 0;
+			do
 			{
-				int id, rr, rrr;
-				fread(&id, sizeof(int), 1, newfile);
-				fread(&rr, sizeof(int), 1, newfile);
-				fread(&rrr, sizeof(int), 1, newfile);
-				if ((id >= 0 && id <= 1) ||
-					(rr <= 3 && rr >= 0) ||
-					(rrr <= 3 && rrr >= 0))
+				tab tabu = (tab)malloc(sizeof(struct tabuleiro));
+				tabu->anterior = NULL;
+				tabu->seguinte = NULL;				
+				for (i = 0; i < 8; i++)
+				{
+					for (j = 0; j < 8; j++)
+					{
+						int cAux = 0;
+						if (feof(newfile))
+						{
+							stop = 1;
+							break;
+						}
+						else
+						{
+							fread(&cAux, sizeof(int), 1, newfile);
+						}
+						if (cAux >= 0 || cAux <= 5)
+						{
+							tabu->taboo[i][j] = chAux[cAux];
+						}
+						else
+						{							
+							stop = 1;
+							break;
+						}
+					}
+				}						
+				tabu2 = inserirFim(tabu2, tabu);
+				drawBoard(tabu2);
+				count++;
+			} while (count < nj);						
+			if (stop == 0)
+			{				
+				*board = *tabu2;
+				int id, rr, rrr;	
+				if (feof(newfile))
+				{
+					stop = 1;
+					fclose(newfile);
+					break;
+				}
+				else			
+					fread(&id, sizeof(int), 1, newfile);						
+				if (feof(newfile))
+				{
+					stop = 1;
+					fclose(newfile);
+					break;
+				}
+				else				
+					fread(&rr, sizeof(int), 1, newfile);							
+				if (feof(newfile))
+				{			
+					stop = 1;
+					fclose(newfile);
+					break;
+				}
+				else				
+					fread(&rrr, sizeof(int), 1, newfile);							
+				if (((id >= 0 && id <= 1 && id != NULL) ||
+					(rr <= 3 && rr >= 0 && rr != NULL) ||
+					(rrr <= 3 && rrr >= 0 && rrr != NULL)) && stop == 0)
 				{
 					*idJog = id;
 					*r1 = rr;
@@ -635,14 +767,13 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2)
 					break;
 				}
 				else { stop = 1; }
-
 			}
-
 			if (stop == 1)
 			{
 				system("cls");
 				int op;
-				puts("FICHEIRO NAO VALIDO !!\n1-Tentar de novo\n2-Comecar novo jogo");
+				puts("FICHEIRO NAO VALIDO !!\nComo o ficheiro nao e valido vai ser Eliminado !!\n1-Tentar de novo\n2-Comecar novo jogo");
+				remove(fileName);
 				scanf("%d", &op);
 				if (op == 2)
 				{
@@ -682,90 +813,109 @@ int MENU()
 	return op;
 }
 
-int Vitoria(tab board, char jog)
-{
-	int x, y;
-	tabarv tb;
+//int Vitoria(tab board, char jog)
+//{
+//	int x, y;
+//	tabarv tb;
+//
+//	for (x = 0; x < 8; x++)
+//	{
+//		for (y = 0; y<8; y++)
+//		{
+//			tb = jogadas(board, jog, x, y, 0);
+//			if (movivel() == 1) return 0;
+//		}
+//	}
+//	return 1;
+//}
 
-	for (x = 0; x < 8; x++)
-	{
-		for (y = 0; y<8; y++)
-		{
-			tb = jogadas(board, jog, x, y, 0);
-			if (movivel() == 1) return 0;
-		}
-	}
-
-	return 1;
-}
 int main()
 {	
-	int jogId = 0;
-	int retr[2] = { 3,3};
+	int jogId = 0,nJogadas = 0;
+	int retr[2] = {3,3};
 	char charsPoss[2][2] = { { 'b','B' },
 						     { 'p','P' } };
 	char opChar;
-	int i = 0;
+	int i = 0,first = 1;
 
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
+	tabu->anterior = NULL;
+	tabu->seguinte = NULL;
 
 	int opMenu = MENU();
 	if (opMenu == 1)
 	{
 		MapaInicio(tabu);
-		saveLastBoard(tabu);
+		tabu = saveLastBoard(tabu);
+		first = 0;
 	}
 	else
 	{
-		int a = loadGameFile(tabu, &jogId, &retr[0], &retr[1]);
+		int a = loadGameFile(tabu, &jogId, &retr[0], &retr[1],&nJogadas);
+		first = 1;
 		if (a == 1)
 		{
+			first = 0;
 			MapaInicio(tabu);
-			saveLastBoard(tabu);
+			tabu = saveLastBoard(tabu);
 		}
 	}
 	while (true)
-	{
+	{	
 		fseek(stdin, 0, SEEK_END);
 		fflush(stdin);
 		system("cls");
-		printf("\nJogador %d (%c/%c)e a sua vez.", jogId + 1,charsPoss[jogId][0],charsPoss[jogId][1]);
-		printf("\nQuer anular a jogada anterior do adversario?(s/S)\n");
-		scanf("%c", &opChar);
-		if (opChar == 's' || opChar == 'S')
+		tabu = saveLastBoard(tabu);
+		printf("\nJogador %d (%c/%c)e a sua vez.\n", jogId + 1,charsPoss[jogId][0],charsPoss[jogId][1]);
+		if (first == 1)
 		{
-			if (retr[jogId]>0)
+			printf("\nQuer anular a jogada anterior do adversario?(s/S)\n");
+			scanf("%c", &opChar);
+			if (opChar == 's' || opChar == 'S')
 			{
-				retrocederJogada(tabu);
-				puts("Conluido.\nContinue a sua jogada");
-				fflush(stdin);
-				getchar();
-				system("cls");
+				if (retr[jogId]>0)
+				{
+					retrocederJogada(tabu);
+					puts("Conluido.\nContinue a sua jogada");
+					fflush(stdin);
+					getchar();
+					system("cls");
+				}
+				else
+					puts("Já nao pode anular mais jogadas ...");
 			}
-			else			
-				puts("Já nao pode anular mais jogadas ...");			
+			system("cls");
 		}
-		int x, y;
-		system("cls");
-		drawBoard(tabu);
+		int x, y, repeat = 0;		
 		do
-		{			
+		{				
+			drawBoard(tabu);
 			printf("\nIndique as coordenadas da peca que quer jogar\n");
+			printf("Linha : ");
 			scanf("%d", &x);
+			printf("\nColuna : ");
 			scanf("%d", &y);
-			if (tabu->taboo[x][y] != charsPoss[jogId][0] || tabu->taboo[x][y] != charsPoss[jogId][1])
+			if (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1])
 			{
 				puts("Nao possui essa peca...\nTente novamente...");
-				printf("\n%c",tabu->taboo[x][y]);
-				printf("\n%c || %c", charsPoss[jogId][0], charsPoss[jogId][1]);
+				printf("\nCasa Escolhida -> %c\n",tabu->taboo[x][y]);
+				printf("Casas do jogador -> %c || %c\n", charsPoss[jogId][0], charsPoss[jogId][1]);
 			}
-		} while (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1]);
+			else
+			{
+				tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y,0,0);
+				if (tb->AntDir == NULL && tb->AntEsq == NULL && tb->SegDir == NULL && tb->SegEsq == NULL)
+				{
+					puts("Esta pepa nao e valida !!\nTente novamente...");
+					repeat = 1;
+				}
+			}
+		} while (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1] || repeat == 1);
 
-		tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0);
+		tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0,0);
 		escolheCaminho(tb);
 		moverPeca(tabu, tb, tabu->taboo[x][y]);
-		drawBoard(tabu);
-		saveLastBoard(tabu);
+		drawBoard(tabu);		
 
 		if (jogId == 0)
 			jogId = 1;
@@ -774,9 +924,10 @@ int main()
 		fflush(stdin);
 		printf("\nQuer salvar o jogo num ficheiro?(s/S)\n");
 		scanf("%c", &opChar);
+		nJogadas++;
 		if (opChar == 's' || opChar == 'S')
 		{
-			saveGameFile(tabu, jogId, retr[0], retr[1]);
+			saveGameFile(tabu, jogId, retr[0], retr[1],nJogadas);
 		}
 		while (getchar() != '\n');
 		getchar();		
