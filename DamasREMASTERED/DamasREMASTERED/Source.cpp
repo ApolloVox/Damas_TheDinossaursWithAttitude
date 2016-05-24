@@ -689,12 +689,12 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 			tab tabu2 = (tab)malloc(sizeof(struct tabuleiro));
 			tabu2->anterior = NULL;
 			tabu2->seguinte = NULL;
+			tab tabu = (tab)malloc(sizeof(struct tabuleiro));
+			tabu->anterior = NULL;
+			tabu->seguinte = NULL;
 			int count = 0;
 			do
-			{
-				tab tabu = (tab)malloc(sizeof(struct tabuleiro));
-				tabu->anterior = NULL;
-				tabu->seguinte = NULL;				
+			{								
 				for (i = 0; i < 8; i++)
 				{
 					for (j = 0; j < 8; j++)
@@ -720,10 +720,12 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 						}
 					}
 				}						
-				tabu2 = inserirFim(tabu2, tabu);
+				tabu2 = inserirFim(tabu2, tabu);				
 				drawBoard(tabu2);
 				count++;
-			} while (count < nj);						
+			} while (count < nj);	
+			MapaInicio(tabu);
+			tabu2 = inserirFim(tabu2,tabu);
 			if (stop == 0)
 			{				
 				*board = *tabu2;
