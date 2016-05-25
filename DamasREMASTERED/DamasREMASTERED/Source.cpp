@@ -298,7 +298,7 @@ void printCaminhos(tabarv tb)
 
 		int i;
 		for (i = -1; i < tb->move; i++) printf("\t");			//tabs para ficar agradavel à vista as jogadas possiveis
-		printf("[%d,%d]\n", tb->casa[0], tb->casa[1]);
+			printf("[%d,%d]\n", tb->casa[0], tb->casa[1]);
 
 		if (tb->SegEsq != NULL && tb->SegEsq->move>tb->move && tb->SegEsq->comestivel == comes)
 			printCaminhos(tb->SegEsq);
@@ -566,9 +566,7 @@ void saveGameFile(tab board, int idJog, int r1, int r2,int nJog)
 			}
 			else if (op == 3)
 			{
-				puts("Terminado !!");
-				while (getchar() != '\n');
-				getchar();
+				puts("Terminado !!");				
 				break;
 			}
 		}
@@ -660,16 +658,6 @@ tab inserirFim(tab board, tab last)
 		board->seguinte = novo;
 		return novo;
 	}
-	/*if (board==NULL)
-	{
-		return last;
-	}
-	else
-	{
-		board->seguinte = last;
-		last->anterior = board;
-		return last;
-	}*/	
 }
 
 int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
@@ -738,7 +726,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 				tabu2 = inserirFim(tabu2, tabu);				
 				drawBoard(tabu2);
 				count++;
-			} while (count < nj);	
+			} while (count < nj);			
 			/*MapaInicio(tabu);
 			tabu2 = inserirFim(tabu2,tabu);*/			
 			if (stop == 0)
@@ -853,102 +841,132 @@ int main()
 	char charsPoss[2][2] = { { 'b','B' },
 						     { 'p','P' } };
 	char opChar;
-	int i = 0,first = 1;
+	int i = 0,first = 1,repeat = 1;
 
 	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
 	tabu->anterior = NULL;
 	tabu->seguinte = NULL;
 
-	int opMenu = MENU();
-	if (opMenu == 1)
+	while (repeat == 1)
 	{
-		MapaInicio(tabu);
-		tabu = saveLastBoard(tabu);
-		first = 0;
-	}
-	else
-	{
-		int a = loadGameFile(tabu, &jogId, &retr[0], &retr[1],&nJogadas);
-		first = 1;
-		if (a == 1)
+		int opMenu = MENU();
+		if (opMenu == 1)
 		{
-			first = 0;
 			MapaInicio(tabu);
 			tabu = saveLastBoard(tabu);
+			first = 0;
 		}
-	}
-	while (true)
-	{	
+		else
+		{
+			int a = loadGameFile(tabu, &jogId, &retr[0], &retr[1], &nJogadas);
+			first = 1;
+			if (a == 1)
+			{
+				first = 0;
+				MapaInicio(tabu);
+				tabu = saveLastBoard(tabu);
+			}
+		}
+		while (true)
+		{
+			fseek(stdin, 0, SEEK_END);
+			fflush(stdin);
+			system("cls");
+			tabu = saveLastBoard(tabu);
+			printf("\nJogador %d (%c/%c) e a sua vez.\n", jogId + 1, charsPoss[jogId][0], charsPoss[jogId][1]);
+			if (first == 1)
+			{
+				printf("\nQuer anular a jogada anterior do adversario?(s/S)\n");
+				scanf("%c", &opChar);
+				if (opChar == 's' || opChar == 'S')
+				{
+					if (retr[jogId]>0)
+					{
+						retrocederJogada(tabu);
+						puts("Conluido.\nContinue a sua jogada");
+						fflush(stdin);
+						getchar();
+						system("cls");
+					}
+					else
+						puts("Já nao pode anular mais jogadas ...");
+				}
+				system("cls");
+			}
+			int x, y, repeat = 0;
+			do
+			{
+				printf("\nJogador %d (%c/%c) e a sua vez.\n", jogId + 1, charsPoss[jogId][0], charsPoss[jogId][1]);
+				drawBoard(tabu);
+				printf("\nIndique as coordenadas da peca que quer jogar\n");
+				printf("Linha : ");
+				scanf("%d", &x);
+				printf("\nColuna : ");
+				scanf("%d", &y);
+				if (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1])
+				{
+					puts("Nao possui essa peca...\nTente novamente...");
+					printf("\nCasa Escolhida -> %c\n", tabu->taboo[x][y]);
+					printf("Casas do jogador -> %c || %c\n", charsPoss[jogId][0], charsPoss[jogId][1]);
+				}
+				else
+				{
+					tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0, 0);
+					if (tb->AntDir == NULL && tb->AntEsq == NULL && tb->SegDir == NULL && tb->SegEsq == NULL)
+					{
+						puts("Esta pepa nao e valida !!\nTente novamente...");
+						repeat = 1;
+					}
+				}
+			} while (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1] || repeat == 1);
+
+			tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0, 0);
+			escolheCaminho(tb);
+			moverPeca(tabu, tb, tabu->taboo[x][y]);
+			drawBoard(tabu);
+			fseek(stdin, 0, SEEK_END);
+			fflush(stdin);
+			printf("\n1-Salvar o jogo num ficheiro\n2-Ver todas as jogadas anteriores\n3-Render\n");
+			int opcao;
+			scanf("%d", &opcao);
+			nJogadas++;
+			if (opcao == 1)
+			{
+				saveGameFile(tabu, jogId, retr[0], retr[1], nJogadas);
+			}
+			else if (opcao == 2)
+			{
+				tab tabu2 = tabu;
+
+				while (tabu2->anterior != NULL)
+				{
+					drawBoard(tabu2);
+					tabu2 = tabu2->anterior;
+				}
+			}
+			else if (opcao == 3)
+			{
+				if (jogId == 0)
+					jogId = 1;
+				else jogId = 0;
+				break;
+			}
+			if (jogId == 0)
+				jogId = 1;
+			else jogId = 0;
+			while (getchar() != '\n');
+			getchar();
+		}
 		fseek(stdin, 0, SEEK_END);
 		fflush(stdin);
 		system("cls");
-		tabu = saveLastBoard(tabu);
-		printf("\nJogador %d (%c/%c) e a sua vez.\n", jogId + 1,charsPoss[jogId][0],charsPoss[jogId][1]);
-		if (first == 1)
-		{
-			printf("\nQuer anular a jogada anterior do adversario?(s/S)\n");
-			scanf("%c", &opChar);
-			if (opChar == 's' || opChar == 'S')
-			{
-				if (retr[jogId]>0)
-				{
-					retrocederJogada(tabu);
-					puts("Conluido.\nContinue a sua jogada");
-					fflush(stdin);
-					getchar();
-					system("cls");
-				}
-				else
-					puts("Já nao pode anular mais jogadas ...");
-			}
-			system("cls");
-		}
-		int x, y, repeat = 0;		
-		do
-		{
-			printf("\nJogador %d (%c/%c) e a sua vez.\n", jogId + 1, charsPoss[jogId][0], charsPoss[jogId][1]);			
-			drawBoard(tabu);
-			printf("\nIndique as coordenadas da peca que quer jogar\n");
-			printf("Linha : ");
-			scanf("%d", &x);
-			printf("\nColuna : ");
-			scanf("%d", &y);
-			if (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1])
-			{
-				puts("Nao possui essa peca...\nTente novamente...");
-				printf("\nCasa Escolhida -> %c\n",tabu->taboo[x][y]);
-				printf("Casas do jogador -> %c || %c\n", charsPoss[jogId][0], charsPoss[jogId][1]);
-			}
-			else
-			{
-				tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y,0,0);
-				if (tb->AntDir == NULL && tb->AntEsq == NULL && tb->SegDir == NULL && tb->SegEsq == NULL)
-				{
-					puts("Esta pepa nao e valida !!\nTente novamente...");
-					repeat = 1;
-				}
-			}
-		} while (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1] || repeat == 1);
-
-		tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0,0);
-		escolheCaminho(tb);
-		moverPeca(tabu, tb, tabu->taboo[x][y]);
-		drawBoard(tabu);		
-
-		if (jogId == 0)
-			jogId = 1;
-		else jogId = 0;
-		fseek(stdin, 0, SEEK_END);
-		fflush(stdin);
-		printf("\nQuer salvar o jogo num ficheiro?(s/S)\n");
+		printf("Parabens jogador %d e o vencedor !!!", jogId+1);
+		printf("\n\nQuer jogar novamente ?(s/S)\n");		
 		scanf("%c", &opChar);
-		nJogadas++;
-		if (opChar == 's' || opChar == 'S')
-		{
-			saveGameFile(tabu, jogId, retr[0], retr[1],nJogadas);
-		}
-		while (getchar() != '\n');
-		getchar();		
+		if (opChar == 's'|| opChar == 'S')		
+			repeat = 1;		
+		else		
+			repeat = 0;	
 	}
 	/*drawBoard(tabu);*/
 	/*lt = saveLast(lt, tabu);
