@@ -551,7 +551,7 @@ void MapaInicio(tab board)
 		{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
 		{ '0', '0', '0', '0', '0', '0', '0', '0' },
 		{ '0', '0', '0', '0', '0', '0', '0', '0' },
-		{ 'B', '0', 'b', '0', 'b', '0', 'b', '0' },
+		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' },
 		{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
 		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' }
 	};
@@ -560,12 +560,7 @@ void MapaInicio(tab board)
 			board->taboo[i][j] = b[i][j];	
 }
 
-<<<<<<< HEAD
-//tab loadBoard(tab novo)
-//{	
-//	
-//}
-=======
+
 int semPecas(tab tabuleiro)
 {
 	int i, j, b = 0, p = 0;
@@ -587,7 +582,7 @@ int semPecas(tab tabuleiro)
 	if (p <= 0)
 		return 0;	
 }
->>>>>>> origin/master
+
 
 tab saveLastBoard(tab board)
 {

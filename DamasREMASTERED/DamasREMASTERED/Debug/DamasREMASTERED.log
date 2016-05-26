@@ -1,9 +1,5 @@
 ﻿  Source.cpp
-<<<<<<< HEAD
+c:\users\eu\desktop\uni\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(584): warning C4715: 'semPecas': not all control paths return a value
+  LINK : C:\Users\Eu\Desktop\Uni\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.exe not found or not built by the last incremental link; performing full link
   DamasREMASTERED.vcxproj -> C:\Users\Eu\Desktop\Uni\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.exe
   DamasREMASTERED.vcxproj -> C:\Users\Eu\Desktop\Uni\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.pdb (Partial PDB)
-=======
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(486): warning C4715: 'semPecas': not all control paths return a value
-  DamasREMASTERED.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.exe
-  DamasREMASTERED.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.pdb (Partial PDB)
->>>>>>> origin/master
