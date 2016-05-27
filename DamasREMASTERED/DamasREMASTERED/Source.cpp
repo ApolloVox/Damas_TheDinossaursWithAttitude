@@ -333,7 +333,7 @@ void escolheCaminho(tabarv tb)
 	int direc = -1, i = 0;
 	printCaminhos(tb);
 	printf("Indique o caminho da peca por ordem (Ex: 1(Enter)2(Enter)0(Enter)");
-	printf("\n 1 - Cima Esquerdo\n 2 - Cima Direita\n 3 - Baixo Esquerdo\n 4 - Baixo Direito\n 0 - fim jogada\n-1 - Jogar outra peca\n");
+	printf("\n 1 - Cima Esquerdo\n 2 - Cima Direita\n 3 - Baixo Esquerdo\n 4 - Baixo Direito\n 0 - Fim jogada\n-1 - Jogar outra peca\n");
 	do
 	{
 		int b = 0;
@@ -350,7 +350,7 @@ void escolheCaminho(tabarv tb)
 					b = 1;
 					tb = tb->AntEsq;
 				}
-				else printf("Jogada inválida. Tente de novo.\n");
+				else printf("Jogada invalida. Tente de novo.\n");
 			}
 
 			//AntDir
@@ -361,7 +361,7 @@ void escolheCaminho(tabarv tb)
 					b = 1;
 					tb = tb->AntDir;
 				}
-				else printf("Jogada inválida. Tente de novo.\n");
+				else printf("Jogada invalida. Tente de novo.\n");
 			}
 
 			//SegEsq
@@ -372,7 +372,7 @@ void escolheCaminho(tabarv tb)
 					b = 1;
 					tb = tb->SegEsq;
 				}
-				else printf("Jogada inválida. Tente de novo.\n");
+				else printf("Jogada invalida. Tente de novo.\n");
 			}
 
 			//SegDir
@@ -383,7 +383,7 @@ void escolheCaminho(tabarv tb)
 					b = 1;
 					tb = tb->SegDir;
 				}
-				else printf("Jogada inválida. Tente de novo.\n");
+				else printf("Jogada invalida. Tente de novo.\n");
 			}
 
 			else b = 1;
@@ -407,10 +407,10 @@ void escolheCaminho(tabarv tb)
 	} while (i < 5);
 }
 
-void moverPeca(tab board, tabarv tb, char jog)
+void moverPeca(tab board, tabarv tb, char j)
 {	
 	int i = 0;
-	
+	char jog = j;
 	while ((caminho[i] < 5) && (caminho[i] > 0) && (i < 5))
 	{
 		board->taboo[tb->casa[0]][tb->casa[1]] = '0';
@@ -421,9 +421,9 @@ void moverPeca(tab board, tabarv tb, char jog)
 			{
 				if (tb->AntEsq->comestivel > 0) board->taboo[tb->casa[0] - 1][tb->casa[1] - 1] = '0';
 				
-				if ((jog == 'b') && (tb->casa[0] = 0))
+				if ((jog == 'b') && (tb->AntEsq->casa[0] == 0))
 				{
-					board->taboo[tb->SegDir->casa[0]][tb->SegDir->casa[1]] = 'B';
+					board->taboo[tb->AntEsq->casa[0]][tb->AntEsq->casa[1]] = 'B';
 					jog = 'B';
 				}
 				else board->taboo[tb->AntEsq->casa[0]][tb->AntEsq->casa[1]] = jog;
@@ -434,9 +434,9 @@ void moverPeca(tab board, tabarv tb, char jog)
 			case 2:
 			{
 				if (tb->AntDir->comestivel > 0) board->taboo[tb->casa[0] - 1][tb->casa[1] + 1] = '0';
-				if ((jog == 'b') && (tb->casa[0] = 0))
+				if ((jog == 'b') && (tb->AntDir->casa[0] == 0))
 				{
-					board->taboo[tb->SegDir->casa[0]][tb->SegDir->casa[1]] = 'B';
+					board->taboo[tb->AntDir->casa[0]][tb->AntDir->casa[1]] = 'B';
 					jog = 'B';
 				}
 				else board->taboo[tb->AntDir->casa[0]][tb->AntDir->casa[1]] = jog;
@@ -446,9 +446,9 @@ void moverPeca(tab board, tabarv tb, char jog)
 			case 3:
 			{
 				if (tb->SegEsq->comestivel > 0) board->taboo[tb->casa[0] + 1][tb->casa[1] - 1] = '0';
-				if ((jog == 'p') && (tb->casa[0] = 7))
+				if ((jog == 'p') && (tb->SegEsq->casa[0] == 7))
 				{
-					board->taboo[tb->SegDir->casa[0]][tb->SegDir->casa[1]] = 'P';
+					board->taboo[tb->SegEsq->casa[0]][tb->SegEsq->casa[1]] = 'P';
 					jog = 'P';
 				}
 				else board->taboo[tb->SegEsq->casa[0]][tb->SegEsq->casa[1]] = jog;
@@ -458,7 +458,7 @@ void moverPeca(tab board, tabarv tb, char jog)
 			case 4:
 			{
 				if (tb->SegDir->comestivel > 0) board->taboo[tb->casa[0] + 1][tb->casa[1] + 1] = '0';
-				if ((jog == 'p') && (tb->casa[0] = 7))
+				if ((jog == 'p') && (tb->SegDir->casa[0] == 7))
 				{
 					board->taboo[tb->SegDir->casa[0]][tb->SegDir->casa[1]] = 'P';
 					jog = 'P';
@@ -527,28 +527,34 @@ return novo;
 }
 }
 */
-void drawBoard(tab tabuleiro)
+void drawBoard(tab tabuleiro,int ant)
 {
 	int i, j;
-
-	for (i = 0; i < 8; i++)
+	do
 	{
-		printf("|");
-		for (j = 0; j < 8; j++)
+		for (i = 0; i < 8; i++)
 		{
-			printf("%c|", tabuleiro->taboo[i][j]);
+			printf("|");
+			for (j = 0; j < 8; j++)
+			{
+				printf("%c|", tabuleiro->taboo[i][j]);
+			}
+			printf(" %d\n", i);
 		}
-		printf(" %d\n", i);
-	}
-	printf("-----------------\n 0/1/2/3/4/5/6/7\n\n");
+		printf("-----------------\n 0/1/2/3/4/5/6/7\n\n");
+
+		if (ant == 0)		
+			break;		
+		tabuleiro = tabuleiro->anterior;
+	} while (tabuleiro != NULL);	
 }
 void MapaInicio(tab board)
 {
 	int i, j;
 	char b[8][8] = {
-		{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
-		{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
-		{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
+		{ '0', 'p', '0', 'p', '0', '0', '0', 'p' },
+		{ 'p', '0', 'p', '0', '0', '0', 'b', '0' },
+		{ '0', 'p', 'P', 'p', '0', 'p', '0', 'p' },
 		{ '0', '0', '0', '0', '0', '0', '0', '0' },
 		{ '0', '0', '0', '0', '0', '0', '0', '0' },
 		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' },
@@ -853,7 +859,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 					}
 				}						
 				tabu2 = inserirFim(tabu2, tabu);				
-				drawBoard(tabu2);
+				drawBoard(tabu2,0);
 				count++;
 			} while (count < nj);			
 			/*MapaInicio(tabu);
@@ -1039,7 +1045,7 @@ int main()
 			do
 			{						
 				printf("\nJogador %d (%c/%c) e a sua vez.\n", jogId + 1, charsPoss[jogId][0], charsPoss[jogId][1]);
-				drawBoard(tabu);
+				drawBoard(tabu,0);
 				printf("\nIndique as coordenadas da peca que quer jogar\n");
 				printf("Linha : ");
 				scanf("%d", &x);
@@ -1056,7 +1062,7 @@ int main()
 					tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0, 0);
 					if (tb->AntDir == NULL && tb->AntEsq == NULL && tb->SegDir == NULL && tb->SegEsq == NULL)
 					{
-						puts("Esta pepa nao e valida !!\nTente novamente...");
+						puts("Esta peca nao e valida !!\nTente novamente...");
 						repeat2 = 1;
 					}
 				}
@@ -1065,10 +1071,10 @@ int main()
 			tabarv tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0, 0);
 			escolheCaminho(tb);
 			moverPeca(tabu, tb, tabu->taboo[x][y]);
-			drawBoard(tabu);
+			drawBoard(tabu,0);
 			fseek(stdin, 0, SEEK_END);
 			fflush(stdin);						
-			printf("\n1-Salvar o jogo num ficheiro\n2-Ver todas as jogadas anteriores\n3-Render\n4-Continuar\n");
+			printf("\n1-Salvar o jogo num ficheiro\n2-Ver todas as jogadas anteriores\n-1-Render\n4-Continuar\n");
 			int opcao;
 			scanf("%d", &opcao);
 			nJogadas++;
@@ -1078,14 +1084,9 @@ int main()
 			}
 			else if (opcao == 2)
 			{
-				tab tabu2 = tabu;
-				while (tabu2->anterior != NULL)
-				{
-					drawBoard(tabu2);
-					tabu2 = tabu2->anterior;
-				}
+				drawBoard(tabu, 1);
 			}
-			else if (opcao == 3)
+			else if (opcao == -1)
 			{
 				if (jogId == 0)
 					jogId = 1;
