@@ -1,6 +1,6 @@
 ﻿  Source.cpp
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(871): warning C4101: 'j': unreferenced local variable
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(871): warning C4101: 'i': unreferenced local variable
-c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(730): warning C4715: 'semPecas': not all control paths return a value
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(891): warning C4101: 'j': unreferenced local variable
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(891): warning C4101: 'i': unreferenced local variable
+c:\users\diogo\documents\github\damas_thedinossaurswithattitude\damasremastered\damasremastered\source.cpp(750): warning C4715: 'semPecas': not all control paths return a value
   DamasREMASTERED.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.exe
   DamasREMASTERED.vcxproj -> C:\Users\Diogo\Documents\GitHub\Damas_TheDinossaursWithAttitude\DamasREMASTERED\Debug\DamasREMASTERED.pdb (Partial PDB)
