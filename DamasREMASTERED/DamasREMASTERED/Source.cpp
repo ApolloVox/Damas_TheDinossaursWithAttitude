@@ -33,6 +33,7 @@ int comidas[8][8] = {
 	{ 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
+tab LOAD = NULL;
 
 tabarv jogadamas(tab board, char peca, int linha, int coluna, int come, int move, int direc)
 {
@@ -895,19 +896,45 @@ void saveGameFile(tab board, int idJog, int r1, int r2,int nJog)
 	} while (bk == 1);
 }
 
-//tab inserirFim(tab board, tab last)
-//{
-//	int i,j;
-//	
-//}
+tab inserirNoFim(tab brd, char numero[8][8])
+{
+	int i, j;
+	tab tabu = (tab)malloc(sizeof(struct tabuleiro));
+	tab aux;
+	if (brd == NULL)
+	{
+		for (i = 0; i < 8; i++)		
+			for (j = 0; j < 8; j++)			
+				tabu->taboo[i][j] = numero[i][j];
+		tabu->anterior = NULL;
+		tabu->seguinte = NULL;
+		brd = tabu;
+		return brd;
+	}
+	else
+	{
+		aux = brd;
+		while (aux->anterior!= NULL)	
+			aux = aux->anterior;	
 
-int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
+		for (i = 0; i < 8; i++)
+			for (j = 0; j < 8; j++)
+				tabu->taboo[i][j] = numero[i][j];
+
+		tabu->anterior = NULL;
+		tabu->seguinte = aux;
+		aux->anterior = tabu;
+		return brd;
+	}
+}
+
+int loadGameFile(tab board, int *idJog, int *r1, int *r2, int *nJog)
 {
 	fseek(stdin, 0, SEEK_END);
 	int i, j, stop = 0, nj;
 	char str[100];
 	char *fileName;
-	char chAux[5] = { 'p','0','b','B','P'}; //Tamanho temporário
+	char chAux[5] = { 'p','0','b','B','P' };
 	int op = 0, bk = 0;
 	do
 	{
@@ -920,23 +947,14 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 			puts("FICHEIRO EXISTE");
 			FILE *newfile;
 			newfile = fopen(fileName, "rb");
-			if (feof(newfile))
-			{
-				stop = 1;
-				break;
-			}
-			else
-			{				
-				fread(&nj, sizeof(int), 1, newfile);
-				*nJog = nj;
-			}						
+			fread(&nj, sizeof(int), 1, newfile);
+			*nJog = nj;
 			tab tabu = (tab)malloc(sizeof(struct tabuleiro));
 			tabu->anterior = NULL;
-			tabu->seguinte = NULL;
-			tab tabu2 = NULL;			
+			tabu->seguinte = NULL;			
 			int count = 0;
 			do
-			{								
+			{
 				for (i = 0; i < 8; i++)
 				{
 					for (j = 0; j < 8; j++)
@@ -944,8 +962,8 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 						int cAux = 0;
 						if (feof(newfile))
 						{
-							stop = 1;
-							break;
+						stop = 1;
+						break;
 						}
 						else
 						{
@@ -956,43 +974,43 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 							tabu->taboo[i][j] = chAux[cAux];
 						}
 						else
-						{							
-							stop = 1;
-							break;
+						{
+						stop = 1;
+						break;
 						}
 					}
-				}						
-				/*tabu2 = inserirFim(tabu2, tabu);*/
+				}				
+				LOAD = inserirNoFim(LOAD, tabu->taboo);
+				//drawBoard(master, 1);
 				count++;
-			} while (count < nj);
-			/**board = *tabu2;*/
+			} while (count <= nj);			
 			if (stop == 0)
-			{								
-				int id, rr, rrr;	
+			{
+				int id, rr, rrr;
 				if (feof(newfile))
 				{
-					stop = 1;
-					fclose(newfile);
-					break;
+				stop = 1;
+				fclose(newfile);
+				break;
 				}
-				else			
-					fread(&id, sizeof(int), 1, newfile);						
+				else	
+				fread(&id, sizeof(int), 1, newfile);
 				if (feof(newfile))
 				{
-					stop = 1;
-					fclose(newfile);
-					break;
+				stop = 1;
+				fclose(newfile);
+				break;
 				}
-				else				
-					fread(&rr, sizeof(int), 1, newfile);							
+				else	
+				fread(&rr, sizeof(int), 1, newfile);
 				if (feof(newfile))
-				{			
-					stop = 1;
-					fclose(newfile);
-					break;
+				{
+				stop = 1;
+				fclose(newfile);
+				break;
 				}
-				else				
-					fread(&rrr, sizeof(int), 1, newfile);							
+				else	
+				fread(&rrr, sizeof(int), 1, newfile);
 				if (((id >= 0 && id <= 1 && id != NULL) ||
 					(rr <= 3 && rr >= 0 && rr != NULL) ||
 					(rrr <= 3 && rrr >= 0 && rrr != NULL)) && stop == 0)
@@ -1007,7 +1025,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 					stop = 0;
 					break;
 				}
-				else { stop = 1; }
+				/*else { stop = 1; }*/
 			}
 			if (stop == 1)
 			{
@@ -1096,6 +1114,7 @@ int main()
 		else
 		{
 			int a = loadGameFile(tabu, &jogId, &retr[0], &retr[1], &nJogadas);
+			tabu = LOAD;
 			first = 1;
 			if (a == 1)
 			{
@@ -1123,7 +1142,7 @@ int main()
 			
 			printf("\nJogador %d (%c/%c) e a sua vez.\n", jogId + 1, charsPoss[jogId][0], charsPoss[jogId][1]);
 			if (first == 1)
-			{
+			{				
 				tabu = saveLastBoard(tabu);
 				printf("\nQuer anular a jogada anterior do adversario?(s/S)\n");
 				scanf("%c", &opChar);
@@ -1195,9 +1214,12 @@ int main()
 			//freeArvore(tb);
 			printf("\n1-Salvar o jogo num ficheiro\n2-Ver todas as jogadas anteriores\n-1-Render\n4-Continuar\n");
 			int opcao;
-			scanf("%d", &opcao);
-			nJogadas++;
+			scanf("%d", &opcao);			
 			first = 1;
+			nJogadas++;
+			if (jogId == 0)
+				jogId = 1;
+			else jogId = 0;
 			if (opcao == 1)
 			{
 				saveGameFile(tabu, jogId, retr[0], retr[1], nJogadas);
@@ -1207,16 +1229,10 @@ int main()
 				drawBoard(tabu, 1);
 			}
 			else if (opcao == -1)
-			{
-				if (jogId == 0)
-					jogId = 1;
-				else jogId = 0;
+			{				
 				break;
-			}
-			if (jogId == 0)
-				jogId = 1;
-			else jogId = 0;
-			//while (getchar() != '\n');
+			}			
+			while (getchar() != '\n');
 			getchar();
 		}
 		fseek(stdin, 0, SEEK_END);
@@ -1225,8 +1241,14 @@ int main()
 		printf("Parabens jogador %d e o vencedor !!!", jogId+1);
 		printf("\n\nQuer jogar novamente ?(s/S)\n");		
 		scanf("%c", &opChar);
-		if (opChar == 's'|| opChar == 'S')		
-			repeat = 1;		
+		if (opChar == 's' || opChar == 'S')
+		{
+			repeat = 1;
+			nJogadas = 0;
+			jogId = 0;
+			retr[0] = 3;
+			retr[1] = 3;
+		}
 		else		
 			repeat = 0;	
 	}	
