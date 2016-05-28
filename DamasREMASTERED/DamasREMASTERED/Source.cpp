@@ -22,6 +22,234 @@ typedef struct tabuleiro
 	struct tabuleiro *seguinte;
 }*tab;
 
+
+tabarv jogadamas(tab board, char peca, int linha, int coluna, int come, int move, int direc)
+{
+	if (move == 5)
+	{
+		return NULL;
+	}
+	else
+	{
+		tabarv tb = (tabarv)malloc(sizeof(struct TabArv));
+		tb->casa[0] = linha;
+		tb->casa[1] = coluna;
+
+		tb->move = move;
+		if (move == 0)
+			tb->comestivel = -1;
+		else tb->comestivel = come;
+
+		//Jogador Branco
+		if (peca == 'B')
+		{
+			//SegEsq
+			if ((linha + 1 > 7) || (coluna - 1 < 0) ||  //Verifica se casa existe 
+				(board->taboo[linha + 1][coluna - 1] == 'b' || (board->taboo[linha + 1][coluna - 1] == 'B'))) //não está ocupda
+			{
+				tb->SegEsq = NULL;
+			}
+			else
+			{
+				if (board->taboo[linha + 1][coluna - 1] == '0')
+				{
+					if (direc == 3) tb->SegEsq = jogadamas(board, peca, linha + 1, coluna - 1, come, move, 3);
+					else tb->SegEsq = jogadamas(board, peca, linha + 1, coluna - 1, come, move + 1, 3);
+				}
+
+				else if (((board->taboo[linha + 1][coluna - 1] == 'p') || (board->taboo[linha + 1][coluna - 1] == 'P'))
+					&& (linha + 2 < 8) && (coluna - 2 >= 0) && (board->taboo[linha + 2][coluna - 2] == '0'))
+				{
+					if (direc == 3) tb->SegEsq = jogadamas(board, peca, linha + 2, coluna - 2, come+1, move, 3);
+					else tb->SegEsq = jogadamas(board, peca, linha + 2, coluna - 2, come+1, move + 1, 3);
+				}
+				else
+				{
+					tb->SegEsq = NULL;
+				}
+			}
+
+			//SegDir
+			if ((linha + 1 > 7) || (coluna + 1 > 7) ||  //Verifica se casa existe 
+				(board->taboo[linha + 1][coluna + 1] == 'b' || (board->taboo[linha + 1][coluna + 1] == 'B'))) //não está ocupda
+			{
+				tb->SegDir = NULL;
+			}
+			else
+			{
+				if (board->taboo[linha + 1][coluna + 1] == '0')
+				{
+					if (direc == 4) tb->SegDir = jogadamas(board, peca, linha + 1, coluna + 1, come, move, 4);
+					else tb->SegDir = jogadamas(board, peca, linha + 1, coluna + 1, come, move + 1, 4);
+				}
+
+				else if (((board->taboo[linha + 1][coluna + 1] == 'p') || (board->taboo[linha + 1][coluna + 1] == 'P'))
+					&& (linha + 2 < 8) && (coluna + 2 < 8) && (board->taboo[linha + 2][coluna + 2] == '0'))
+				{
+					if (direc == 4) tb->SegDir = jogadamas(board, peca, linha + 2, coluna + 2, come+1, move, 4);
+					else tb->SegDir = jogadamas(board, peca, linha + 2, coluna + 2, come+1, move + 1, 4);
+				}
+				else
+				{
+					tb->SegDir = NULL;
+				}
+			}
+
+			//AntEsq
+			if ((linha - 1 < 0) || (coluna - 1 < 0) ||  //Verifica se casa existe 
+				(board->taboo[linha - 1][coluna - 1] == 'b' || (board->taboo[linha - 1][coluna - 1] == 'B'))) //não está ocupda
+			{
+				tb->AntEsq = NULL;
+			}
+			else
+			{
+				if (board->taboo[linha - 1][coluna - 1] == '0')
+				{
+					if (direc == 1) tb->AntEsq = jogadamas(board, peca, linha - 1, coluna - 1, come, move, 1);
+					else tb->AntEsq = jogadamas(board, peca, linha - 1, coluna - 1, come, move + 1, 1);
+				}
+
+				else if (((board->taboo[linha - 1][coluna - 1] == 'p') || (board->taboo[linha - 1][coluna - 1] == 'P'))
+					&& (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
+				{
+					if (direc == 1) tb->AntEsq = jogadamas(board, peca, linha - 2, coluna - 2, come+1, move, 1);
+					else tb->AntEsq = jogadamas(board, peca, linha - 2, coluna - 2, come + 1, move + 1, 1);
+				}
+				else
+				{
+					tb->AntEsq = NULL;
+				}
+			}
+
+			//Direita
+			if ((linha - 1 < 0) || (coluna + 1 > 7) ||  //Verifica se casa existe 
+				(board->taboo[linha - 1][coluna + 1] == 'b' || (board->taboo[linha - 1][coluna + 1] == 'B')))
+			{
+				tb->AntDir = NULL;
+			}
+
+			else if (board->taboo[linha - 1][coluna + 1] == '0')
+			{
+				if (direc == 2) tb->AntDir = jogadamas(board, peca, linha - 1, coluna + 1, come, move, 2);
+				else tb->AntDir = jogadamas(board, peca, linha - 1, coluna + 1, come, move + 1, 2);
+			}
+			else if (((board->taboo[linha - 1][coluna + 1] == 'p') || (board->taboo[linha - 1][coluna + 1] == 'P'))
+				&& (linha - 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha - 2][coluna + 2] == '0'))
+			{
+				if (direc == 2) tb->AntDir = jogadamas(board, peca, linha - 2, coluna + 2, come+1, move, 2);
+				else tb->AntDir = jogadamas(board, peca, linha - 2, coluna + 2, come + 1, move + 1, 2);
+			}
+			else tb->AntDir = NULL;
+		}
+
+		//Jogador preto
+		else if (peca == 'P')
+		{
+
+			//AntEsq
+			if ((linha - 1 < 0) || (coluna - 1 < 0) ||  //Verifica se casa existe 
+				(board->taboo[linha - 1][coluna - 1] == 'p' || (board->taboo[linha - 1][coluna - 1] == 'P'))) //não está ocupda
+			{
+				tb->AntEsq = NULL;
+			}
+			else
+			{
+				if (board->taboo[linha - 1][coluna - 1] == '0')
+				{
+					if (direc == 1) tb->AntEsq = jogadamas(board, peca, linha - 1, coluna - 1, come, move, 1);
+					else tb->AntEsq = jogadamas(board, peca, linha - 1, coluna - 1, come, move + 1, 1);
+				}
+
+				else if (((board->taboo[linha - 1][coluna - 1] == 'b') || (board->taboo[linha - 1][coluna - 1] == 'B'))
+					&& (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
+				{
+					if (direc == 1) tb->AntEsq = jogadamas(board, peca, linha - 2, coluna - 2, come + 1, move, 1);
+					else tb->AntEsq = jogadamas(board, peca, linha - 2, coluna - 2, come + 1, move + 1, 1);
+				}
+				else
+				{
+					tb->AntEsq = NULL;
+				}
+			}
+
+			//AntDir
+			if ((linha - 1 < 0) || (coluna + 1 > 7) ||  //Verifica se casa existe 
+				(board->taboo[linha - 1][coluna + 1] == 'p' || (board->taboo[linha - 1][coluna + 1] == 'P'))) //não está ocupda
+			{
+				tb->AntDir = NULL;
+			}
+			else
+			{
+				if (board->taboo[linha - 1][coluna + 1] == '0')
+				{
+					if (direc == 2) tb->AntDir = jogadamas(board, peca, linha - 1, coluna + 1, come, move, 2);
+					else tb->AntDir = jogadamas(board, peca, linha - 1, coluna + 1, come, move + 1, 2);
+				}
+				else if (((board->taboo[linha - 1][coluna + 1] == 'b') || (board->taboo[linha - 1][coluna + 1] == 'B'))
+					&& (linha - 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha - 2][coluna + 2] == '0'))
+				{
+					if (direc == 2) tb->AntDir = jogadamas(board, peca, linha - 2, coluna + 2, come + 1, move, 2);
+					else tb->AntDir = jogadamas(board, peca, linha - 2, coluna + 2, come + 1, move + 1, 2);
+				}
+				else
+				{
+					tb->AntDir = NULL;
+				}
+			}
+
+			//SegEsq
+			if ((linha + 1 > 7) || (coluna - 1 < 0) ||  //Verifica se casa existe 
+				(board->taboo[linha + 1][coluna - 1] == 'p' || (board->taboo[linha + 1][coluna - 1] == 'P'))) //não está ocupda
+			{
+				tb->SegEsq = NULL;
+			}
+			else
+			{
+				if (board->taboo[linha + 1][coluna - 1] == '0')
+				{
+					if (direc == 3) tb->SegEsq = jogadamas(board, peca, linha + 1, coluna - 1, come, move, 3);
+					else tb->SegEsq = jogadamas(board, peca, linha + 1, coluna - 1, come, move + 1, 3);
+
+				}
+
+				else if (((board->taboo[linha + 1][coluna - 1] == 'b') || (board->taboo[linha + 1][coluna - 1] == 'B'))
+					&& (linha + 2 < 8) && (coluna - 2 >= 0) && (board->taboo[linha + 2][coluna - 2] == '0'))
+				{
+					if (direc == 3) tb->SegEsq = jogadamas(board, peca, linha + 2, coluna - 2, come + 1, move, 3);
+					else tb->SegEsq = jogadamas(board, peca, linha + 2, coluna - 2, come + 1, move + 1, 3);
+
+				}
+				else
+				{
+					tb->SegEsq = NULL;
+				}
+			}
+			//SegDir
+			if ((linha + 1 > 7) || (coluna + 1 > 7) ||  //Verifica se casa existe 
+				(board->taboo[linha + 1][coluna + 1] == 'p' || (board->taboo[linha + 1][coluna + 1] == 'P')))
+			{
+				tb->SegDir = NULL;
+			}
+			else if (board->taboo[linha + 1][coluna + 1] == '0')
+			{
+				if (direc == 4) tb->SegDir = jogadamas(board, peca, linha + 1, coluna + 1, come, move, 4);
+				else tb->SegDir = jogadamas(board, peca, linha + 1, coluna + 1, come, move + 1, 4);
+
+			}
+			else if (((board->taboo[linha + 1][coluna + 1] == 'b') || (board->taboo[linha + 1][coluna + 1] == 'B'))
+				&& (linha + 2 < 8) && (coluna + 2 < 8) && (board->taboo[linha + 2][coluna + 2] == '0'))
+			{
+				if (direc == 4) tb->SegDir = jogadamas(board, peca, linha + 2, coluna + 2, come + 1, move, 4);
+				else tb->SegDir = jogadamas(board, peca, linha + 2, coluna + 2, come + 1, move + 1, 4);
+
+			}
+			else tb->SegDir = NULL;
+		}
+		return tb;
+
+	}
+}
+
 tabarv jogadas(tab board, char peca, int linha, int coluna, int come, int move) //se comeu uma peça 1, se não comeu 0
 {
 	if (move == 5)
@@ -37,82 +265,28 @@ tabarv jogadas(tab board, char peca, int linha, int coluna, int come, int move) 
 		//Transforma em Dama
 		if (peca == 'b'&& linha == 0)
 		{
-			tb->dama = 1;
 			peca = 'B';
+			tb = jogadamas(board, peca, linha, coluna, come, move, 0);
+			tb->dama = 1;
 		}
 		else if (peca == 'p' &&coluna == 7)
 		{
-			tb->dama = 1;
 			peca = 'P';
+			tb = jogadamas(board, peca, linha, coluna, come, move, 0);
+			tb->dama = 1;
 		}
 		else tb->dama = 0;
 
 		tb->move = move;
-		if (move == 0)
-			tb->comestivel = -1;
-		else tb->comestivel = come;
+		tb->comestivel = come;
 
 		//Jogador Branco
-		if ((peca == 'b') || (peca == 'B'))
+		if (peca == 'b')
 		{
-			if (peca == 'b') //Não dama
-			{
+			
 				tb->SegDir = NULL;
 				tb->SegEsq = NULL;
-			}
-			else //Dama (Casas para trás)
-			{
-				//Esquerda
-				if ((linha + 1 > 7) || (coluna - 1 < 0) ||  //Verifica se casa existe 
-					(board->taboo[linha + 1][coluna - 1] == 'b' || (board->taboo[linha + 1][coluna - 1] == 'B'))) //não está ocupda
-				{
-					tb->SegEsq = NULL;
-				}
-				else
-				{
-					if (board->taboo[linha + 1][coluna - 1] == '0')
-					{
-						tb->SegEsq = jogadas(board, peca, linha + 1, coluna - 1, come, move + 1);
-					}
 
-					else if (((board->taboo[linha + 1][coluna - 1] == 'p') || (board->taboo[linha + 1][coluna - 1] == 'P'))
-						&& (linha + 2 < 8) && (coluna - 2 >= 0) && (board->taboo[linha + 2][coluna - 2] == '0'))
-					{
-						tb->SegEsq = jogadas(board, peca, linha + 2, coluna - 2, come + 1, move + 1);
-					}
-					else
-					{
-						tb->SegEsq = NULL;
-					}
-				}
-
-				//Direita
-				if ((linha + 1 > 7) || (coluna + 1 > 7) ||  //Verifica se casa existe 
-					(board->taboo[linha + 1][coluna + 1] == 'b' || (board->taboo[linha + 1][coluna + 1] == 'B'))) //não está ocupda
-				{
-					tb->SegDir = NULL;
-				}
-				else
-				{
-					if (board->taboo[linha + 1][coluna + 1] == '0')
-					{
-						tb->SegDir = jogadas(board, peca, linha + 1, coluna + 1, come, move + 1);
-					}
-
-					else if (((board->taboo[linha + 1][coluna + 1] == 'p') || (board->taboo[linha + 1][coluna + 1] == 'P'))
-						&& (linha + 2 < 8) && (coluna + 2 < 8) && (board->taboo[linha + 2][coluna + 2] == '0'))
-					{
-						tb->SegDir = jogadas(board, peca, linha + 2, coluna + 2, come + 1, move + 1);
-					}
-					else
-					{
-						tb->SegDir = NULL;
-					}
-				}
-
-			}
-
-			//Não dama e dama
 			//Esquerda
 			if ((linha - 1 < 0) || (coluna - 1 < 0) ||  //Verifica se casa existe 
 				(board->taboo[linha - 1][coluna - 1] == 'b' || (board->taboo[linha - 1][coluna - 1] == 'B'))) //não está ocupda
@@ -124,16 +298,13 @@ tabarv jogadas(tab board, char peca, int linha, int coluna, int come, int move) 
 				if (board->taboo[linha - 1][coluna - 1] == '0')
 				{
 					tb->AntEsq = jogadas(board, peca, linha - 1, coluna - 1, come, move + 1);
-					if (tb->AntEsq != NULL && peca != 'B')
-						tb->AntEsq->SegDir = tb;
+	
 				}
 
 				else if (((board->taboo[linha - 1][coluna - 1] == 'p') || (board->taboo[linha - 1][coluna - 1] == 'P'))
 					&& (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
 				{
 					tb->AntEsq = jogadas(board, peca, linha - 2, coluna - 2, come + 1, move + 1);
-					if (tb->AntEsq != NULL && peca != 'B')
-						tb->AntEsq->SegDir = tb;
 				}
 				else
 				{
@@ -151,78 +322,22 @@ tabarv jogadas(tab board, char peca, int linha, int coluna, int come, int move) 
 			else if (board->taboo[linha - 1][coluna + 1] == '0')
 			{
 				tb->AntDir = jogadas(board, peca, linha - 1, coluna + 1, come, move + 1);
-				if (tb->AntDir != NULL && peca != 'B')
-					tb->AntDir->SegEsq = tb;
 			}
 			else if (((board->taboo[linha - 1][coluna + 1] == 'p') || (board->taboo[linha - 1][coluna + 1] == 'P'))
 				&& (linha - 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha - 2][coluna + 2] == '0'))
 			{
 				tb->AntDir = jogadas(board, peca, linha - 2, coluna + 2, come + 1, move + 1);
-				if (tb->AntDir != NULL && peca != 'B')
-					tb->AntDir->SegEsq = tb;
 			}
 			else tb->AntDir = NULL;
 		}
 
 		//Jogador preto
-		if ((peca == 'p') || (peca == 'P'))
+		if (peca == 'p')
 		{
-			if (peca == 'p') //Não dama
-			{
+			
 				tb->AntDir = NULL;
 				tb->AntEsq = NULL;
-			}
-			else //Dama (Casas para trás)
-			{
-				//Esquerda
-				if ((linha - 1 < 0) || (coluna - 1 < 0) ||  //Verifica se casa existe 
-					(board->taboo[linha - 1][coluna - 1] == 'p' || (board->taboo[linha - 1][coluna - 1] == 'P'))) //não está ocupda
-				{
-					tb->AntEsq = NULL;
-				}
-				else
-				{
-					if (board->taboo[linha - 1][coluna - 1] == '0')
-					{
-						tb->AntEsq = jogadas(board, peca, linha - 1, coluna - 1, come, move + 1);
-					}
-
-					else if (((board->taboo[linha - 1][coluna - 1] == 'b') || (board->taboo[linha - 1][coluna - 1] == 'B'))
-						&& (linha - 2 >= 0) && (coluna - 2 >= 0) && (board->taboo[linha - 2][coluna - 2] == '0'))
-					{
-						tb->AntEsq = jogadas(board, peca, linha - 2, coluna - 2, come + 1, move + 1);
-					}
-					else
-					{
-						tb->AntEsq = NULL;
-					}
-				}
-
-				//Direita
-				if ((linha - 1 < 0) || (coluna + 1 >7) ||  //Verifica se casa existe 
-					(board->taboo[linha - 1][coluna + 1] == 'p' || (board->taboo[linha - 1][coluna + 1] == 'P'))) //não está ocupda
-				{
-					tb->AntDir = NULL;
-				}
-				else
-				{
-					if (board->taboo[linha - 1][coluna + 1] == '0')
-					{
-						tb->AntDir = jogadas(board, peca, linha - 1, coluna + 1, come, move + 1);
-					}
-					else if (((board->taboo[linha - 1][coluna + 1] == 'b') || (board->taboo[linha - 1][coluna + 1] == 'B'))
-						&& (linha - 2 >= 0) && (coluna + 2 < 8) && (board->taboo[linha - 2][coluna + 2] == '0'))
-					{
-						tb->AntDir = jogadas(board, peca, linha - 2, coluna + 2, come + 1, move + 1);
-					}
-					else
-					{
-						tb->AntDir = NULL;
-					}
-				}
-
-			}
-			//Não Damas e Damas
+			
 			//Esquerda
 			if ((linha + 1 > 7) || (coluna - 1 < 0) ||  //Verifica se casa existe 
 				(board->taboo[linha + 1][coluna - 1] == 'p' || (board->taboo[linha + 1][coluna - 1] == 'P'))) //não está ocupda
@@ -234,16 +349,12 @@ tabarv jogadas(tab board, char peca, int linha, int coluna, int come, int move) 
 				if (board->taboo[linha + 1][coluna - 1] == '0')
 				{
 					tb->SegEsq = jogadas(board, peca, linha + 1, coluna - 1, come, move + 1);
-					if (tb->SegEsq != NULL && peca != 'P')
-						tb->SegEsq->AntDir = tb;
 				}
 
 				else if (((board->taboo[linha + 1][coluna - 1] == 'b') || (board->taboo[linha + 1][coluna - 1] == 'B'))
 					&& (linha + 2 <8) && (coluna - 2 >= 0) && (board->taboo[linha + 2][coluna - 2] == '0'))
 				{
 					tb->SegEsq = jogadas(board, peca, linha + 2, coluna - 2, come + 1, move + 1);
-					if (tb->SegEsq != NULL && peca != 'P')
-						tb->SegEsq->AntDir = tb;
 				}
 				else
 				{
@@ -259,15 +370,11 @@ tabarv jogadas(tab board, char peca, int linha, int coluna, int come, int move) 
 			else if (board->taboo[linha + 1][coluna + 1] == '0')
 			{
 				tb->SegDir = jogadas(board, peca, linha + 1, coluna + 1, come, move + 1);
-				if (tb->SegDir != NULL && peca != 'B')
-					tb->SegDir->AntEsq = tb;
 			}
 			else if (((board->taboo[linha + 1][coluna + 1] == 'b') || (board->taboo[linha + 1][coluna + 1] == 'B'))
 				&& (linha + 2 <8) && (coluna + 2 <8) && (board->taboo[linha + 2][coluna + 2] == '0'))
 			{
 				tb->SegDir = jogadas(board, peca, linha + 2, coluna + 2, come + 1, move + 1);
-				if (tb->SegDir != NULL && peca != 'B')
-					tb->SegDir->AntEsq = tb;
 			}
 			else tb->SegDir = NULL;
 		}
@@ -304,25 +411,43 @@ void printCaminhos(tabarv tb, int max)
 {
 	if (tb != NULL)
 	{
-		int comes = maxComestivel(tb);
 
-		if (tb->AntEsq != NULL && tb->AntEsq->move>tb->move && tb->AntEsq->comestivel == comes)
-			printCaminhos(tb->AntEsq, max);
-		if (tb->AntDir != NULL && tb->AntDir->move>tb->move && tb->AntDir->comestivel == comes)
-			printCaminhos(tb->AntDir, max);
-
-		int i;
-		for (i = -1; i < tb->move; i++) printf("\t");			//tabs para ficar agradavel à vista as jogadas possiveis
+		int i, comes = maxComestivel(tb);
 		printf("[%d,%d]", tb->casa[0], tb->casa[1]);
 
 		//Identificação da(s) melhor(es) jogada(s)
 		if (tb->comestivel == max) printf("*");
 		printf("\n");
 
-		if (tb->SegEsq != NULL && tb->SegEsq->move>tb->move && tb->SegEsq->comestivel == comes)
-			printCaminhos(tb->SegEsq, max);
-		if (tb->SegDir != NULL && tb->SegDir->move>tb->move && tb->SegDir->comestivel == comes)
+		if (tb->AntEsq != NULL && tb->AntEsq->move >= tb->move && tb->AntEsq->comestivel == comes)
+		{
+			for (i = -1; i < tb->move; i++) printf("\t");
+			printf("1-");
+			printCaminhos(tb->AntEsq, max);
+		}
+
+		if (tb->AntDir != NULL && tb->AntDir->move >= tb->move && tb->AntDir->comestivel == comes)
+		{
+			for (i = -1; i < tb->move; i++) printf("\t");
+			printf("2-");
+			printCaminhos(tb->AntDir, max);
+		}
+
+
+		if (tb->SegEsq != NULL && tb->SegEsq->move >= tb->move && tb->SegEsq->comestivel == comes)
+		{
+			for (i = -1; i < tb->move; i++) printf("\t");
+			printf("3-");
+			printCaminhos(tb->SegEsq, max); 
+		}
+
+		
+		if (tb->SegDir != NULL && tb->SegDir->move >= tb->move && tb->SegDir->comestivel == comes)
+		{
+			for (i = -1; i < tb->move; i++) printf("\t");
+			printf("4-");
 			printCaminhos(tb->SegDir, max);
+		}
 	}
 }
 
@@ -339,8 +464,9 @@ void escolheCaminho(tabarv tb)
 	printf("\n 1 - Cima Esquerdo\n 2 - Cima Direita\n 3 - Baixo Esquerdo\n 4 - Baixo Direito\n 0 - Fim jogada\n-1 - Jogar outra peca\n");
 	do
 	{
-		int b = 0;
+		int b = 0, maxcome = 0;
 
+		maxcome = maxComestivel(tb);
 		do
 		{
 			scanf("%d", &direc);
@@ -348,7 +474,7 @@ void escolheCaminho(tabarv tb)
 			//AntEsq
 			if (direc == 1)
 			{
-				if (tb->AntEsq != NULL)
+				if (tb->AntEsq != NULL && tb->AntEsq->comestivel==maxcome && tb->AntEsq->move>tb->move)
 				{
 					b = 1;
 					tb = tb->AntEsq;
@@ -359,7 +485,7 @@ void escolheCaminho(tabarv tb)
 			//AntDir
 			else if (direc == 2)
 			{
-				if (tb->AntDir != NULL)
+				if (tb->AntDir != NULL && tb->AntDir->comestivel == maxcome && tb->AntDir->move>tb->move)
 				{
 					b = 1;
 					tb = tb->AntDir;
@@ -370,7 +496,7 @@ void escolheCaminho(tabarv tb)
 			//SegEsq
 			else if (direc == 3)
 			{
-				if (tb->SegEsq != NULL)
+				if (tb->SegEsq != NULL && tb->SegEsq->comestivel == maxcome && tb->SegEsq->move>tb->move)
 				{
 					b = 1;
 					tb = tb->SegEsq;
@@ -381,7 +507,7 @@ void escolheCaminho(tabarv tb)
 			//SegDir
 			else if (direc == 4)
 			{
-				if (tb->SegDir != NULL)
+				if (tb->SegDir != NULL  && tb->SegDir->comestivel == maxcome && tb->SegDir->move>tb->move)
 				{
 					b = 1;
 					tb = tb->SegDir;
@@ -389,14 +515,14 @@ void escolheCaminho(tabarv tb)
 				else printf("Jogada invalida. Tente de novo.\n");
 			}
 
-			else b = 1;
+			else if(direc>4 || direc < 1)b = 1;
 
 		} while (b == 0);
 		
 		//verificar direc
 		if (direc == -1)
 		{
-			caminho[1] = -1;
+			caminho[0] = -1;
 			break;
 		}
 		if (direc > 4 || direc < 1)
@@ -422,7 +548,7 @@ void moverPeca(tab board, tabarv tb, char j)
 			//AntEsq
 			case 1:
 			{
-				if (tb->AntEsq->comestivel > 0) board->taboo[tb->casa[0] - 1][tb->casa[1] - 1] = '0';				
+				if (tb->AntEsq->comestivel > tb->comestivel) board->taboo[tb->casa[0] - 1][tb->casa[1] - 1] = '0';				
 				if ((jog == 'b') && (tb->AntEsq->casa[0] == 0))
 				{
 					board->taboo[tb->AntEsq->casa[0]][tb->AntEsq->casa[1]] = 'B';
@@ -435,7 +561,7 @@ void moverPeca(tab board, tabarv tb, char j)
 			}
 			case 2:
 			{
-				if (tb->AntDir->comestivel > 0) board->taboo[tb->casa[0] - 1][tb->casa[1] + 1] = '0';
+				if (tb->AntDir->comestivel > tb->comestivel) board->taboo[tb->casa[0] - 1][tb->casa[1] + 1] = '0';
 				if ((jog == 'b') && (tb->AntDir->casa[0] == 0))
 				{
 					board->taboo[tb->AntDir->casa[0]][tb->AntDir->casa[1]] = 'B';
@@ -447,7 +573,7 @@ void moverPeca(tab board, tabarv tb, char j)
 			}
 			case 3:
 			{
-				if (tb->SegEsq->comestivel > 0) board->taboo[tb->casa[0] + 1][tb->casa[1] - 1] = '0';
+				if (tb->SegEsq->comestivel > tb->comestivel) board->taboo[tb->casa[0] + 1][tb->casa[1] - 1] = '0';
 				if ((jog == 'p') && (tb->SegEsq->casa[0] == 7))
 				{
 					board->taboo[tb->SegEsq->casa[0]][tb->SegEsq->casa[1]] = 'P';
@@ -482,7 +608,7 @@ void moverPeca(tab board, tabarv tb, char j)
 
 void freeArvore(tabarv tb)
 {	
-	if (tb != NULL)
+	if (tb!=NULL)
 	{
 		freeArvore(tb->AntDir);
 		freeArvore(tb->AntEsq);
@@ -567,13 +693,13 @@ void MapaInicio(tab board)
 	int i, j;
 	char b[8][8] = {
 		{ '0', 'p', '0', 'p', '0', '0', '0', 'p' },
-		{ 'p', '0', 'p', '0', '0', '0', 'b', '0' },
-		{ '0', 'p', 'P', '0', '0', 'p', '0', 'p' },
+		{ 'p', '0', 'p', '0', 'p', '0', 'p', '0' },
+		{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
 		{ '0', '0', '0', '0', '0', '0', '0', '0' },
-		{ '0', '0', '0', '0', '0', 'p', '0', '0' },
-		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' },
+		{ '0', '0', '0', '0', '0', '0', '0', '0' },
+		{ 'b', '0', 'b', '0', 'B', '0', 'b', '0' },
 		{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
-		{ 'b', '0', 'b', '0', 'b', '0', 'b', '0' }
+		{ 'b', '0', 'b', '0', 'b', '0', 'b', 'B' }
 	};
 	for (i = 0; i < 8; i++)	
 		for (j = 0; j < 8; j++)		
@@ -745,22 +871,19 @@ tab inserirFim(tab board, tab last)
 	int i,j;
 	tab aux = board;
 	tab novo = (tab)malloc(sizeof(struct tabuleiro));
-	if (board == NULL)
+	if (aux == NULL)
 	{
 		novo = last;
-		novo->anterior = NULL;
-		novo->seguinte = NULL;
 		return novo;
 	}
 	else
 	{
-		while (aux != NULL)
+		while (aux->seguinte != NULL)
 		{
 			aux = aux->seguinte;		
 		}
 		novo = last;
 		novo->anterior = board;
-		novo->seguinte = NULL;
 		aux->seguinte = novo;
 		return novo;
 	}
@@ -798,9 +921,7 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 			tab tabu = (tab)malloc(sizeof(struct tabuleiro));
 			tabu->anterior = NULL;
 			tabu->seguinte = NULL;
-			tab tabu2 = (tab)malloc(sizeof(struct tabuleiro));;
-			tabu2->anterior = NULL;
-			tabu2->seguinte = NULL;
+			tab tabu2 = NULL;			
 			int count = 0;
 			do
 			{								
@@ -828,11 +949,11 @@ int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
 							break;
 						}
 					}
-				}		
-				tabu2 = inserirFim(tabu2, tabu);
+				}						
+				/*tabu2 = inserirFim(tabu2, tabu);*/
 				count++;
 			} while (count < nj);
-			*board = *tabu2;
+			/**board = *tabu2;*/
 			if (stop == 0)
 			{								
 				int id, rr, rrr;	
@@ -987,10 +1108,11 @@ int main()
 				jogId = 1;
 				break;
 			}
-			tabu = saveLastBoard(tabu);
+			
 			printf("\nJogador %d (%c/%c) e a sua vez.\n", jogId + 1, charsPoss[jogId][0], charsPoss[jogId][1]);
 			if (first == 1)
 			{
+				tabu = saveLastBoard(tabu);
 				printf("\nQuer anular a jogada anterior do adversario?(s/S)\n");
 				scanf("%c", &opChar);
 				if (opChar == 's' || opChar == 'S')
@@ -1041,15 +1163,13 @@ int main()
 					}
 				} while (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1] || repeat2 == 1);
 
-				tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0, 0);
+				if(tabu->taboo[x][y]==charsPoss[jogId][1])
+					tb = jogadamas(tabu, tabu->taboo[x][y], x, y, 0, 0,0);
+				else tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0, 0);
 				escolheCaminho(tb);
-				for (x = 0; x < 5; x++)
+				if (caminho[0] == -1)
 				{
-					if (caminho[x] == -1)
-					{
-						b = 1;
-						break;
-					}					
+					b = 1;
 				}
 			} while (b == 1);
 			moverPeca(tabu, tb, tabu->taboo[x][y]);
@@ -1079,7 +1199,7 @@ int main()
 			if (jogId == 0)
 				jogId = 1;
 			else jogId = 0;
-			while (getchar() != '\n');
+			//while (getchar() != '\n');
 			getchar();
 		}
 		fseek(stdin, 0, SEEK_END);
