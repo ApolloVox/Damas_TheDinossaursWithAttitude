@@ -623,7 +623,6 @@ void moverPeca(tab board, tabarv tb, char jog)
 		i++;
 		j = 0;
 	}
-	getchar();
 }
 
 void freeArvore(tabarv tb)
@@ -637,56 +636,7 @@ void freeArvore(tabarv tb)
 		free(tb);
 	}	
 }
-/*typedef struct Peça
-{
-int coord[2];
-bool dama = false;
-}*peça;
-*/
 
-/*ListJogs AddJog(ListJogs apt, int *origem, int **destino)
-{
-ListJogs novo = (ListJogs)malloc(sizeof(Lista));
-novo->seguinte = NULL;
-if (apt == NULL)
-{
-novo->anterior = NULL;
-novo->origem[0] = origem[0];
-novo->origem[1] = origem[1];
-for (int i = 0; i < 2; i++)
-{
-for (int j = 0; j < 5; j++)
-{
-if ((destino[i][j]>8) || (destino[i][j] < 0)) return novo;
-else
-{
-novo->destino[i][j] = destino[i][j];
-}
-}
-}
-return novo;
-}
-
-else
-{
-novo->anterior = apt;
-novo->origem[0] = origem[0];
-novo->origem[1] = origem[1];
-for (int i = 0; i < 2; i++)
-{
-for (int j = 0; j < 5; j++)
-{
-if ((destino[i][j]>8) || (destino[i][j] < 0)) return novo;
-else
-{
-novo->destino[i][j] = destino[i][j];
-}
-}
-}
-return novo;
-}
-}
-*/
 void drawBoard(tab tabuleiro,int ant)
 {
 	int i, j;
@@ -889,24 +839,7 @@ void saveGameFile(tab board, int idJog, int r1, int r2,int nJog)
 tab inserirFim(tab board, tab last)
 {
 	int i,j;
-	tab aux = board;
-	tab novo = (tab)malloc(sizeof(struct tabuleiro));
-	if (aux == NULL)
-	{
-		novo = last;
-		return novo;
-	}
-	else
-	{
-		while (aux->seguinte != NULL)
-		{
-			aux = aux->seguinte;		
-		}
-		novo = last;
-		novo->anterior = board;
-		aux->seguinte = novo;
-		return novo;
-	}
+	
 }
 
 int loadGameFile(tab board, int *idJog, int *r1, int *r2,int *nJog)
@@ -1185,6 +1118,10 @@ int main()
 				} while (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1] || repeat2 == 1);
 				peca = tabu->taboo[x][y];
 				tabu->taboo[x][y] = '0';
+				tab aux;
+				aux->anterior = NULL;
+				aux->seguinte = NULL;
+				
 				if(peca==charsPoss[jogId][1])
 					tb = jogadamas(tabu, peca, x, y, 0, -1,0);
 				else tb = jogadas(tabu, peca, x, y, 0, -1);
