@@ -455,17 +455,24 @@ int maxComestivel(tabarv tb)
 
 int maxComeJogada(tabarv tb, int max)
 {
-	if ((tb->AntDir != NULL) && (tb->AntDir->move > tb->move)) max = maxComeJogada(tb->AntDir, max);
-	if ((tb->AntEsq != NULL) && (tb->AntEsq->move > tb->move)) max = maxComeJogada(tb->AntEsq, max);
-	if ((tb->SegDir != NULL) && (tb->SegDir->move > tb->move)) max = maxComeJogada(tb->SegDir, max);
-	if ((tb->SegEsq != NULL) && (tb->SegEsq->move > tb->move)) max = maxComeJogada(tb->SegEsq, max);
+	if ((tb->AntDir != NULL) && ((tb->AntDir->move > tb->move) || tb->AntDir->comestivel>tb->comestivel)) 
+		max = maxComeJogada(tb->AntDir, max);
+
+	if ((tb->AntEsq != NULL) && ((tb->AntEsq->move > tb->move) || tb->AntEsq->comestivel>tb->comestivel)) 
+		max = maxComeJogada(tb->AntEsq, max);
+
+	if ((tb->SegDir != NULL) && ((tb->SegDir->move > tb->move) || tb->SegDir->comestivel>tb->comestivel)) 
+		max = maxComeJogada(tb->SegDir, max);
+
+	if ((tb->SegEsq != NULL) && ((tb->SegEsq->move > tb->move) || tb->SegEsq->comestivel>tb->comestivel)) 
+		max = maxComeJogada(tb->SegEsq, max);
 
 	if (max > tb->comestivel) return max;
 	else return tb->comestivel;
 }
 
 //print dos caminhos possiveis
-void printCaminhos(tabarv tb, int max)
+void printCaminhos(tabarv tb, int max, int tab)
 {
 	if (tb != NULL)
 	{
@@ -479,32 +486,32 @@ void printCaminhos(tabarv tb, int max)
 
 		if (tb->AntEsq != NULL && tb->AntEsq->move >= tb->move && tb->AntEsq->comestivel == comes)
 		{
-			for (i = -1; i < tb->move; i++) printf("\t");
+			for (i = -1; i < tab; i++) printf("\t|");
 			printf("1-");
-			printCaminhos(tb->AntEsq, max);
+			printCaminhos(tb->AntEsq, max,tab+1);
 		}
 
 		if (tb->AntDir != NULL && tb->AntDir->move >= tb->move && tb->AntDir->comestivel == comes)
 		{
-			for (i = -1; i < tb->move; i++) printf("\t");
+			for (i = -1; i < tab; i++) printf("\t|");
 			printf("2-");
-			printCaminhos(tb->AntDir, max);
+			printCaminhos(tb->AntDir, max,tab+1);
 		}
 
 
 		if (tb->SegEsq != NULL && tb->SegEsq->move >= tb->move && tb->SegEsq->comestivel == comes)
 		{
-			for (i = -1; i < tb->move; i++) printf("\t");
+			for (i = -1; i < tab; i++) printf("\t|");
 			printf("3-");
-			printCaminhos(tb->SegEsq, max); 
+			printCaminhos(tb->SegEsq, max,tab+1); 
 		}
 
 		
 		if (tb->SegDir != NULL && tb->SegDir->move >= tb->move && tb->SegDir->comestivel == comes)
 		{
-			for (i = -1; i < tb->move; i++) printf("\t");
+			for (i = -1; i < tab; i++) printf("\t|");
 			printf("4-");
-			printCaminhos(tb->SegDir, max);
+			printCaminhos(tb->SegDir, max,tab+1);
 		}
 	}
 }
@@ -513,10 +520,9 @@ void printCaminhos(tabarv tb, int max)
 int caminho[5][7];
 void escolheCaminho(tabarv tb)
 {
-	tabarv aux = tb;
 	int direc = -1, i = 0, move =-1;
 	int max = maxComeJogada(tb,0);
-	printCaminhos(tb,max);
+	printCaminhos(tb,max,0);
 	printf("Indique o caminho da peca por ordem (Ex: 1(Enter)2(Enter)0(Enter)");
 	printf("\n 1 - Cima Esquerdo\n 2 - Cima Direita\n 3 - Baixo Esquerdo\n 4 - Baixo Direito\n 0 - Fim jogada\n-1 - Jogar outra peca\n");
 	do
@@ -685,6 +691,7 @@ void moverPeca(tab board, tabarv tb, char jog)
 	}
 }
 
+//NAO ESTA A SER USADO VER DEPOIS
 void freeArvore(tabarv tb)
 {	
 	if (tb!=NULL)
@@ -718,15 +725,16 @@ void drawBoard(tab tabuleiro,int ant)
 		tabuleiro = tabuleiro->anterior;
 	} while (tabuleiro != NULL);	
 }
+
 void MapaInicio(tab board)
 {
 	int i, j;
 	char b[8][8] = {
 		{ '0', 'p', '0', 'p', '0', '0', '0', 'p' },
 		{ 'p', 'p', 'p', '0', 'p', '0', 'p', '0' },
-		{ '0', 'p', '0', 'p', '0', 'p', '0', 'p' },
-		{ '0', '0', '0', 'p', '0', '0', '0', '0' },
-		{ '0', '0', '0', '0', '0', '0', '0', '0' },
+		{ '0', 'p', '0', '0', '0', 'p', '0', '0' },
+		{ '0', '0', 'b', 'p', 'b', '0', '0', '0' },
+		{ '0', '0', '0', '0', '0', 'b', '0', '0' },
 		{ 'b', '0', 'b', '0', 'B', '0', 'b', '0' },
 		{ '0', 'b', '0', 'b', '0', 'b', '0', 'b' },
 		{ 'b', '0', 'b', '0', 'b', '0', 'b', 'B' }
@@ -735,7 +743,6 @@ void MapaInicio(tab board)
 		for (j = 0; j < 8; j++)		
 			board->taboo[i][j] = b[i][j];	
 }
-
 
 int semPecas(tab tabuleiro)
 {
@@ -759,7 +766,6 @@ int semPecas(tab tabuleiro)
 		return 0;	
 }
 
-
 tab saveLastBoard(tab board)
 {
 	int i, j;
@@ -775,7 +781,9 @@ tab saveLastBoard(tab board)
 
 tab retrocederJogada(tab board)
 {
-	board = board->anterior;	
+	board = board->anterior;
+	free(board->seguinte);
+	board->seguinte = NULL;
 	return board;
 }
 
@@ -789,6 +797,7 @@ int existe(char *fname)
 	}
 	return 0;
 }
+
 void saveGameFile(tab board, int idJog, int r1, int r2,int nJog)
 {
 	fseek(stdin, 0, SEEK_END);
@@ -861,6 +870,7 @@ void saveGameFile(tab board, int idJog, int r1, int r2,int nJog)
 			FILE *newfile;
 			newfile = fopen(fileName, "wb");
 			tab tbAux = board;
+			fwrite(&nJog, sizeof(int), 1, newfile);
 			do
 			{
 				for (i = 0; i < 8; i++)
@@ -1114,7 +1124,6 @@ int main()
 		else
 		{
 			int a = loadGameFile(tabu, &jogId, &retr[0], &retr[1], &nJogadas);
-			tabu = LOAD;
 			first = 1;
 			if (a == 1)
 			{
@@ -1122,6 +1131,7 @@ int main()
 				MapaInicio(tabu);
 				tabu = saveLastBoard(tabu);
 			}
+			else tabu = LOAD;
 		}
 		while (semP == -1)
 		{
@@ -1143,14 +1153,13 @@ int main()
 			printf("\nJogador %d (%c/%c) e a sua vez.\n", jogId + 1, charsPoss[jogId][0], charsPoss[jogId][1]);
 			if (first == 1)
 			{				
-				tabu = saveLastBoard(tabu);
 				printf("\nQuer anular a jogada anterior do adversario?(s/S)\n");
 				scanf("%c", &opChar);
 				if (opChar == 's' || opChar == 'S')
 				{
 					if (retr[jogId]>0)
 					{
-						retrocederJogada(tabu);
+						tabu=retrocederJogada(tabu);
 						retr[jogId]-= 1;
 						puts("Conluido.\nContinue a sua jogada");
 						fflush(stdin);
@@ -1160,8 +1169,10 @@ int main()
 					else
 						puts("Já nao pode anular mais jogadas ...");
 				}
+				tabu = saveLastBoard(tabu);
 				system("cls");
 			}
+
 			int x, y,b = 0, repeat2 = 0;
 			tabarv tb;
 			system("cls");			
