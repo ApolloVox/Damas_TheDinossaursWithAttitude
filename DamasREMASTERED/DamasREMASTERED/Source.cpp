@@ -579,7 +579,7 @@ void escolheCaminho(tabarv tb)
 				else printf("Jogada invalida. Tente de novo.\n");
 			}
 
-			else if (direc == 0 ||direc==-1) b = 1;
+			else if ((direc == 0 && (tb->move!=0 && i!=0))  ||direc==-1) b = 1;
 			else printf("Insira um numero valido\n");
 
 		} while (b == 0);
