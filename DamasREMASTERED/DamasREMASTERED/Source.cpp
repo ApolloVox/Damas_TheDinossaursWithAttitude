@@ -691,7 +691,6 @@ void moverPeca(tab board, tabarv tb, char jog)
 	}
 }
 
-//NAO ESTA A SER USADO VER DEPOIS
 void freeArvore(tabarv tb)
 {	
 	if (tb!=NULL)
@@ -1159,6 +1158,7 @@ int main()
 				{
 					if (retr[jogId]>0)
 					{
+						nJogadas--;
 						tabu=retrocederJogada(tabu);
 						retr[jogId]-= 1;
 						puts("Conluido.\nContinue a sua jogada");
@@ -1172,7 +1172,6 @@ int main()
 				tabu = saveLastBoard(tabu);
 				system("cls");
 			}
-
 			int x, y,b = 0, repeat2 = 0;
 			tabarv tb;
 			system("cls");			
@@ -1197,23 +1196,24 @@ int main()
 					}
 					else
 					{
-						tb = jogadas(tabu, tabu->taboo[x][y], x, y, 0, 0);
+						peca = tabu->taboo[x][y];
+						if (peca == charsPoss[jogId][1])
+							tb = jogadamas(tabu, peca, x, y, 0, -1, 0);
+						else tb = jogadas(tabu, peca, x, y, 0, -1);
 						if (tb->AntDir == NULL && tb->AntEsq == NULL && tb->SegDir == NULL && tb->SegEsq == NULL)
 						{
 							puts("Esta peca nao e valida !!\nTente novamente...");
 							repeat2 = 1;
 						}
 					}
+
 				} while (tabu->taboo[x][y] != charsPoss[jogId][0] && tabu->taboo[x][y] != charsPoss[jogId][1] || repeat2 == 1);
 				peca = tabu->taboo[x][y];
 				tabu->taboo[x][y] = '0';
-				
-				if(peca==charsPoss[jogId][1])
-					tb = jogadamas(tabu, peca, x, y, 0, -1,0);
-				else tb = jogadas(tabu, peca, x, y, 0, -1);
 				escolheCaminho(tb);
 				if (caminho[0][0] == -1)
 				{
+					freeArvore(tb);
 					b = 1;
 					tabu->taboo[x][y] = peca;
 				}
@@ -1222,7 +1222,7 @@ int main()
 			drawBoard(tabu,0);
 			fseek(stdin, 0, SEEK_END);
 			fflush(stdin);		
-			//freeArvore(tb);
+			freeArvore(tb);
 			printf("\n1-Salvar o jogo num ficheiro\n2-Ver todas as jogadas anteriores\n-1-Render\n4-Continuar\n");
 			int opcao;
 			scanf("%d", &opcao);			
