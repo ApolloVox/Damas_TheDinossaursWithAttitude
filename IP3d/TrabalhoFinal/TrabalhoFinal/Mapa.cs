@@ -26,7 +26,7 @@ namespace TrabalhoFinal
             effect = new BasicEffect(device);
             worldMatrix = Matrix.Identity;
             mapaImagem = Content.Load<Texture2D>("lh3d1");
-            texture = Content.Load<Texture2D>("sandTexture");
+            texture = Content.Load<Texture2D>("ground1");
 
             ReadPixeis();
 

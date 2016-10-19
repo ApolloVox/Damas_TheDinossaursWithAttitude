@@ -59,6 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icon.ico" />
+    <Content Include="Content\ground1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\lh3d1.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
