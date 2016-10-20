@@ -20,6 +20,7 @@ namespace TrabalhoFinal
         short[] verIndex;
         VertexBuffer vertexBuffer;
         IndexBuffer indexBuffer;
+        float maxHeight, maxWidht;
 
         public Mapa(GraphicsDevice device, ContentManager Content)
         {
@@ -71,33 +72,29 @@ namespace TrabalhoFinal
             verIndex = new short[6 * (mapaImagem.Width - 1) * (mapaImagem.Height - 1)];
             vertices = new VertexPositionColorTexture[mapaImagem.Width * mapaImagem.Height];
 
-            for(int x = 0;x<mapaImagem.Width;x++)
+            maxHeight = mapaImagem.Height;
+            maxWidht = mapaImagem.Width;
+
+            for(int z = 0;z<mapaImagem.Width;z++)
             {
-                for(int z = 0;z<mapaImagem.Height;z++)
+                for(int x = 0;x<mapaImagem.Height;x++)
                 {
-                    if(x %2 == 0 && z % 2 == 0)
-                        vertices[x+z*mapaImagem.Width] = new VertexPositionColorTexture(new Vector3((float)x/(float)10,(float)pixeis[x+z*mapaImagem.Width].R/255, (float)z / (float)10), pixeis[x + z * mapaImagem.Width], new Vector2(0,0));
-                    else if(x%2 != 0 && z % 2 == 0)
-                        vertices[x + z * mapaImagem.Width] = new VertexPositionColorTexture(new Vector3((float)x / (float)10, (float)pixeis[x + z * mapaImagem.Width].R / 255, (float)z / (float)10), pixeis[x + z * mapaImagem.Width], new Vector2(1, 0));
-                    else if(x % 2 == 0 && z % 2 !=0)
-                        vertices[x + z * mapaImagem.Width] = new VertexPositionColorTexture(new Vector3((float)x / (float)10, (float)pixeis[x + z * mapaImagem.Width].R / 255, (float)z / (float)10), pixeis[x + z * mapaImagem.Width], new Vector2(0,1));
-                    else if(x %2 != 0 && z % 2 !=0)
-                        vertices[x + z * mapaImagem.Width] = new VertexPositionColorTexture(new Vector3((float)x / (float)10, (float)pixeis[x + z * mapaImagem.Width].R / 255, (float)z / (float)10), pixeis[x + z * mapaImagem.Width], new Vector2(1 ,1));
+                    vertices[x+z*mapaImagem.Width] = new VertexPositionColorTexture(new Vector3((float)x,(float)pixeis[x+z*mapaImagem.Width].R/255*10f, (float)z), pixeis[x + z * mapaImagem.Width], new Vector2(x%2,z%2));
                 }
             }
 
-            int number = 0;
+            int contador = 0;
             for(int y = 0;y<mapaImagem.Height-1;y++)
             {
                 for(int x = 0;x<mapaImagem.Width-1;x++)
                 {
-                    verIndex[number] = (short)(x + y * mapaImagem.Width);
-                    verIndex[number + 1] = (short)(x + y * mapaImagem.Width + 1);
-                    verIndex[number+2] = (short)(x + (y + 1) * mapaImagem.Width);
-                    verIndex[number + 3] = (short)(x + y * mapaImagem.Width + 1);
-                    verIndex[number + 4] = (short)(x + (y + 1) * mapaImagem.Width + 1);
-                    verIndex[number + 5] = (short)(x + (y + 1) * mapaImagem.Width);
-                    number += 6;
+                    verIndex[contador] = (short)(x + y * mapaImagem.Width);
+                    verIndex[contador + 1] = (short)(x + y * mapaImagem.Width + 1);
+                    verIndex[contador+2] = (short)(x + (y + 1) * mapaImagem.Width);
+                    verIndex[contador + 3] = (short)(x + y * mapaImagem.Width + 1);
+                    verIndex[contador + 4] = (short)(x + (y + 1) * mapaImagem.Width + 1);
+                    verIndex[contador + 5] = (short)(x + (y + 1) * mapaImagem.Width);
+                    contador += 6;
                 }
             }
         }
@@ -113,7 +110,32 @@ namespace TrabalhoFinal
             device.SetVertexBuffer(vertexBuffer);
             device.Indices = indexBuffer;
 
-            device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vertices, 0, vertices.Length, verIndex, 0, verIndex.Length/3);
+            //device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vertices, 0, vertices.Length, verIndex, 0, verIndex.Length/3);
+            device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verIndex.Length / 3);
+        }
+
+        public float MapBoundariesHeight
+        {
+            get
+            {
+                return maxHeight;
+            }
+        }
+
+        public float MapBoundariesWidth
+        {
+            get
+            {
+                return maxWidht;
+            }
+        }
+
+        public VertexPositionColorTexture[] mapVertices
+        {
+            get
+            {
+                return vertices;
+            }
         }
     }
 }
