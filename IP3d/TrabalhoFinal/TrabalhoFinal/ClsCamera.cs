@@ -88,12 +88,13 @@ namespace TrabalhoFinal
                 position += speed * Vector3.Cross(dir - position, Vector3.Up);
             }
 
+            //verificação da camera se passa limites do campo e caso passe atriu a posição antiga
             if ((position.X < 0 || position.Z < 0))
                 position = oldPos;
             if ((position.X > 127 || position.Z > 127))
                 position = oldPos;
 
-            Console.WriteLine(oldPos);
+            //calculo do vetor direção
             dir.X = (float)Math.Cos(yaw) * (float)Math.Cos(pitch) + position.X;
             dir.Z = -(float)Math.Sin(yaw) * (float)Math.Cos(pitch) + position.Z;
             dir.Y = (float)Math.Sin(pitch) + position.Y;
@@ -119,10 +120,12 @@ namespace TrabalhoFinal
             }
         }
 
+        //Função que cálcula a altura do mapa e assim atribui essa altura a posição da camera
         public void HeightY()
         {
             Vector3 verticeA,verticeB,verticeC,verticeD;
 
+            //Obtem os vertices adjacentes a camera
             if ((int)(position.X) + (int)(position.Z + 1) * (int)map.MapBoundariesHeight < map.MapBoundariesHeight * map.MapBoundariesWidth && (int)(position.X) + (int)(position.Z + 1) * (int)map.MapBoundariesHeight >0)
             {
                 verticeA = map.mapVertices[(int)(position.X) + (int)position.Z * (int)map.MapBoundariesHeight].Position;
@@ -138,6 +141,8 @@ namespace TrabalhoFinal
                 verticeD = map.mapVertices[(int)map.MapBoundariesWidth * (int)map.MapBoundariesHeight - 1].Position;
             }
 
+            //interpolação das alturas para à medida que se anda com a camera o movimento ser fluido
+            //interpolação feita com o peso que cada vertice da à camera
             float Ya, Yb, Yc, Yd;
             Ya = verticeA.Y;
             Yb = verticeB.Y;

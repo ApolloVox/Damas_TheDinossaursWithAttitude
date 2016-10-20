@@ -67,6 +67,7 @@ namespace TrabalhoFinal
             mapaImagem.GetData<Color>(pixeis);
         }
 
+        //Cria o mapa atráves de indices e de triangle list
         private void CreateMap()
         {
             verIndex = new short[6 * (mapaImagem.Width - 1) * (mapaImagem.Height - 1)];
@@ -84,6 +85,8 @@ namespace TrabalhoFinal
             }
 
             int contador = 0;
+
+            //Indices calculados 6 a 6 de modo que cada ciclo seja um "quadrado" da textura
             for(int y = 0;y<mapaImagem.Height-1;y++)
             {
                 for(int x = 0;x<mapaImagem.Width-1;x++)
@@ -99,6 +102,7 @@ namespace TrabalhoFinal
             }
         }
 
+        //Metodo draw com triangle list
         public void Draw(GraphicsDevice device,ClsCamera camera)
         {
             effect.World = worldMatrix;
