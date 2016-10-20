@@ -10,3 +10,5 @@ D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\obj\x86\Debug\TrabalhoFinal.pdb
 D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\lh3d1.jpg
 D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\sandTexture.jpg
 D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\ground1.jpg
+C:\Users\Eduardo\Documents\GitHub\TheDinossaursWithAttitude\IP3d\TrabalhoFinal\TrabalhoFinal\obj\x86\Debug\TrabalhoFinal.exe
+C:\Users\Eduardo\Documents\GitHub\TheDinossaursWithAttitude\IP3d\TrabalhoFinal\TrabalhoFinal\obj\x86\Debug\TrabalhoFinal.pdb
