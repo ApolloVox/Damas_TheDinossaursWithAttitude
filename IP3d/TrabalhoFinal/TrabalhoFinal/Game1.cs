@@ -30,7 +30,7 @@ namespace TrabalhoFinal
         {
             // TODO: Add your initialization logic here
             mapa = new Mapa(graphics.GraphicsDevice, Content);
-            camera = new ClsCamera(graphics.GraphicsDevice, Vector3.Zero);
+            camera = new ClsCamera(graphics.GraphicsDevice, Vector3.Zero,mapa);
             base.Initialize();
         }
 
