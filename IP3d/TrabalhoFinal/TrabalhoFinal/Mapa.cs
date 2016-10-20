@@ -110,7 +110,6 @@ namespace TrabalhoFinal
             device.SetVertexBuffer(vertexBuffer);
             device.Indices = indexBuffer;
 
-            //device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vertices, 0, vertices.Length, verIndex, 0, verIndex.Length/3);
             device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verIndex.Length / 3);
         }
 
