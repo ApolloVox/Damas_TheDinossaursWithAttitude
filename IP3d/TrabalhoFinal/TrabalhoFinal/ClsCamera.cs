@@ -50,43 +50,14 @@ namespace TrabalhoFinal
 
         public void Update(GameTime gametime)
         {
-            KeyboardState keys = Keyboard.GetState();
-            mouse = Mouse.GetState();
             Vector3 oldPos = position;
-            Vector2 mousePos;
             float speed = 0.5f;
 
-            mousePos.X = mouse.X;
-            mousePos.Y = mouse.Y;
-
-            mousePos.X -= width / 2;
-            mousePos.Y -= height / 2;
-
-            yaw -= mousePos.X * scale;
-
-            pitch = MathHelper.Clamp(pitch + mousePos.Y * scale, -1.5f, 1.5f);
+            yawPitchCalc();
 
             HeightY();
 
-            if (keys.IsKeyDown(Keys.NumPad5))
-            {
-                position.X -= (dir.X - position.X) * speed;
-                position.Z -= (dir.Z - position.Z) * speed;
-                
-            }
-            if (keys.IsKeyDown(Keys.NumPad8))
-            {
-                position.X += (dir.X - position.X) * speed;
-                position.Z += (dir.Z - position.Z) * speed;
-            }
-            if (keys.IsKeyDown(Keys.NumPad4))
-            {
-                position -= speed * Vector3.Cross(dir - position, Vector3.Up);
-            }
-            if (keys.IsKeyDown(Keys.NumPad6))
-            {
-                position += speed * Vector3.Cross(dir - position, Vector3.Up);
-            }
+            Move(speed);
 
             //verificação da camera se passa limites do campo e caso passe atriu a posição antiga
             if ((position.X < 0 || position.Z < 0))
@@ -99,6 +70,7 @@ namespace TrabalhoFinal
             dir.Z = -(float)Math.Sin(yaw) * (float)Math.Cos(pitch) + position.Z;
             dir.Y = (float)Math.Sin(pitch) + position.Y;
 
+            //actualizar viewMatriz da camera
             viewMatrix = Matrix.CreateLookAt(position, dir, Vector3.Up);
             Mouse.SetPosition((int)(width / 2), (int)(height / 2));
             oldState = mouse;
@@ -117,6 +89,51 @@ namespace TrabalhoFinal
             get
             {
                 return projectionMatrix;
+            }
+        }
+
+        //Cálculo do yaw e pitch atráves da deslocação do rato do meio do ecra
+        // ate a posição final
+        public void yawPitchCalc()
+        {
+            mouse = Mouse.GetState();
+            Vector2 mousePos;
+
+            mousePos.X = mouse.X;
+            mousePos.Y = mouse.Y;
+
+            mousePos.X -= width / 2;
+            mousePos.Y -= height / 2;
+
+            yaw -= mousePos.X * scale;
+
+            pitch = MathHelper.Clamp(pitch + mousePos.Y * scale, -1.5f, 1.5f);
+        }
+
+        //função com o movimento
+        public void Move(float speed)
+        {
+            KeyboardState keys = Keyboard.GetState();
+            if (keys.IsKeyDown(Keys.NumPad5))
+            {
+                position.X -= (dir.X - position.X) * speed;
+                position.Z -= (dir.Z - position.Z) * speed;
+
+            }
+            if (keys.IsKeyDown(Keys.NumPad8))
+            {
+                position.X += (dir.X - position.X) * speed;
+                position.Z += (dir.Z - position.Z) * speed;
+            }
+
+            //Cálculo das normais para andar paralelo à direçao
+            if (keys.IsKeyDown(Keys.NumPad4))
+            {
+                position -= speed * Vector3.Cross(dir - position, Vector3.Up);
+            }
+            if (keys.IsKeyDown(Keys.NumPad6))
+            {
+                position += speed * Vector3.Cross(dir - position, Vector3.Up);
             }
         }
 
