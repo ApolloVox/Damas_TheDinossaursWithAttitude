@@ -34,27 +34,28 @@ namespace TrabalhoFinal
             float aspectRatio = (float)(device.Viewport.Width /
                 device.Viewport.Height);
 
+            float nearPlane = 1.0f, FarPlane = 40.0f;
             effect.Projection = Matrix.CreatePerspectiveFieldOfView(
                 MathHelper.ToRadians(45.0f),
-                aspectRatio, 1.0f, 10.0f);
+                aspectRatio, nearPlane, FarPlane);
 
             effect.LightingEnabled = false;
             effect.VertexColorEnabled = true;
 
             effect.TextureEnabled = true;
             effect.Texture = texture;
-            effect.EnableDefaultLighting();
-            /*effect.DirectionalLight0.DiffuseColor = new Vector3(0.5f, 0.5f, 0.5f); // a red light
-            //effect.DirectionalLight0.Direction = new Vector3(0.5f, 0.5f, 0.5f);  // coming along the x-axis
-            effect.DirectionalLight0.SpecularColor = new Vector3(0.5f, 0.5f,0.5f); // with green highlights
-            effect.DirectionalLight1.DiffuseColor = new Vector3(0.5f, 0.5f, 0.5f); // a red light
-            //effect.DirectionalLight1.Direction = new Vector3(0.5f, 0.5f, 0.5f);  // coming along the x-axis
-            effect.DirectionalLight1.SpecularColor = new Vector3(0.5f, 0.5f, 0.5f); // with green highlights
-            effect.DirectionalLight2.DiffuseColor = new Vector3(0.5f, 0.5f, 0.5f); // a red light
-           // effect.DirectionalLight2.Direction = new Vector3(0.5f, 0.5f, 0.5f);  // coming along the x-axis
-            effect.DirectionalLight2.SpecularColor = new Vector3(0.5f, 0.5f, 0.5f); // with green highlights
-            effect.AmbientLightColor = new Vector3(0.2f, 0.2f, 0.2f);
-            effect.EmissiveColor = new Vector3(1, 0.2f, 0.2f);*/
+            //effect.EnableDefaultLighting();
+            effect.LightingEnabled = true;
+            effect.DirectionalLight0.DiffuseColor = new Vector3(0.78f,0.43f, 0f);
+            effect.DirectionalLight0.Direction = new Vector3(1f, -1f, 0);
+            effect.DirectionalLight0.SpecularColor = new Vector3(0, 0.025f, 0);
+            effect.AmbientLightColor = new Vector3(0.4f, 0.4f, 0.4f);
+            effect.EmissiveColor = new Vector3(0f, 0f, 0f);
+
+            effect.FogEnabled = true;
+            effect.FogColor = new Color(180f, 180f, 180f).ToVector3(); // For best results, ake this color whatever your background is.
+            effect.FogStart = 20f;
+            effect.FogEnd = 40.0f;
 
             CreateMap();
 

@@ -78,7 +78,7 @@ namespace TrabalhoFinal
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(new Color(180f,180f,180f));
             mapa.Draw(graphics.GraphicsDevice,camera);
             // TODO: Add your drawing code here
 
