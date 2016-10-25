@@ -13,10 +13,10 @@ namespace TrabalhoFinal
     {
         BasicEffect effect;
         Texture2D mapaImagem,texture;
-        Matrix worldMatrix,viewMatrix;
+        Matrix worldMatrix;
         Color[] pixeis;
 
-        VertexPositionColorTexture[] vertices;
+        VertexPositionNormalTexture[] vertices;
         short[] verIndex;
         VertexBuffer vertexBuffer;
         IndexBuffer indexBuffer;
@@ -43,15 +43,27 @@ namespace TrabalhoFinal
 
             effect.TextureEnabled = true;
             effect.Texture = texture;
+            effect.EnableDefaultLighting();
+            /*effect.DirectionalLight0.DiffuseColor = new Vector3(0.5f, 0.5f, 0.5f); // a red light
+            //effect.DirectionalLight0.Direction = new Vector3(0.5f, 0.5f, 0.5f);  // coming along the x-axis
+            effect.DirectionalLight0.SpecularColor = new Vector3(0.5f, 0.5f,0.5f); // with green highlights
+            effect.DirectionalLight1.DiffuseColor = new Vector3(0.5f, 0.5f, 0.5f); // a red light
+            //effect.DirectionalLight1.Direction = new Vector3(0.5f, 0.5f, 0.5f);  // coming along the x-axis
+            effect.DirectionalLight1.SpecularColor = new Vector3(0.5f, 0.5f, 0.5f); // with green highlights
+            effect.DirectionalLight2.DiffuseColor = new Vector3(0.5f, 0.5f, 0.5f); // a red light
+           // effect.DirectionalLight2.Direction = new Vector3(0.5f, 0.5f, 0.5f);  // coming along the x-axis
+            effect.DirectionalLight2.SpecularColor = new Vector3(0.5f, 0.5f, 0.5f); // with green highlights
+            effect.AmbientLightColor = new Vector3(0.2f, 0.2f, 0.2f);
+            effect.EmissiveColor = new Vector3(1, 0.2f, 0.2f);*/
 
             CreateMap();
 
             vertexBuffer = new VertexBuffer(device,
-                typeof(VertexPositionColorTexture),
+                typeof(VertexPositionNormalTexture),
                 vertices.Length,
                 BufferUsage.None);
 
-            vertexBuffer.SetData<VertexPositionColorTexture>(vertices);
+            vertexBuffer.SetData<VertexPositionNormalTexture>(vertices);
 
             indexBuffer = new IndexBuffer(device,
                 typeof(short),
@@ -71,7 +83,7 @@ namespace TrabalhoFinal
         private void CreateMap()
         {
             verIndex = new short[6 * (mapaImagem.Width - 1) * (mapaImagem.Height - 1)];
-            vertices = new VertexPositionColorTexture[mapaImagem.Width * mapaImagem.Height];
+            vertices = new VertexPositionNormalTexture[mapaImagem.Width * mapaImagem.Height];
 
             maxHeight = mapaImagem.Height;
             maxWidht = mapaImagem.Width;
@@ -80,9 +92,11 @@ namespace TrabalhoFinal
             {
                 for(int x = 0;x<mapaImagem.Height;x++)
                 {
-                    vertices[x+z*mapaImagem.Width] = new VertexPositionColorTexture(new Vector3((float)x,(float)pixeis[x+z*mapaImagem.Width].R/255*10f, (float)z), pixeis[x + z * mapaImagem.Width], new Vector2(x%2,z%2));
+                    vertices[x+z*mapaImagem.Width] = new VertexPositionNormalTexture(new Vector3((float)x,(float)pixeis[x+z*mapaImagem.Width].R/255*10f, (float)z), Vector3.Up, new Vector2(x%2,z%2));
                 }
             }
+
+            GetNormals();
 
             int contador = 0;
 
@@ -98,6 +112,94 @@ namespace TrabalhoFinal
                     verIndex[contador + 4] = (short)(x + (y + 1) * mapaImagem.Width + 1);
                     verIndex[contador + 5] = (short)(x + (y + 1) * mapaImagem.Width);
                     contador += 6;
+                }
+            }
+        }
+
+        //Método que contém as normais
+        public void GetNormals()
+        {
+            for(int z= 0;z < mapaImagem.Width;z++)
+            {
+                for(int x = 0;x<MapBoundariesHeight;x++)
+                {
+                    //Produto externo (V0 - p) * (V1-p)
+                    Vector3[] normais = new Vector3[8];
+                    int contador = 0;
+                    
+                    //Left Up
+                    if (x - 1 >= 0 && z - 1 >= 0)
+                    {
+                        normais[contador] = vertices[x - 1 + (z - 1) * (int)maxHeight].Position;
+                        contador++;
+                    }
+                    //Center Up
+                    if (z - 1 >= 0)
+                    {
+                        normais[contador] = vertices[x + (z - 1) * (int)maxHeight].Position;
+                        contador++;
+                    }
+                    //Right Up
+                    if (x + 1 < maxHeight && z - 1 >= 0)
+                    {
+                        normais[contador] = vertices[x + 1 + (z - 1) * (int)maxHeight].Position;
+                        contador++;
+                    }
+                    //Left
+                    if (x - 1 >= 0)
+                    {
+                        normais[contador] = vertices[x - 1 + z * (int)maxHeight].Position;
+                        contador++;
+                    }
+                    //Right
+                    if (x + 1 < maxHeight)
+                    {
+                        normais[contador] = vertices[x + 1 + z*(int)maxHeight].Position;
+                        contador++;
+                    }
+                    //Down Left
+                    if (x - 1 >= 0 && z + 1 < maxHeight)
+                    {
+                        normais[contador] = vertices[x - 1 + (z + 1) * (int)maxHeight].Position;
+                        contador++;
+                    }
+                    //Down Center
+                    if (z + 1 < maxHeight)
+                    {
+                        normais[contador] = vertices[x + (z + 1) * (int)maxHeight].Position;
+                        contador++;
+                    }
+                    //Down Right
+                    if (x + 1 < mapaImagem.Width && z + 1 < maxHeight)
+                    {
+                        normais[contador] = vertices[x + 1 + (z + 1) * (int)maxHeight].Position;
+                        contador++;
+                    }
+
+                    //Cálculo Da Distãncia do vários pontos ao vertice central
+                    for (int i = contador-1; i >= 0; i--)
+                    {
+                        normais[i] = normais[i] - vertices[x + z * (int)maxHeight].Position;
+                    }
+
+                    //Cálculo final das normais
+                    for(int i = contador-1;i>= 1;i--)
+                    {
+                        normais[i] = Vector3.Cross(normais[i], normais[i-1]);
+                    }
+
+                    //Obtenção da media das normais e atribuindo ao vertice central
+                    // a normal correspondente
+                    Vector3 media = Vector3.Zero;
+                    for(int i = 0;i<contador;i++)
+                    {
+                        media += normais[i];
+                    }
+
+                    media /= contador;
+                    media.Normalize();
+                    vertices[x + z * (int)maxHeight].Normal = media;
+
                 }
             }
         }
@@ -133,7 +235,7 @@ namespace TrabalhoFinal
             }
         }
 
-        public VertexPositionColorTexture[] mapVertices
+        public VertexPositionNormalTexture[] mapVertices
         {
             get
             {

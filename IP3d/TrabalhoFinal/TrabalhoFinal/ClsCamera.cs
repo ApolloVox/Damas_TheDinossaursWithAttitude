@@ -17,7 +17,7 @@ namespace TrabalhoFinal
         float yaw, pitch;
         float width, height;
         float scale = MathHelper.ToRadians(10) /500;
-        MouseState oldState,mouse;
+        MouseState mouse;
         Mapa map;
 
         public ClsCamera(GraphicsDevice device, Vector3 startPos,Mapa map)
@@ -42,7 +42,6 @@ namespace TrabalhoFinal
 
             effect.View = viewMatrix;
             effect.Projection = projectionMatrix;
-            oldState = Mouse.GetState();
 
             this.map = map;
         }
@@ -73,7 +72,6 @@ namespace TrabalhoFinal
             //actualizar viewMatriz da camera
             viewMatrix = Matrix.CreateLookAt(position, dir, Vector3.Up);
             Mouse.SetPosition((int)(width / 2), (int)(height / 2));
-            oldState = mouse;
         }
 
         public Matrix ViewMatrixCamera
