@@ -39,11 +39,12 @@ namespace TrabalhoFinal
                 MathHelper.ToRadians(45.0f),
                 aspectRatio, nearPlane, FarPlane);
 
-            effect.LightingEnabled = false;
             effect.VertexColorEnabled = true;
 
             effect.TextureEnabled = true;
             effect.Texture = texture;
+
+            //LIGHTS
             //effect.EnableDefaultLighting();
             effect.LightingEnabled = true;
             effect.DirectionalLight0.DiffuseColor = new Vector3(0.78f,0.43f, 0f);
@@ -52,10 +53,12 @@ namespace TrabalhoFinal
             effect.AmbientLightColor = new Vector3(0.4f, 0.4f, 0.4f);
             effect.EmissiveColor = new Vector3(0f, 0f, 0f);
 
+            //FOG
             effect.FogEnabled = true;
             effect.FogColor = new Color(180f, 180f, 180f).ToVector3(); // For best results, ake this color whatever your background is.
             effect.FogStart = 20f;
             effect.FogEnd = 40.0f;
+
 
             CreateMap();
 
@@ -131,56 +134,50 @@ namespace TrabalhoFinal
                     //Left Up
                     if (x - 1 >= 0 && z - 1 >= 0)
                     {
-                        normais[contador] = vertices[x - 1 + (z - 1) * (int)maxHeight].Position;
+                        normais[contador] = vertices[x - 1 + (z - 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
                         contador++;
                     }
                     //Center Up
                     if (z - 1 >= 0)
                     {
-                        normais[contador] = vertices[x + (z - 1) * (int)maxHeight].Position;
+                        normais[contador] = vertices[x + (z - 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
                         contador++;
                     }
                     //Right Up
                     if (x + 1 < maxHeight && z - 1 >= 0)
                     {
-                        normais[contador] = vertices[x + 1 + (z - 1) * (int)maxHeight].Position;
+                        normais[contador] = vertices[x + 1 + (z - 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
                         contador++;
                     }
                     //Left
                     if (x - 1 >= 0)
                     {
-                        normais[contador] = vertices[x - 1 + z * (int)maxHeight].Position;
+                        normais[contador] = vertices[x - 1 + z * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
                         contador++;
                     }
                     //Right
                     if (x + 1 < maxHeight)
                     {
-                        normais[contador] = vertices[x + 1 + z*(int)maxHeight].Position;
+                        normais[contador] = vertices[x + 1 + z*(int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
                         contador++;
                     }
                     //Down Left
                     if (x - 1 >= 0 && z + 1 < maxHeight)
                     {
-                        normais[contador] = vertices[x - 1 + (z + 1) * (int)maxHeight].Position;
+                        normais[contador] = vertices[x - 1 + (z + 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
                         contador++;
                     }
                     //Down Center
                     if (z + 1 < maxHeight)
                     {
-                        normais[contador] = vertices[x + (z + 1) * (int)maxHeight].Position;
+                        normais[contador] = vertices[x + (z + 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
                         contador++;
                     }
                     //Down Right
                     if (x + 1 < mapaImagem.Width && z + 1 < maxHeight)
                     {
-                        normais[contador] = vertices[x + 1 + (z + 1) * (int)maxHeight].Position;
+                        normais[contador] = vertices[x + 1 + (z + 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
                         contador++;
-                    }
-
-                    //Cálculo Da Distãncia do vários pontos ao vertice central
-                    for (int i = contador-1; i >= 0; i--)
-                    {
-                        normais[i] = normais[i] - vertices[x + z * (int)maxHeight].Position;
                     }
 
                     //Cálculo final das normais
@@ -242,6 +239,42 @@ namespace TrabalhoFinal
             {
                 return vertices;
             }
+        }
+
+        //Interpolação das normais
+        public float InterpolyNormals(Vector3 position)
+        {
+            Vector3 verticeA, verticeB, verticeC, verticeD;
+
+            //Obtem os vertices adjacentes a camera
+            if ((int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight < MapBoundariesHeight * MapBoundariesWidth && (int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight > 0)
+            {
+                verticeA = mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Normal;
+                verticeB = mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Normal;
+                verticeC = mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Normal;
+                verticeD = mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Normal;
+            }
+            else
+            {
+                verticeA = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
+                verticeB = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
+                verticeC = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
+                verticeD = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
+            }
+
+            //interpolação das Normais para à medida que se anda com a camera o movimento ser fluido
+            //interpolação feita com o peso que cada vertice da à camera
+            float Ya, Yb, Yc, Yd;
+            Ya = verticeA.Y;
+            Yb = verticeB.Y;
+            Yc = verticeC.Y;
+            Yd = verticeD.Y;
+
+            float Yab = (1 - (position.X - verticeA.X)) * Ya + (position.X - verticeA.X) * Yb;
+            float Ycd = (1 - (position.X - verticeC.X)) * Yc + (position.X - verticeC.X) * Yd;
+            float Y = (1 - (position.Z - verticeA.Z)) * Yab + (position.Z - verticeA.Z) * Ycd;
+
+            return position.Y = Y + 2;
         }
     }
 }

@@ -9,6 +9,12 @@ using System.Threading.Tasks;
 
 namespace TrabalhoFinal
 {
+    enum CameraSelect
+    {
+        FreeCam,
+        Surface
+    };
+
     class ClsCamera
     {
         private Matrix viewMatrix, projectionMatrix;
@@ -19,9 +25,12 @@ namespace TrabalhoFinal
         float scale = MathHelper.ToRadians(10) /500;
         MouseState mouse;
         Mapa map;
+        CameraSelect camState;
 
         public ClsCamera(GraphicsDevice device, Vector3 startPos,Mapa map)
         {
+            camState = CameraSelect.Surface;
+
             width = device.Viewport.Width;
             height = device.Viewport.Height;
             yaw = 0;
@@ -51,23 +60,62 @@ namespace TrabalhoFinal
         {
             Vector3 oldPos = position;
             float speed = 0.5f;
+            KeyboardState keys = Keyboard.GetState();
 
-            yawPitchCalc();
 
-            HeightY();
+            if (keys.IsKeyDown(Keys.D1))
+            {
+                Console.WriteLine("FreeCam");
+                camState = CameraSelect.FreeCam;
+            }
+            else if (keys.IsKeyDown(Keys.D2))
+            {
+                Console.WriteLine("Surface");
+                camState = CameraSelect.Surface;
+            }
 
-            Move(speed);
+            switch (camState)
+            {
+                case CameraSelect.FreeCam:
 
-            //verificação da camera se passa limites do campo e caso passe atriu a posição antiga
-            if ((position.X < 0 || position.Z < 0))
-                position = oldPos;
-            if ((position.X > 127 || position.Z > 127))
-                position = oldPos;
+                    yawPitchCalc();
 
-            //calculo do vetor direção
-            dir.X = (float)Math.Cos(yaw) * (float)Math.Cos(pitch) + position.X;
-            dir.Z = -(float)Math.Sin(yaw) * (float)Math.Cos(pitch) + position.Z;
-            dir.Y = (float)Math.Sin(pitch) + position.Y;
+                    MoveFps(keys,speed);
+
+                    //verificação da camera se passa limites do campo e caso passe atriu a posição antiga
+                    if ((position.X < 0 || position.Z < 0))
+                        position = oldPos;
+                    if ((position.X > 127 || position.Z > 127))
+                        position = oldPos;
+
+                    //calculo do vetor direção
+                    dir.X = (float)Math.Cos(yaw) * (float)Math.Cos(pitch) + position.X;
+                    dir.Z = -(float)Math.Sin(yaw) * (float)Math.Cos(pitch) + position.Z;
+                    dir.Y = (float)Math.Sin(pitch) + position.Y;
+                    break;
+
+                case CameraSelect.Surface:
+
+                    yawPitchCalc();
+
+                    HeightY();
+
+                    MoveSurface(keys,speed);
+
+                    //verificação da camera se passa limites do campo e caso passe atriu a posição antiga
+                    if ((position.X < 0 || position.Z < 0))
+                        position = oldPos;
+                    if ((position.X > 127 || position.Z > 127))
+                        position = oldPos;
+
+                    //calculo do vetor direção
+                    dir.X = (float)Math.Cos(yaw) * (float)Math.Cos(pitch) + position.X;
+                    dir.Z = -(float)Math.Sin(yaw) * (float)Math.Cos(pitch) + position.Z;
+                    dir.Y = (float)Math.Sin(pitch) + position.Y;
+
+                    break;
+            }
+           
 
             //actualizar viewMatriz da camera
             viewMatrix = Matrix.CreateLookAt(position, dir, Vector3.Up);
@@ -108,10 +156,10 @@ namespace TrabalhoFinal
             pitch = MathHelper.Clamp(pitch + mousePos.Y * scale, -1.5f, 1.5f);
         }
 
-        //função com o movimento
-        public void Move(float speed)
+        //função com o movimento Surface
+        public void MoveSurface(KeyboardState keys, float speed)
         {
-            KeyboardState keys = Keyboard.GetState();
+
             if (keys.IsKeyDown(Keys.NumPad5))
             {
                 position.X -= (dir.X - position.X) * speed;
@@ -122,6 +170,35 @@ namespace TrabalhoFinal
             {
                 position.X += (dir.X - position.X) * speed;
                 position.Z += (dir.Z - position.Z) * speed;
+            }
+
+            //Cálculo das normais para andar paralelo à direçao
+            if (keys.IsKeyDown(Keys.NumPad4))
+            {
+                position -= speed * Vector3.Cross(dir - position, Vector3.Up);
+            }
+            if (keys.IsKeyDown(Keys.NumPad6))
+            {
+                position += speed * Vector3.Cross(dir - position, Vector3.Up);
+            }
+        }
+
+        //função com o movimento Fps
+        public void MoveFps(KeyboardState keys, float speed)
+        {
+
+            if (keys.IsKeyDown(Keys.NumPad5))
+            {
+                position.X -= (dir.X - position.X) * speed;
+                position.Z -= (dir.Z - position.Z) * speed;
+                position.Y -= (dir.Y - position.Y) * speed;
+
+            }
+            if (keys.IsKeyDown(Keys.NumPad8))
+            {
+                position.X += (dir.X - position.X) * speed;
+                position.Z += (dir.Z - position.Z) * speed;
+                position.Y += (dir.Y - position.Y) * speed;
             }
 
             //Cálculo das normais para andar paralelo à direçao
