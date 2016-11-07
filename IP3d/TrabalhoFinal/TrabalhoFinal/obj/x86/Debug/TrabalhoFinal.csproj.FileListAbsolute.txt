@@ -1,0 +1,16 @@
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\OpenTK.dll.config
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\TrabalhoFinal.exe
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\TrabalhoFinal.pdb
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\MonoGame.Framework.dll
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\NVorbis.dll
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\OpenTK.dll
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\obj\x86\Debug\TrabalhoFinal.csprojResolveAssemblyReference.cache
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\obj\x86\Debug\TrabalhoFinal.exe
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\obj\x86\Debug\TrabalhoFinal.pdb
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\lh3d1.jpg
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\ground1.jpg
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\tank.xnb
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\engine_diff_tex.xnb
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\engine_diff_tex_0.xnb
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\turret_alt_diff_tex.xnb
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\turret_alt_diff_tex_0.xnb
