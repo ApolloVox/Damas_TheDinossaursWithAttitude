@@ -13,14 +13,15 @@ namespace TrabalhoFinal
     class Tank
     {
         Matrix worldMatrix, viewMatrix, projectionMatrix;
-        Matrix cannonTransform,turretTransform;
+        Matrix cannonTransform,turretTransform,r;
         Vector3 tankPos,dir;
-        float yaw, pitch,speed;
+        float yaw, pitch,speed,cannonYaw,cannonPitch;
         Matrix[] boneTransforms;
         Model tankModel;
         ModelBone turretBone, cannonBone;
         BasicEffect effect;
         Mapa map;
+        BasicEffect basicEffect;
 
         public Tank(GraphicsDevice device, ContentManager content,Mapa mapa)
         {
@@ -41,12 +42,15 @@ namespace TrabalhoFinal
 
             map = mapa;
 
-            tankPos = new Vector3(5f, 15f, 5f);
-            dir = new Vector3(1,0,1);
+            tankPos = new Vector3(20f, 15f, 20f);
+            dir = new Vector3(0,0,0);
 
             yaw = 0;
             pitch = 0;
             speed = 0.5f;
+            cannonYaw = 0f;
+            cannonPitch = 0f;
+
         }
 
         public void Update()
@@ -54,52 +58,83 @@ namespace TrabalhoFinal
             Vector3 oldPos = tankPos;
 
             KeyboardState keys = Keyboard.GetState();
+
             Move(keys);
 
-            tankPos.Y = map.GetHeight(tankPos).Y;
-
+            tankPos.Y = map.GetHeight(tankPos).Y-0.3f;
+            
             //calculo do vetor direção
-            dir.X = (float)Math.Cos(yaw) + tankPos.X;
-            dir.Z = -(float)Math.Sin(yaw) + tankPos.Z;
-            dir.Y =  tankPos.Y;
+            dir.X = (float)Math.Cos(yaw);
+            dir.Z = -(float)Math.Sin(yaw);
+            dir.Y =  0;
 
+            //Console.WriteLine(dir);
             if ((tankPos.X < 0 || tankPos.Z < 0))
                 tankPos = oldPos;
             if ((tankPos.X > 127 || tankPos.Z > 127))
                 tankPos = oldPos;
-            //Console.WriteLine(tankPos);
+
         }
 
         public void Move(KeyboardState keys)
         {
-
+            //TankMove
             if (keys.IsKeyDown(Keys.S))
             {
-                tankPos.X -= (dir.X - tankPos.X) * speed;
-                tankPos.Z -= (dir.Z - tankPos.Z) * speed;
+                tankPos.X += dir.X * speed;
+                tankPos.Z += dir.Z * speed;
             }
             if (keys.IsKeyDown(Keys.W))
             {
-                tankPos.X += (dir.X - tankPos.X) * speed;
-                tankPos.Z += (dir.Z - tankPos.Z) * speed;
+                tankPos.X -= dir.X * speed;
+                tankPos.Z -= dir.Z * speed;
             }
-
-            //Cálculo das normais para andar paralelo à direçao
             if (keys.IsKeyDown(Keys.A))
             {
-                yaw += 0.1f;
+                yaw += 0.05f;
             }
             if (keys.IsKeyDown(Keys.D))
             {
-                yaw -= 0.1f;
+                yaw -= 0.05f;
+            }
+
+            //Cannon Move
+            if(keys.IsKeyDown(Keys.Up))
+            {
+                if(cannonPitch >= -MathHelper.PiOver2)
+                cannonPitch -= 0.05f;
+            }
+            if(keys.IsKeyDown(Keys.Down))
+            {
+                if (cannonPitch < 0.6f)
+                    cannonPitch += 0.05f;
+            }
+            if(keys.IsKeyDown(Keys.Left))
+            {
+                cannonYaw += 0.1f;
+            }
+            if (keys.IsKeyDown(Keys.Right))
+            {
+                cannonYaw -= 0.1f;
             }
         }
 
         public void Draw(GraphicsDevice device,ClsCamera camera)
         {
-            tankModel.Root.Transform = Matrix.CreateScale(0.01f) * Matrix.CreateRotationY(yaw + MathHelper.ToRadians(90f));
-            turretBone.Transform = Matrix.CreateRotationY(MathHelper.ToRadians(180)) * turretTransform;
-            cannonBone.Transform = Matrix.CreateRotationX(2f);
+            Vector3 N = map.InterpolyNormals(tankPos);
+            Vector3 right = Vector3.Cross(new Vector3(dir.X,0,dir.Z), N);
+
+            Vector3 d = Vector3.Cross(N, right);
+            r = Matrix.Identity;
+            r.Forward = d;
+            r.Up = N;
+            r.Right = right;
+         
+            //r = Matrix.CreateFromYawPitchRoll(0f, yaw, MathHelper.ToRadians(90)) * r;
+
+            tankModel.Root.Transform = Matrix.CreateScale(0.01f) * r * Matrix.CreateTranslation(tankPos);// Matrix.CreateRotationY(yaw + MathHelper.ToRadians(90));
+            turretBone.Transform = Matrix.CreateRotationY(cannonYaw) * turretTransform;
+            cannonBone.Transform = Matrix.CreateRotationX(cannonPitch) * cannonTransform;
 
             tankModel.CopyAbsoluteBoneTransformsTo(boneTransforms);
 
@@ -107,7 +142,7 @@ namespace TrabalhoFinal
             {
                 foreach(BasicEffect effect in  mesh.Effects)
                 {
-                    effect.World = effect.World = boneTransforms[mesh.ParentBone.Index] * Matrix.CreateTranslation(tankPos);
+                    effect.World = boneTransforms[mesh.ParentBone.Index];
                     effect.View = camera.ViewMatrixCamera;
                     effect.Projection = camera.ProjectionMatrixCamera;
 
@@ -115,6 +150,20 @@ namespace TrabalhoFinal
                 }
                 mesh.Draw();
             }
+        }
+
+        private void DrawVectors(GraphicsDevice device, Vector3 startPoint, Vector3 endPoint, Color color,ClsCamera camera)
+        {
+            basicEffect = new BasicEffect(device);
+            basicEffect.Projection = camera.ProjectionMatrixCamera;
+            basicEffect.View = camera.ViewMatrixCamera;
+            basicEffect.World = worldMatrix;
+            basicEffect.VertexColorEnabled = true;
+            basicEffect.CurrentTechnique.Passes[0].Apply();
+            startPoint.Y += 4;
+            endPoint.Y += 4;
+            var vertices = new[] { new VertexPositionColor(startPoint, color), new VertexPositionColor(endPoint, color) };
+            device.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
         }
 
         /*
@@ -128,5 +177,21 @@ namespace TrabalhoFinal
          r.Forward = d
          r.Up = n
          r.right = right*/
+
+        public Vector3 TankPosition
+        {
+            get
+            {
+                return tankPos;
+            }
+        }
+
+        public Vector3 TankDirection
+        {
+            get
+            {
+                return dir;
+            }
+        }
     }
 }

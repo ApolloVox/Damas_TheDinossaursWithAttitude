@@ -12,7 +12,8 @@ namespace TrabalhoFinal
     enum CameraSelect
     {
         FreeCam,
-        Surface
+        Surface,
+        Follow
     };
 
     class ClsCamera
@@ -47,7 +48,7 @@ namespace TrabalhoFinal
                 Vector3.Up);
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
                 MathHelper.ToRadians(45.0f),
-                aspectRatio, 0.5f, 50.0f);
+                aspectRatio, 0.5f, 150.0f);
 
             effect.View = viewMatrix;
             effect.Projection = projectionMatrix;
@@ -63,15 +64,20 @@ namespace TrabalhoFinal
 
             KeyboardState keys = Keyboard.GetState();
 
-            if (keys.IsKeyDown(Keys.D1))
+            if (keys.IsKeyDown(Keys.F1))
             {
                 Console.WriteLine("FreeCam");
                 camState = CameraSelect.FreeCam;
             }
-            else if (keys.IsKeyDown(Keys.D2))
+            else if (keys.IsKeyDown(Keys.F2))
             {
                 Console.WriteLine("Surface");
                 camState = CameraSelect.Surface;
+            }
+            else if(keys.IsKeyDown(Keys.F3))
+            {
+                Console.WriteLine("Follow");
+                camState = CameraSelect.Follow;
             }
 
             switch (camState)
@@ -114,6 +120,11 @@ namespace TrabalhoFinal
                     dir.Y = (float)Math.Sin(pitch) + position.Y;
 
                     break;
+
+                case CameraSelect.Follow:
+                    MoveFollow();
+
+                    break;
             }
            
             //actualizar viewMatriz da camera
@@ -139,7 +150,7 @@ namespace TrabalhoFinal
 
         //Cálculo do yaw e pitch atráves da deslocação do rato do meio do ecra
         // ate a posição final
-        public void yawPitchCalc()
+        private void yawPitchCalc()
         {
             mouse = Mouse.GetState();
             Vector2 mousePos;
@@ -156,7 +167,7 @@ namespace TrabalhoFinal
         }
 
         //função com o movimento Surface
-        public void MoveSurface(KeyboardState keys, float speed)
+        private void MoveSurface(KeyboardState keys, float speed)
         {
 
             if (keys.IsKeyDown(Keys.NumPad5))
@@ -171,7 +182,6 @@ namespace TrabalhoFinal
                 position.Z += (dir.Z - position.Z) * speed;
             }
 
-            //Cálculo das normais para andar paralelo à direçao
             if (keys.IsKeyDown(Keys.NumPad4))
             {
                 position -= speed * Vector3.Cross(dir - position, Vector3.Up);
@@ -183,7 +193,7 @@ namespace TrabalhoFinal
         }
 
         //função com o movimento Free
-        public void MoveFps(KeyboardState keys, float speed)
+        private void MoveFps(KeyboardState keys, float speed)
         {
 
             if (keys.IsKeyDown(Keys.NumPad5))
@@ -200,7 +210,6 @@ namespace TrabalhoFinal
                 position.Y += (dir.Y - position.Y) * speed;
             }
 
-            //Cálculo das normais para andar paralelo à direçao
             if (keys.IsKeyDown(Keys.NumPad4))
             {
                 position -= speed * Vector3.Cross(dir - position, Vector3.Up);
@@ -211,8 +220,13 @@ namespace TrabalhoFinal
             }
         }
 
+        private void MoveFollow()
+        {
+            
+        }
+
         //Função que cálcula a altura do mapa e assim atribui essa altura a posição da camera
-        public void HeightY()
+        private void HeightY()
         {
             position.Y = map.GetHeight(position).Y + 4f;
         }

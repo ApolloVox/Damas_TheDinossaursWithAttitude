@@ -34,7 +34,7 @@ namespace TrabalhoFinal
             float aspectRatio = (float)(device.Viewport.Width /
                 device.Viewport.Height);
 
-            float nearPlane = 1.0f, FarPlane = 40.0f;
+            float nearPlane = 1.0f, FarPlane = 100.0f;
             effect.Projection = Matrix.CreatePerspectiveFieldOfView(
                 MathHelper.ToRadians(45.0f),
                 aspectRatio, nearPlane, FarPlane);
@@ -54,10 +54,10 @@ namespace TrabalhoFinal
             effect.EmissiveColor = new Vector3(0f, 0f, 0f);
 
             //FOG
-            effect.FogEnabled = true;
+           /* effect.FogEnabled = true;
             effect.FogColor = new Color(180f, 180f, 180f).ToVector3(); // For best results, ake this color whatever your background is.
             effect.FogStart = 20f;
-            effect.FogEnd = 40.0f;
+            effect.FogEnd = 40.0f;*/
 
 
             CreateMap();
@@ -121,7 +121,7 @@ namespace TrabalhoFinal
         }
 
         //Método que contém as normais
-        public void GetNormals()
+        private void GetNormals()
         {
             for(int z= 0;z < mapaImagem.Width;z++)
             {
@@ -130,60 +130,61 @@ namespace TrabalhoFinal
                     //Produto externo (V0 - p) * (V1-p)
                     Vector3[] normais = new Vector3[8];
                     int contador = 0;
-                    
+
                     //Left Up
                     if (x - 1 >= 0 && z - 1 >= 0)
                     {
-                        normais[contador] = vertices[x - 1 + (z - 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
+                        normais[contador] = Vector3.Subtract( vertices[x - 1 + (z - 1) * (int)maxHeight].Position,vertices[x + z * (int)maxHeight].Position);
                         contador++;
                     }
                     //Center Up
                     if (z - 1 >= 0)
                     {
-                        normais[contador] = vertices[x + (z - 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
+                        normais[contador] = Vector3.Subtract( vertices[x + (z - 1) * (int)maxHeight].Position , vertices[x + z * (int)maxHeight].Position);
                         contador++;
                     }
                     //Right Up
                     if (x + 1 < maxHeight && z - 1 >= 0)
                     {
-                        normais[contador] = vertices[x + 1 + (z - 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
-                        contador++;
-                    }
-                    //Left
-                    if (x - 1 >= 0)
-                    {
-                        normais[contador] = vertices[x - 1 + z * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
+                        normais[contador] = Vector3.Subtract( vertices[x + 1 + (z - 1) * (int)maxHeight].Position , vertices[x + z * (int)maxHeight].Position);
                         contador++;
                     }
                     //Right
                     if (x + 1 < maxHeight)
                     {
-                        normais[contador] = vertices[x + 1 + z*(int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
-                        contador++;
-                    }
-                    //Down Left
-                    if (x - 1 >= 0 && z + 1 < maxHeight)
-                    {
-                        normais[contador] = vertices[x - 1 + (z + 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
-                        contador++;
-                    }
-                    //Down Center
-                    if (z + 1 < maxHeight)
-                    {
-                        normais[contador] = vertices[x + (z + 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
+                        normais[contador] = Vector3.Subtract(vertices[x + 1 + z * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
                         contador++;
                     }
                     //Down Right
                     if (x + 1 < mapaImagem.Width && z + 1 < maxHeight)
                     {
-                        normais[contador] = vertices[x + 1 + (z + 1) * (int)maxHeight].Position - vertices[x + z * (int)maxHeight].Position;
+                        normais[contador] = Vector3.Subtract(vertices[x + 1 + (z + 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                        contador++;
+                    }
+                    //Down Center
+                    if (z + 1 < maxHeight)
+                    {
+                        normais[contador] = Vector3.Subtract(vertices[x + (z + 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                        contador++;
+                    }
+                    //Down Left
+                    if (x - 1 >= 0 && z + 1 < maxHeight)
+                    {
+                        normais[contador] = Vector3.Subtract(vertices[x - 1 + (z + 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                        contador++;
+                    }
+                    //Left
+                    if (x - 1 >= 0)
+                    {
+                        normais[contador] = Vector3.Subtract(vertices[x - 1 + z * (int)maxHeight].Position , vertices[x + z * (int)maxHeight].Position);
                         contador++;
                     }
 
                     //Cálculo final das normais
-                    for(int i = contador-1;i>= 1;i--)
+                    for(int i = contador-1;i>=1;i--)
                     {
-                        normais[i] = Vector3.Cross(normais[i], normais[i-1]);
+                        normais[i] = -Vector3.Cross(normais[i-1], normais[i]);
+
                     }
 
                     //Obtenção da media das normais e atribuindo ao vertice central
@@ -194,7 +195,7 @@ namespace TrabalhoFinal
                         media += normais[i];
                     }
 
-                    media /= contador;
+                    media /= (float)contador;
                     media.Normalize();
                     vertices[x + z * (int)maxHeight].Normal = media;
 
@@ -215,6 +216,21 @@ namespace TrabalhoFinal
             device.Indices = indexBuffer;
 
             device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verIndex.Length / 3);
+
+        }
+
+        private void DrawVectors(GraphicsDevice device, Vector3 startPoint, Vector3 endPoint, Color color, ClsCamera camera)
+        {
+            BasicEffect basicEffect = new BasicEffect(device);
+            basicEffect.Projection = camera.ProjectionMatrixCamera;
+            basicEffect.View = camera.ViewMatrixCamera;
+            basicEffect.World = worldMatrix;
+            basicEffect.VertexColorEnabled = true;
+            basicEffect.CurrentTechnique.Passes[0].Apply();
+            startPoint.Y +=4;
+            endPoint.Y += 4;
+            var vertices = new[] { new VertexPositionColor(startPoint, color), new VertexPositionColor(endPoint, color) };
+            device.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
         }
 
         public float MapBoundariesHeight
@@ -244,26 +260,40 @@ namespace TrabalhoFinal
         public Vector3 InterpolyNormals(Vector3 position)
         {
             Vector3 verticeA, verticeB, verticeC, verticeD;
+            Vector3 verAN, verBN, verCN, verDN;
 
             //Obtem os vertices adjacentes a camera
             if ((int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight < MapBoundariesHeight * MapBoundariesWidth && (int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight > 0)
             {
-                verticeA = mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Normal;
-                verticeB = mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Normal;
-                verticeC = mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Normal;
-                verticeD = mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Normal;
+                verticeA = mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Position;
+                verticeB = mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Position;
+                verticeC = mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position;
+                verticeD = mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position;
+
+                verAN = mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Normal;
+                verBN = mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Normal;
+                verCN = mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Normal;
+                verDN = mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Normal;
             }
             else
             {
-                verticeA = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
-                verticeB = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
-                verticeC = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
-                verticeD = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
+                verticeA = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Position;
+                verticeB = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Position;
+                verticeC = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Position;
+                verticeD = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Position;
+
+                verAN = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
+                verBN = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
+                verCN = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
+                verDN = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
             }
 
-            //position.Y = Y + 2;
+            Vector3 Dab = (1 - (position.X-verticeA.X)) * verAN + (position.X-verticeA.X) * verBN;
+            Vector3 Dcd = (1 - (position.X - verticeC.X)) * verCN + (position.X - verticeC.X) * verDN;
 
-            return Vector3.Zero;
+            Vector3 N = (1 - (position.Z - verticeA.Z)) * Dab + (position.Z - verticeA.Z) * Dcd;
+  
+            return N;
         }
 
         public Vector3 GetHeight(Vector3 position)
