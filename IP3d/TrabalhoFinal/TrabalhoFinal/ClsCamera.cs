@@ -20,7 +20,7 @@ namespace TrabalhoFinal
     {
         private Matrix viewMatrix, projectionMatrix;
         private BasicEffect effect;
-        Vector3 position, dir;
+        Vector3 position,freePos,surPos,followPos, dir;
         float yaw, pitch;
         float width, height;
         float scale = MathHelper.ToRadians(10) /500;
@@ -37,6 +37,10 @@ namespace TrabalhoFinal
             yaw = 0;
             pitch = 0;
             position = new Vector3(8.0f,5.0f, 8.0f);
+            freePos = new Vector3(8.0f, 5.0f, 8.0f);
+            surPos = new Vector3(8.0f, 5.0f, 8.0f);
+            followPos = new Vector3(8.0f, 5.0f, 8.0f);
+
             dir = Vector3.Zero - position;
             dir.Normalize();
             effect = new BasicEffect(device);
@@ -57,7 +61,7 @@ namespace TrabalhoFinal
         }
 
 
-        public void Update(GameTime gametime)
+        public void Update(GameTime gametime,Tank tank)
         {
             Vector3 oldPos = position;
             float speed = 0.5f;
@@ -132,7 +136,10 @@ namespace TrabalhoFinal
                     break;
 
                 case CameraSelect.Follow:
-                    MoveFollow();
+
+                    yawPitchCalc();
+
+                    MoveFollow(tank.TankPosition);
 
                     break;
             }
@@ -230,9 +237,15 @@ namespace TrabalhoFinal
             }
         }
 
-        private void MoveFollow()
+        private void MoveFollow(Vector3 tankPos)
         {
-            
+            Vector3 test = new Vector3(tankPos.X * (float)Math.Cos(yaw), 1f, tankPos.Z * (float)Math.Sin(yaw));
+            test.Normalize();
+            position = tankPos + test;
+            position.Y += 0.5f;
+            dir = tankPos;
+            dir.Y = (float)Math.Sin(pitch) + position.Y;
+
         }
 
         //Função que cálcula a altura do mapa e assim atribui essa altura a posição da camera

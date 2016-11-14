@@ -81,6 +81,7 @@ namespace TrabalhoFinal
             dir.X = (float)Math.Cos(yaw);
             dir.Z = (float)Math.Sin(yaw);
             dir.Y =  0;
+
             if ((tankPos.X < 0 || tankPos.Z < 0))
                 tankPos = oldPos;
             if ((tankPos.X > 127 || tankPos.Z > 127))

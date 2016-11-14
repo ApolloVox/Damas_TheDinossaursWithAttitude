@@ -69,7 +69,7 @@ namespace TrabalhoFinal
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            camera.Update(gameTime);
+            camera.Update(gameTime,tank);
             tank.Update();
             // TODO: Add your update logic here
 
