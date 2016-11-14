@@ -13,15 +13,16 @@ namespace TrabalhoFinal
     class Tank
     {
         Matrix worldMatrix, viewMatrix, projectionMatrix;
-        Matrix cannonTransform,turretTransform,r;
+        Matrix cannonTransform,turretTransform,r,rfWheelTransform,rbWheelTransform,lfWheelTransform,lbWheelTransform,leftSteerTransform,rightSteerTransform;
         Vector3 tankPos,dir;
-        float yaw, pitch,speed,cannonYaw,cannonPitch;
+        float yaw, pitch,speed,cannonYaw,cannonPitch,wheelRotation,steerRotation;
         Matrix[] boneTransforms;
         Model tankModel;
-        ModelBone turretBone, cannonBone;
+        ModelBone turretBone, cannonBone,rfWheelBone,lfWheelBone,rbWheelBone,lbWheelBone,leftSteer,rightSteer;
         BasicEffect effect;
         Mapa map;
         BasicEffect basicEffect;
+        float scale = 0.001f;
 
         public Tank(GraphicsDevice device, ContentManager content,Mapa mapa)
         {
@@ -34,9 +35,21 @@ namespace TrabalhoFinal
             tankModel = content.Load<Model>("tank");
             turretBone = tankModel.Bones["turret_geo"];
             cannonBone = tankModel.Bones["canon_geo"];
+            rfWheelBone = tankModel.Bones["r_front_wheel_geo"];
+            rbWheelBone = tankModel.Bones["r_back_wheel_geo"];
+            lfWheelBone = tankModel.Bones["l_front_wheel_geo"];
+            lbWheelBone = tankModel.Bones["l_back_wheel_geo"];
+            leftSteer = tankModel.Bones["l_steer_geo"];
+            rightSteer = tankModel.Bones["r_steer_geo"];
 
             turretTransform = turretBone.Transform;
             cannonTransform = cannonBone.Transform;
+            rfWheelTransform = rfWheelBone.Transform;
+            rbWheelTransform = rbWheelBone.Transform;
+            lfWheelTransform = lfWheelBone.Transform;
+            lbWheelTransform = lbWheelBone.Transform;
+            leftSteerTransform = leftSteer.Transform;
+            rightSteerTransform = rightSteer.Transform;
 
             boneTransforms = new Matrix[tankModel.Bones.Count];
 
@@ -47,10 +60,11 @@ namespace TrabalhoFinal
 
             yaw = 0;
             pitch = 0;
-            speed = 0.5f;
+            speed = 0.1f;
             cannonYaw = 0f;
             cannonPitch = 0f;
-
+            wheelRotation = 0;
+            steerRotation = 0;
         }
 
         public void Update()
@@ -61,14 +75,12 @@ namespace TrabalhoFinal
 
             Move(keys);
 
-            tankPos.Y = map.GetHeight(tankPos).Y-0.3f;
+            tankPos.Y = map.GetHeight(tankPos).Y;
             
             //calculo do vetor direção
             dir.X = (float)Math.Cos(yaw);
-            dir.Z = -(float)Math.Sin(yaw);
+            dir.Z = (float)Math.Sin(yaw);
             dir.Y =  0;
-
-            //Console.WriteLine(dir);
             if ((tankPos.X < 0 || tankPos.Z < 0))
                 tankPos = oldPos;
             if ((tankPos.X > 127 || tankPos.Z > 127))
@@ -83,23 +95,29 @@ namespace TrabalhoFinal
             {
                 tankPos.X += dir.X * speed;
                 tankPos.Z += dir.Z * speed;
+                wheelRotation -= 0.05f;
+                yaw += MathHelper.ToRadians(steerRotation);
             }
             if (keys.IsKeyDown(Keys.W))
             {
                 tankPos.X -= dir.X * speed;
                 tankPos.Z -= dir.Z * speed;
+                wheelRotation += 0.05f;
+                yaw -= MathHelper.ToRadians(steerRotation);
             }
             if (keys.IsKeyDown(Keys.A))
             {
-                yaw += 0.05f;
+                if(steerRotation <= 0.85f)
+                steerRotation += 0.03f;
             }
             if (keys.IsKeyDown(Keys.D))
-            {
-                yaw -= 0.05f;
+            {   
+                if(steerRotation >= -0.85f)
+                steerRotation -= 0.03f;
             }
 
             //Cannon Move
-            if(keys.IsKeyDown(Keys.Up))
+            if (keys.IsKeyDown(Keys.Up))
             {
                 if(cannonPitch >= -MathHelper.PiOver2)
                 cannonPitch -= 0.05f;
@@ -123,18 +141,22 @@ namespace TrabalhoFinal
         {
             Vector3 N = map.InterpolyNormals(tankPos);
             Vector3 right = Vector3.Cross(new Vector3(dir.X,0,dir.Z), N);
-
             Vector3 d = Vector3.Cross(N, right);
+
             r = Matrix.Identity;
             r.Forward = d;
             r.Up = N;
             r.Right = right;
-         
-            //r = Matrix.CreateFromYawPitchRoll(0f, yaw, MathHelper.ToRadians(90)) * r;
 
-            tankModel.Root.Transform = Matrix.CreateScale(0.01f) * r * Matrix.CreateTranslation(tankPos);// Matrix.CreateRotationY(yaw + MathHelper.ToRadians(90));
+            tankModel.Root.Transform = Matrix.CreateScale(scale) * r * Matrix.CreateTranslation(tankPos);
             turretBone.Transform = Matrix.CreateRotationY(cannonYaw) * turretTransform;
             cannonBone.Transform = Matrix.CreateRotationX(cannonPitch) * cannonTransform;
+            rfWheelBone.Transform = Matrix.CreateRotationX(wheelRotation) * rfWheelTransform;
+            rbWheelBone.Transform = Matrix.CreateRotationX(wheelRotation) * rbWheelTransform;
+            lfWheelBone.Transform = Matrix.CreateRotationX(wheelRotation) * lfWheelTransform;
+            lbWheelBone.Transform = Matrix.CreateRotationX(wheelRotation) * lbWheelTransform;
+            rightSteer.Transform = Matrix.CreateRotationY(steerRotation*0.5f) * rightSteerTransform;
+            leftSteer.Transform = Matrix.CreateRotationY(steerRotation*0.5f) * leftSteerTransform;
 
             tankModel.CopyAbsoluteBoneTransformsTo(boneTransforms);
 

@@ -48,7 +48,7 @@ namespace TrabalhoFinal
                 Vector3.Up);
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
                 MathHelper.ToRadians(45.0f),
-                aspectRatio, 0.5f, 150.0f);
+                aspectRatio, 0.5f, 100.0f);
 
             effect.View = viewMatrix;
             effect.Projection = projectionMatrix;
@@ -74,10 +74,20 @@ namespace TrabalhoFinal
                 Console.WriteLine("Surface");
                 camState = CameraSelect.Surface;
             }
-            else if(keys.IsKeyDown(Keys.F3))
+            else if (keys.IsKeyDown(Keys.F3))
             {
                 Console.WriteLine("Follow");
                 camState = CameraSelect.Follow;
+            }
+            else if( keys.IsKeyDown(Keys.F4))
+            {
+                Console.WriteLine("FogOn!");
+                map.FogOn();
+            }
+            else if(keys.IsKeyDown(Keys.F5))
+            {
+                Console.WriteLine("FogOFF!");
+                map.FogOff();
             }
 
             switch (camState)
@@ -228,7 +238,7 @@ namespace TrabalhoFinal
         //Função que cálcula a altura do mapa e assim atribui essa altura a posição da camera
         private void HeightY()
         {
-            position.Y = map.GetHeight(position).Y + 4f;
+            position.Y = map.GetHeight(position).Y + 3f;
         }
     }
 }

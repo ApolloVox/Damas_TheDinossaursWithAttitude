@@ -31,13 +31,13 @@ namespace TrabalhoFinal
 
             ReadPixeis();
 
-            float aspectRatio = (float)(device.Viewport.Width /
-                device.Viewport.Height);
+            /*float aspectRatio = (float)(device.Viewport.Width /
+                device.Viewport.Height);*/
 
-            float nearPlane = 1.0f, FarPlane = 100.0f;
+            /*float nearPlane = 1.0f, FarPlane = 100.0f;
             effect.Projection = Matrix.CreatePerspectiveFieldOfView(
                 MathHelper.ToRadians(45.0f),
-                aspectRatio, nearPlane, FarPlane);
+                aspectRatio, nearPlane, FarPlane);*/
 
             effect.VertexColorEnabled = true;
 
@@ -52,13 +52,6 @@ namespace TrabalhoFinal
             effect.DirectionalLight0.SpecularColor = new Vector3(0, 0.025f, 0);
             effect.AmbientLightColor = new Vector3(0.4f, 0.4f, 0.4f);
             effect.EmissiveColor = new Vector3(0f, 0f, 0f);
-
-            //FOG
-           /* effect.FogEnabled = true;
-            effect.FogColor = new Color(180f, 180f, 180f).ToVector3(); // For best results, ake this color whatever your background is.
-            effect.FogStart = 20f;
-            effect.FogEnd = 40.0f;*/
-
 
             CreateMap();
 
@@ -81,6 +74,20 @@ namespace TrabalhoFinal
         {
             pixeis = new Color[mapaImagem.Width * mapaImagem.Height];
             mapaImagem.GetData<Color>(pixeis);
+        }
+
+        public void FogOn()
+        {
+            //FOG
+            effect.FogEnabled = true;
+            effect.FogColor = new Color(180f, 180f, 180f).ToVector3(); // For best results, ake this color whatever your background is.
+            effect.FogStart = 20f;
+            effect.FogEnd = 100f;
+        }
+
+        public void FogOff()
+        {
+            effect.FogEnabled = false;
         }
 
         //Cria o mapa atráves de indices e de triangle list
