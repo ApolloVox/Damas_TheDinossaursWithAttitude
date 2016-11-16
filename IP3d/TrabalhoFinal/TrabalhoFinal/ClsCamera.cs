@@ -36,10 +36,11 @@ namespace TrabalhoFinal
             height = device.Viewport.Height;
             yaw = 0;
             pitch = 0;
+
             position = new Vector3(8.0f,5.0f, 8.0f);
-            freePos = new Vector3(8.0f, 5.0f, 8.0f);
-            surPos = new Vector3(8.0f, 5.0f, 8.0f);
-            followPos = new Vector3(8.0f, 5.0f, 8.0f);
+            freePos = position;
+            surPos = position;
+            followPos = position;
 
             dir = Vector3.Zero - position;
             dir.Normalize();
@@ -63,7 +64,24 @@ namespace TrabalhoFinal
 
         public void Update(GameTime gametime,Tank tank)
         {
-            Vector3 oldPos = position;
+            Vector3 oldPos;
+            switch(camState)
+            {
+                case CameraSelect.FreeCam:
+                    oldPos = freePos;
+                    break;
+                case CameraSelect.Surface:
+                    oldPos = surPos;
+                    break;
+
+                case CameraSelect.Follow:
+                    oldPos = followPos;
+                    break;
+
+                default: oldPos = position;
+                    break;
+            }
+
             float speed = 0.5f;
 
             KeyboardState keys = Keyboard.GetState();

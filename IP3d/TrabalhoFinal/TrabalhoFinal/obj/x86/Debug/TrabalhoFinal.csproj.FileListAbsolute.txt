@@ -14,3 +14,4 @@ D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\engine_
 D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\engine_diff_tex_0.xnb
 D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\turret_alt_diff_tex.xnb
 D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\turret_alt_diff_tex_0.xnb
+D:\IPCA\IP3D\TrabalhoFinal\TrabalhoFinal\bin\DesktopGL\x86\Debug\Content\projektil FBX.xnb

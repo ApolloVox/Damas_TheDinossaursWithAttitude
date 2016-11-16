@@ -14,7 +14,7 @@ namespace TrabalhoFinal
         SpriteBatch spriteBatch;
         Mapa mapa;
         ClsCamera camera;
-        Tank tank;
+        Tank tank,tank2;
 
         public Game1()
         {
@@ -46,7 +46,8 @@ namespace TrabalhoFinal
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            tank = new Tank(graphics.GraphicsDevice, Content,mapa);
+            tank = new Tank(graphics.GraphicsDevice, Content,mapa,1);
+            tank2 = new Tank(GraphicsDevice, Content, mapa,2);
             // TODO: use this.Content to load your game content here
         }
 
@@ -71,6 +72,7 @@ namespace TrabalhoFinal
 
             camera.Update(gameTime,tank);
             tank.Update();
+            tank2.Update();
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -86,6 +88,7 @@ namespace TrabalhoFinal
             mapa.Draw(graphics.GraphicsDevice,camera);
             // TODO: Add your drawing code here
             tank.Draw(graphics.GraphicsDevice,camera);
+            tank2.Draw(GraphicsDevice, camera);
 
             base.Draw(gameTime);
         }
