@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace TrabalhoFinal
 {
+    //Estados Possiveis da camera
     enum CameraSelect
     {
         FreeCam,
@@ -20,7 +21,7 @@ namespace TrabalhoFinal
     {
         private Matrix viewMatrix, projectionMatrix;
         private BasicEffect effect;
-        Vector3 position,freePos,surPos,followPos, dir;
+        Vector3 position, dir;
         float yaw, pitch;
         float width, height;
         float scale = MathHelper.ToRadians(10) /500;
@@ -38,9 +39,6 @@ namespace TrabalhoFinal
             pitch = 0;
 
             position = new Vector3(8.0f,5.0f, 8.0f);
-            freePos = position;
-            surPos = position;
-            followPos = position;
 
             dir = Vector3.Zero - position;
             dir.Normalize();
@@ -64,28 +62,13 @@ namespace TrabalhoFinal
 
         public void Update(GameTime gametime,Tank tank)
         {
-            Vector3 oldPos;
-            switch(camState)
-            {
-                case CameraSelect.FreeCam:
-                    oldPos = freePos;
-                    break;
-                case CameraSelect.Surface:
-                    oldPos = surPos;
-                    break;
-
-                case CameraSelect.Follow:
-                    oldPos = followPos;
-                    break;
-
-                default: oldPos = position;
-                    break;
-            }
+            Vector3 oldPos = position;
 
             float speed = 0.5f;
 
             KeyboardState keys = Keyboard.GetState();
 
+            //De acordo com o Teclado Obter a camera que queremos
             if (keys.IsKeyDown(Keys.F1))
             {
                 Console.WriteLine("FreeCam");
@@ -112,6 +95,7 @@ namespace TrabalhoFinal
                 map.FogOff();
             }
 
+            //Calculo de movimento da camera de acordo com o estado activo
             switch (camState)
             {
                 case CameraSelect.FreeCam:
@@ -255,11 +239,12 @@ namespace TrabalhoFinal
             }
         }
 
+        //Função com o movimento Follow do tank
         private void MoveFollow(Vector3 tankPos)
         {
-            Vector3 test = new Vector3(tankPos.X * (float)Math.Cos(yaw), 1f, tankPos.Z * (float)Math.Sin(yaw));
-            test.Normalize();
-            position = tankPos + test;
+            Vector3 dirFollow = new Vector3(tankPos.X * (float)Math.Cos(yaw), 1f, tankPos.Z * (float)Math.Sin(yaw));
+            dirFollow.Normalize();
+            position = tankPos + dirFollow;
             position.Y += 0.5f;
             dir = tankPos;
             dir.Y = (float)Math.Sin(pitch) + position.Y;

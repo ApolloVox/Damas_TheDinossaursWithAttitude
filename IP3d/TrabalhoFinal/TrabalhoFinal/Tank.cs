@@ -104,6 +104,7 @@ namespace TrabalhoFinal
             //Lista que obtem informação sobre as balas de canhao
             if (keys.IsKeyDown(Keys.Space))
             {
+                //creação de uma bala mas ainda sem movimento
                 ammoList.Add(new Bullet(device, content, tankPos));
             }
 
@@ -112,6 +113,7 @@ namespace TrabalhoFinal
             dir.Z = (float)Math.Sin(yaw);
             dir.Y = 0;
 
+            //Impedir que saia do terreno de jogo
             if ((tankPos.X < 0 || tankPos.Z < 0))
                 tankPos = oldPos;
             if ((tankPos.X > 127 || tankPos.Z > 127))
@@ -125,6 +127,7 @@ namespace TrabalhoFinal
             switch (player)
             {
                 case TankNumber.Tank1:
+                    //Movimento do tank de acorod com o yaw do steerRotation
                     if (keys.IsKeyDown(Keys.S))
                     {
                         tankPos.X += dir.X * speed;
@@ -223,6 +226,7 @@ namespace TrabalhoFinal
 
         public void Draw(GraphicsDevice device, ClsCamera camera)
         {
+            //Calculo da matriz rotação com a normal do terreno
             Vector3 N = map.InterpolyNormals(tankPos);
             Vector3 right = Vector3.Cross(new Vector3(dir.X, 0, dir.Z), N);
             Vector3 d = Vector3.Cross(N, right);
@@ -232,6 +236,7 @@ namespace TrabalhoFinal
             r.Up = N;
             r.Right = right;
 
+            //Deslocaçoes dos varios bones do tank
             tankModel.Root.Transform = Matrix.CreateScale(scale) * r * Matrix.CreateTranslation(tankPos);
             turretBone.Transform = Matrix.CreateRotationY(cannonYaw) * turretTransform;
             cannonBone.Transform = Matrix.CreateRotationX(cannonPitch) * cannonTransform;
@@ -244,6 +249,8 @@ namespace TrabalhoFinal
 
             tankModel.CopyAbsoluteBoneTransformsTo(boneTransforms);
 
+            //desenho dos tanks
+            //AmbienteLightColors diferentes só para mostrar qual o tank 1 e 2
             switch(player)
             {
                 case TankNumber.Tank1:
@@ -277,20 +284,6 @@ namespace TrabalhoFinal
                     break;
             }       
         }
-
-        /*private void DrawVectors(GraphicsDevice device, Vector3 startPoint, Vector3 endPoint, Color color, ClsCamera camera)
-        {
-            basicEffect = new BasicEffect(device);
-            basicEffect.Projection = camera.ProjectionMatrixCamera;
-            basicEffect.View = camera.ViewMatrixCamera;
-            basicEffect.World = worldMatrix;
-            basicEffect.VertexColorEnabled = true;
-            basicEffect.CurrentTechnique.Passes[0].Apply();
-            startPoint.Y += 4;
-            endPoint.Y += 4;
-            var vertices = new[] { new VertexPositionColor(startPoint, color), new VertexPositionColor(endPoint, color) };
-            device.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
-        }*/
 
         public Vector3 TankPosition
         {

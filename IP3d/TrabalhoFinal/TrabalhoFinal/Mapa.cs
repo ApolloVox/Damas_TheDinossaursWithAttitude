@@ -226,20 +226,6 @@ namespace TrabalhoFinal
 
         }
 
-        private void DrawVectors(GraphicsDevice device, Vector3 startPoint, Vector3 endPoint, Color color, ClsCamera camera)
-        {
-            BasicEffect basicEffect = new BasicEffect(device);
-            basicEffect.Projection = camera.ProjectionMatrixCamera;
-            basicEffect.View = camera.ViewMatrixCamera;
-            basicEffect.World = worldMatrix;
-            basicEffect.VertexColorEnabled = true;
-            basicEffect.CurrentTechnique.Passes[0].Apply();
-            startPoint.Y +=4;
-            endPoint.Y += 4;
-            var vertices = new[] { new VertexPositionColor(startPoint, color), new VertexPositionColor(endPoint, color) };
-            device.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
-        }
-
         public float MapBoundariesHeight
         {
             get
@@ -264,12 +250,13 @@ namespace TrabalhoFinal
             }
         }
 
+        //Interpolação das normais do terreno
         public Vector3 InterpolyNormals(Vector3 position)
         {
             Vector3 verticeA, verticeB, verticeC, verticeD;
             Vector3 verAN, verBN, verCN, verDN;
 
-            //Obtem os vertices adjacentes a camera
+            //Obtem os vertices adjacentes a posiçaõ tal como as normais
             if ((int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight < MapBoundariesHeight * MapBoundariesWidth && (int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight > 0)
             {
                 verticeA = mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Position;
@@ -295,6 +282,8 @@ namespace TrabalhoFinal
                 verDN = mapVertices[(int)MapBoundariesWidth * (int)MapBoundariesHeight - 1].Normal;
             }
 
+            //calculo do peso da posição com os vertices adjacentes
+            //e depois calculo final da normal
             Vector3 Dab = (1 - (position.X-verticeA.X)) * verAN + (position.X-verticeA.X) * verBN;
             Vector3 Dcd = (1 - (position.X - verticeC.X)) * verCN + (position.X - verticeC.X) * verDN;
 
