@@ -20,15 +20,14 @@ namespace TrabalhoFinal
     {
         Matrix worldMatrix, viewMatrix, projectionMatrix;
         Matrix cannonTransform, turretTransform, r, rfWheelTransform, rbWheelTransform, lfWheelTransform, lbWheelTransform, leftSteerTransform, rightSteerTransform;
-        Vector3 tankPos, dir, bulletPos;
-        float yaw, pitch, speed, cannonYaw, cannonPitch, wheelRotation, steerRotation;
+        Vector3 tankPos, dir;
+        float yaw, speed = 0.1f, cannonYaw, cannonPitch, wheelRotation, steerRotation;
         Matrix[] boneTransforms;
         Model tankModel;
         ModelBone turretBone, cannonBone, rfWheelBone, lfWheelBone, rbWheelBone, lbWheelBone, leftSteer, rightSteer;
         BasicEffect effect;
         Mapa map;
-        BasicEffect basicEffect;
-        float scale = 0.001f;
+        float scale = 0.001f,fireRate = 2f,fireTimer = 0f;
         List<Bullet> ammoList;
         ContentManager content;
         GraphicsDevice device;
@@ -81,8 +80,6 @@ namespace TrabalhoFinal
             dir = new Vector3(0, 0, 0);
 
             yaw = 0;
-            pitch = 0;
-            speed = 0.1f;
             cannonYaw = 0f;
             cannonPitch = 0f;
             wheelRotation = 0;
@@ -91,7 +88,7 @@ namespace TrabalhoFinal
             ammoList = new List<Bullet>();
         }
 
-        public void Update()
+        public void Update(GameTime gameTime,Vector3 enemyPos,Model enemyModel,Matrix[] enemyWordlMatrix)
         {
             Vector3 oldPos = tankPos;
 
@@ -102,11 +99,14 @@ namespace TrabalhoFinal
             tankPos.Y = map.GetHeight(tankPos).Y;
 
             //Lista que obtem informação sobre as balas de canhao
-            if (keys.IsKeyDown(Keys.Space))
-            {
-                //creação de uma bala mas ainda sem movimento
-                ammoList.Add(new Bullet(device, content, tankPos));
-            }
+            fireTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (player == TankNumber.Tank1)
+                if (keys.IsKeyDown(Keys.Space) && fireTimer > fireRate)
+                {
+                    //creação de uma bala mas ainda sem movimento
+                    ammoList.Add(new Bullet(device, content, tankPos, cannonYaw, cannonPitch,yaw));
+                    fireTimer = 0;
+                }
 
             //calculo do vetor direção
             dir.X = (float)Math.Cos(yaw);
@@ -118,7 +118,14 @@ namespace TrabalhoFinal
                 tankPos = oldPos;
             if ((tankPos.X > 127 || tankPos.Z > 127))
                 tankPos = oldPos;
+            
 
+
+            if(player == TankNumber.Tank1)
+            foreach(Bullet bullet in ammoList)
+            {
+                    bullet.Update(map,enemyPos,enemyModel,enemyWordlMatrix);
+            }
         }
 
         public void Move(KeyboardState keys)
@@ -166,11 +173,13 @@ namespace TrabalhoFinal
                     }
                     if (keys.IsKeyDown(Keys.Left))
                     {
-                        cannonYaw += 0.1f;
+                        if (cannonYaw <= MathHelper.Pi/3f+MathHelper.PiOver2)
+                            cannonYaw += 0.1f;
                     }
                     if (keys.IsKeyDown(Keys.Right))
                     {
-                        cannonYaw -= 0.1f;
+                        if (cannonYaw >= -MathHelper.Pi/3f-MathHelper.PiOver2)
+                            cannonYaw -= 0.1f;
                     }
                     break;
 
@@ -199,26 +208,6 @@ namespace TrabalhoFinal
                         if (steerRotation >= -0.85f)
                             steerRotation -= 0.03f;
                     }
-
-                    //Cannon Move
-                    if (keys.IsKeyDown(Keys.Up))
-                    {
-                        if (cannonPitch >= -MathHelper.PiOver2)
-                            cannonPitch -= 0.05f;
-                    }
-                    if (keys.IsKeyDown(Keys.Down))
-                    {
-                        if (cannonPitch < 0.6f)
-                            cannonPitch += 0.05f;
-                    }
-                    if (keys.IsKeyDown(Keys.Left))
-                    {
-                        cannonYaw += 0.1f;
-                    }
-                    if (keys.IsKeyDown(Keys.Right))
-                    {
-                        cannonYaw -= 0.1f;
-                    }
                     break;
             }
 
@@ -237,7 +226,7 @@ namespace TrabalhoFinal
             r.Right = right;
 
             //Deslocaçoes dos varios bones do tank
-            tankModel.Root.Transform = Matrix.CreateScale(scale) * r * Matrix.CreateTranslation(tankPos);
+            tankModel.Root.Transform = Matrix.CreateScale(scale) *r * Matrix.CreateTranslation(tankPos);
             turretBone.Transform = Matrix.CreateRotationY(cannonYaw) * turretTransform;
             cannonBone.Transform = Matrix.CreateRotationX(cannonPitch) * cannonTransform;
             rfWheelBone.Transform = Matrix.CreateRotationX(wheelRotation) * rfWheelTransform;
@@ -283,6 +272,11 @@ namespace TrabalhoFinal
                     }
                     break;
             }       
+
+            foreach(Bullet bullet in ammoList)
+            {
+                bullet.Draw(device,camera,cannonYaw,map);
+            }
         }
 
         public Vector3 TankPosition
@@ -299,6 +293,16 @@ namespace TrabalhoFinal
             {
                 return dir;
             }
+        }
+
+        public Model TankModel()
+        {
+            return tankModel;
+        }
+
+        public Matrix[] WorldMatrix()
+        {
+            return boneTransforms;
         }
     }
 }

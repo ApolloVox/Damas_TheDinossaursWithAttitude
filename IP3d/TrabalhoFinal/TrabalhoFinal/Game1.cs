@@ -71,8 +71,8 @@ namespace TrabalhoFinal
                 Exit();
 
             camera.Update(gameTime,tank);
-            tank.Update();
-            tank2.Update();
+            tank.Update(gameTime,tank2.TankPosition,tank2.TankModel(),tank2.WorldMatrix());
+            tank2.Update(gameTime,tank.TankPosition,tank.TankModel(), tank.WorldMatrix());
             // TODO: Add your update logic here
 
             base.Update(gameTime);

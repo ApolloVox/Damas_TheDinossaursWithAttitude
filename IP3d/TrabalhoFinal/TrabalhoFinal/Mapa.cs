@@ -31,15 +31,7 @@ namespace TrabalhoFinal
 
             ReadPixeis();
 
-            /*float aspectRatio = (float)(device.Viewport.Width /
-                device.Viewport.Height);*/
-
-            /*float nearPlane = 1.0f, FarPlane = 100.0f;
-            effect.Projection = Matrix.CreatePerspectiveFieldOfView(
-                MathHelper.ToRadians(45.0f),
-                aspectRatio, nearPlane, FarPlane);*/
-
-            effect.VertexColorEnabled = true;
+            effect.VertexColorEnabled = false;
 
             effect.TextureEnabled = true;
             effect.Texture = texture;
@@ -81,8 +73,8 @@ namespace TrabalhoFinal
             //FOG
             effect.FogEnabled = true;
             effect.FogColor = new Color(180f, 180f, 180f).ToVector3(); // For best results, ake this color whatever your background is.
-            effect.FogStart = 20f;
-            effect.FogEnd = 100f;
+            effect.FogStart = 10f;
+            effect.FogEnd = 60f;
         }
 
         public void FogOff()
