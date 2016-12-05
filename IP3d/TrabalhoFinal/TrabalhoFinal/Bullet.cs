@@ -16,7 +16,7 @@ namespace TrabalhoFinal
         Model bullet;
         float velocity,gravity,angle,time,scale,yaw,pitch;
         Matrix r,world;
-        bool isALive = false;
+        bool isALive = false,Collision = false;
 
         public Bullet(GraphicsDevice device,ContentManager content, Vector3 startPos,float cannonYaw,float cannonPitch,float _yaw)
         {
@@ -45,7 +45,10 @@ namespace TrabalhoFinal
             //V = V+A*t
             oldPos = position;
             if (map.GetHeight(position).Y >= position.Y)
+            {
                 isALive = false;
+                Collision = false;
+            }
             if (isALive)
             {
                 float velocityY = velocity * (float)Math.Sin(angle) - (gravity * (time * time) / 2f);
@@ -54,8 +57,11 @@ namespace TrabalhoFinal
                 position.Y += velocityY;
 
                 time += 0.01f;
-                if(CollisionDectection(enemyPos,enemyModel,enemyWorldMatrix))
-                isALive = false;
+                if (CollisionDectection(enemyPos, enemyModel, enemyWorldMatrix))
+                {
+                    isALive = false;
+                    Collision = true; 
+                }
 
                 sphere.Transform(Matrix.CreateTranslation(position));
             }
@@ -82,14 +88,11 @@ namespace TrabalhoFinal
 
                 if (d < sphere.Radius)
                 {
-                    Console.WriteLine("HIT!!!!");
+                    position = enemyPos;
+                    Console.WriteLine(position);
+                    Console.WriteLine("HIT!!!!");  
                     return true;
                 }
-                /*if ((position - enemyPos).Length() < sphere.Radius + bulletSphere.Radius)
-                {
-                    Console.WriteLine("HIT!!");
-                    return true;
-                }*/
             }
             return false;
         }
@@ -118,6 +121,21 @@ namespace TrabalhoFinal
                     }
                     mesh.Draw();
                 }
+            }
+            if(Collision)
+            {
+                foreach (ModelMesh mesh in bullet.Meshes)
+                {
+                    foreach (BasicEffect effect in mesh.Effects)
+                    {
+                        world = Matrix.CreateScale(scale) * r * Matrix.CreateRotationY(-MathHelper.PiOver2) * Matrix.CreateTranslation(position);
+                        effect.World = world;
+                        effect.View = camera.ViewMatrixCamera;
+                        effect.Projection = camera.ProjectionMatrixCamera;
+                    }
+                    mesh.Draw();
+                }
+                Collision = false;
             }
         }
     }

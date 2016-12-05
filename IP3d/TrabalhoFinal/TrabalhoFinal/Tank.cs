@@ -16,6 +16,7 @@ namespace TrabalhoFinal
         Tank1,
         Tank2
     }
+
     class Tank
     {
         Matrix worldMatrix, viewMatrix, projectionMatrix;
@@ -33,7 +34,9 @@ namespace TrabalhoFinal
         GraphicsDevice device;
         TankNumber player;
 
-        public Tank(GraphicsDevice device, ContentManager content, Mapa mapa, int number)
+        ParticleSystem particleSystem;
+
+        public Tank(GraphicsDevice device, ContentManager content, Mapa mapa,ClsCamera camera, int number)
         {
             effect = new BasicEffect(device);
 
@@ -86,6 +89,8 @@ namespace TrabalhoFinal
             steerRotation = 0;
 
             ammoList = new List<Bullet>();
+
+            particleSystem = new ParticleSystem(device, camera, this);
         }
 
         public void Update(GameTime gameTime,Vector3 enemyPos,Model enemyModel,Matrix[] enemyWordlMatrix)
@@ -118,14 +123,20 @@ namespace TrabalhoFinal
                 tankPos = oldPos;
             if ((tankPos.X > 127 || tankPos.Z > 127))
                 tankPos = oldPos;
-            
 
+            if (tankPos != oldPos)
+                particleSystem.Moving = true;
+            else
+                particleSystem.Moving = false;
 
             if(player == TankNumber.Tank1)
             foreach(Bullet bullet in ammoList)
             {
                     bullet.Update(map,enemyPos,enemyModel,enemyWordlMatrix);
             }
+
+            particleSystem.Update(gameTime, boneTransforms[tankModel.Meshes["l_back_wheel_geo"].ParentBone.Index].Translation ,map);
+            //WriteLine(Vector3.Transform(Vector3.Zero, Matrix.Invert(rbWheelTransform*turretTransform)));
         }
 
         public void Move(KeyboardState keys)
@@ -174,12 +185,12 @@ namespace TrabalhoFinal
                     if (keys.IsKeyDown(Keys.Left))
                     {
                         if (cannonYaw <= MathHelper.Pi/3f+MathHelper.PiOver2)
-                            cannonYaw += 0.1f;
+                            cannonYaw += 0.01f;
                     }
                     if (keys.IsKeyDown(Keys.Right))
                     {
                         if (cannonYaw >= -MathHelper.Pi/3f-MathHelper.PiOver2)
-                            cannonYaw -= 0.1f;
+                            cannonYaw -= 0.01f;
                     }
                     break;
 
@@ -276,6 +287,12 @@ namespace TrabalhoFinal
             foreach(Bullet bullet in ammoList)
             {
                 bullet.Draw(device,camera,cannonYaw,map);
+            }
+
+
+            if(particleSystem.Moving)
+            {
+                particleSystem.Draw();
             }
         }
 

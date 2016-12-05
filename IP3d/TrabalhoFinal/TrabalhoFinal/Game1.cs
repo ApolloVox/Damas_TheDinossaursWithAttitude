@@ -16,6 +16,7 @@ namespace TrabalhoFinal
         ClsCamera camera;
         Tank tank,tank2;
 
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -46,8 +47,8 @@ namespace TrabalhoFinal
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            tank = new Tank(graphics.GraphicsDevice, Content,mapa,1);
-            tank2 = new Tank(GraphicsDevice, Content, mapa,2);
+            tank = new Tank(graphics.GraphicsDevice, Content,mapa,camera,1);
+            tank2 = new Tank(GraphicsDevice, Content, mapa,camera,2);
             // TODO: use this.Content to load your game content here
         }
 
