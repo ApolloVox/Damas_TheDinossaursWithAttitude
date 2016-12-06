@@ -99,7 +99,10 @@ namespace TrabalhoFinal
 
             KeyboardState keys = Keyboard.GetState();
 
-            Move(keys);
+            if (player == TankNumber.Tank1)
+                Move(keys);
+            else if (player == TankNumber.Tank2)
+                FollowPlayer(enemyPos);
 
             tankPos.Y = map.GetHeight(tankPos).Y;
 
@@ -113,21 +116,24 @@ namespace TrabalhoFinal
                     fireTimer = 0;
                 }
 
-            //calculo do vetor direção
-            dir.X = (float)Math.Cos(yaw);
-            dir.Z = (float)Math.Sin(yaw);
-            dir.Y = 0;
-
             //Impedir que saia do terreno de jogo
-            if ((tankPos.X < 0 || tankPos.Z < 0))
-                tankPos = oldPos;
-            if ((tankPos.X > 127 || tankPos.Z > 127))
-                tankPos = oldPos;
+            if (player == TankNumber.Tank1)
+            {
+                if ((tankPos.X < 0 || tankPos.Z < 0) || CollisionBetweenTanks(enemyModel, enemyWordlMatrix))
+                    tankPos = oldPos;
+                if ((tankPos.X > 127 || tankPos.Z > 127) || CollisionBetweenTanks(enemyModel, enemyWordlMatrix))
+                    tankPos = oldPos;
+            }
 
             if (tankPos != oldPos)
                 particleSystem.Moving = true;
             else
                 particleSystem.Moving = false;
+
+            //calculo do vetor direção
+            dir.X = (float)Math.Cos(yaw);
+            dir.Z = (float)Math.Sin(yaw);
+            dir.Y = 0;
 
             if(player == TankNumber.Tank1)
             foreach(Bullet bullet in ammoList)
@@ -136,7 +142,30 @@ namespace TrabalhoFinal
             }
 
             particleSystem.Update(gameTime, boneTransforms[tankModel.Meshes["l_back_wheel_geo"].ParentBone.Index].Translation ,map);
-            //WriteLine(Vector3.Transform(Vector3.Zero, Matrix.Invert(rbWheelTransform*turretTransform)));
+        }
+
+        private bool CollisionBetweenTanks(Model enemyModel,Matrix[] enemyMatrix)
+        {
+            for(int i = 0;i<tankModel.Meshes.Count;i++)
+            {
+                BoundingSphere sphere = tankModel.Meshes[i].BoundingSphere;
+                Matrix spherePos = boneTransforms[tankModel.Meshes[i].ParentBone.Index];
+                spherePos.Translation = tankPos;
+                sphere = sphere.Transform(spherePos);
+
+                for (int j = 0; j < enemyModel.Meshes.Count; j++)
+                {
+                    BoundingSphere eSphere = enemyModel.Meshes[i].BoundingSphere;
+                    eSphere = sphere.Transform(enemyMatrix[i]);
+                    
+                    if((sphere.Center - eSphere.Center).Length() < sphere.Radius + sphere.Radius)
+                    {
+                        return true;
+                    }
+                }
+
+            }
+            return false;
         }
 
         public void Move(KeyboardState keys)
@@ -222,6 +251,25 @@ namespace TrabalhoFinal
                     break;
             }
 
+        }
+
+        private void FollowPlayer(Vector3 tankTarget)
+        {
+            Vector3 direction = tankTarget - tankPos;
+            direction.Normalize();
+
+            Vector3 crossVector = Vector3.Cross(direction, dir);
+            Console.WriteLine(direction);
+            Console.WriteLine(dir);
+            Console.WriteLine(crossVector);
+            if (crossVector.X <= 0 && crossVector.Z <= 0)
+            {
+                if(steerRotation <= 0.85f)
+                steerRotation += 0.03f;
+            }
+            //if(crossVector.X >=)
+            
+           // yaw+= MathHelper.ToRadians(steerRotation);
         }
 
         public void Draw(GraphicsDevice device, ClsCamera camera)

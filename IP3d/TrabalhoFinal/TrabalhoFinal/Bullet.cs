@@ -88,9 +88,11 @@ namespace TrabalhoFinal
 
                 if (d < sphere.Radius)
                 {
-                    position = enemyPos;
                     Console.WriteLine(position);
-                    Console.WriteLine("HIT!!!!");  
+                    Console.WriteLine(sphere.Radius);
+                    Console.WriteLine(sphere.Center);
+                    Console.WriteLine("HIT!!!!");
+                    position = enemyPos;
                     return true;
                 }
             }

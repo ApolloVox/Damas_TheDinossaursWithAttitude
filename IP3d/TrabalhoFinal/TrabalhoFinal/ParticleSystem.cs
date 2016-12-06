@@ -58,8 +58,8 @@ namespace TrabalhoFinal
                 for (int i = 0; i < poeira.Count; i++)
                 {
                     poeira[i].Update(gameTime, map, isMoving);
-                    if(i == 5)
-                        Console.WriteLine(poeira[i].Position);
+                    //if(i == 5)
+                       // Console.WriteLine(poeira[i].Position);
                     if (poeira[i].LifeTimer > 0.5f)
                     {
                         poeira.RemoveAt(i);
