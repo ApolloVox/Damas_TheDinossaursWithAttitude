@@ -8,64 +8,94 @@ using System.Threading.Tasks;
 
 namespace TrabalhoFinal
 {
+    enum PSType
+    {
+        wheel,
+        explosion
+    };
+
     class ParticleSystem
     {
         BasicEffect effect;
         GraphicsDevice device;
-        Vector3 poeiraPos, explosionPos;
         int numberParticles;
-        float timer;
         List<Dust> poeira;
         List<Explosion> explosion;
         ClsCamera camera;
         Random rnd;
         bool isMoving = false;
         Tank tank;
+        PSType active;
+        VertexPositionColor[] verticesPoeira;
 
-        public ParticleSystem(GraphicsDevice device,ClsCamera camera,Tank tank)
+        public ParticleSystem(GraphicsDevice device, ClsCamera camera, Tank tank)
         {
+            poeira = new List<Dust>();
+            explosion = new List<Explosion>();
+
             effect = new BasicEffect(device);
             effect.VertexColorEnabled = true;
 
-            numberParticles = 100;
+            //fogOn
+            effect.FogEnabled = true;
+            effect.FogColor = Color.Black.ToVector3(); // For best results, ake this color whatever your background is.
+            effect.FogStart = 20f;
+            effect.FogEnd = 100f;
+
+            numberParticles = 200;
 
             this.camera = camera;
             this.device = device;
             this.tank = tank;
 
-            poeira = new List<Dust>();
-            explosion = new List<Explosion>();
-
             rnd = new Random();
+
         }
 
-        public void Update(GameTime gameTime,Vector3 Pos,Mapa map)
+        public void Update(GameTime gameTime, Vector3 Pos, Mapa map,PSType _PsType)
         {
-            if (isMoving)
+            active = _PsType;
+            switch (_PsType)
             {
-                int total = 10;
-                for (int i = 0; i < total; i++)
-                {
-                    if (poeira.Count < numberParticles)
+                case PSType.wheel:
+                    if (isMoving)
                     {
-                        //Console.WriteLine(Pos);
-                        //Console.WriteLine(poeira.Count);
-                        poeira.Add(new Dust(Pos, tank.TankDirection, 1f, rnd));
+                        int total = 10;
+                        for (int i = 0; i < total; i++)
+                        {
+                            if (poeira.Count < numberParticles)
+                            {
+                                poeira.Add(new Dust(map.GetHeight(Pos), tank.TankDirection, 1f, rnd));
+                            }
+                            else
+                                break;
+                        }
+                        for (int i = 0; i < poeira.Count; i++)
+                        {
+                            //if(i == 5)
+                            // Console.WriteLine(poeira[i].Position);
+                            if (poeira[i].LifeTimer > 0.4f)
+                            {
+                                poeira.RemoveAt(i);
+                                i--;
+                            }
+                            else
+                                poeira[i].Update(gameTime, map, isMoving);
+                        }
                     }
-                    else
-                        break;
-                }
-                for (int i = 0; i < poeira.Count; i++)
-                {
-                    poeira[i].Update(gameTime, map, isMoving);
-                    //if(i == 5)
-                       // Console.WriteLine(poeira[i].Position);
-                    if (poeira[i].LifeTimer > 0.5f)
+
+                    verticesPoeira = new VertexPositionColor[poeira.Count * 2];
+
+                    for (int i = 0; i < poeira.Count; i++)
                     {
-                        poeira.RemoveAt(i);
-                        i--;
+                        verticesPoeira[i * 2] = new VertexPositionColor(poeira[i].Position, Color.GreenYellow);
+                        verticesPoeira[i * 2 + 1] = new VertexPositionColor(poeira[i].Position + new Vector3(0.01f, 0.0f, 0.01f), Color.Green);
                     }
-                }
+                    break;
+
+                case PSType.explosion:
+
+                    break;
             }
         }
 
@@ -77,15 +107,14 @@ namespace TrabalhoFinal
 
             effect.CurrentTechnique.Passes[0].Apply();
 
-            VertexPositionColor[] vertices = new VertexPositionColor[poeira.Count * 2];
-
-            for(int i = 0;i< poeira.Count;i++)
+            switch (active)
             {
-                vertices[i * 2] = new VertexPositionColor(poeira[i].Position, Color.Black);
-                vertices[i * 2 + 1] = new VertexPositionColor(poeira[i].Position + new Vector3(0.05f,0.05f,0.05f), Color.Black);
+                case PSType.wheel:
+                    device.DrawUserPrimitives(PrimitiveType.LineList, verticesPoeira, 0, poeira.Count);
+                    break;
+                case PSType.explosion:
+                    break;
             }
-
-            device.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, poeira.Count);
         }
 
         public Boolean Moving

@@ -22,7 +22,7 @@ namespace TrabalhoFinal
         Matrix worldMatrix, viewMatrix, projectionMatrix;
         Matrix cannonTransform, turretTransform, r, rfWheelTransform, rbWheelTransform, lfWheelTransform, lbWheelTransform, leftSteerTransform, rightSteerTransform;
         Vector3 tankPos, dir;
-        float yaw, speed = 0.1f, cannonYaw, cannonPitch, wheelRotation, steerRotation;
+        float yaw, speed = 0.05f, cannonYaw, cannonPitch, wheelRotation, steerRotation;
         Matrix[] boneTransforms;
         Model tankModel;
         ModelBone turretBone, cannonBone, rfWheelBone, lfWheelBone, rbWheelBone, lbWheelBone, leftSteer, rightSteer;
@@ -141,7 +141,8 @@ namespace TrabalhoFinal
                     bullet.Update(map,enemyPos,enemyModel,enemyWordlMatrix);
             }
 
-            particleSystem.Update(gameTime, boneTransforms[tankModel.Meshes["l_back_wheel_geo"].ParentBone.Index].Translation ,map);
+            particleSystem.Update(gameTime, boneTransforms[tankModel.Meshes["l_back_wheel_geo"].ParentBone.Index].Translation ,map,PSType.wheel);
+            particleSystem.Update(gameTime, boneTransforms[tankModel.Meshes["r_back_wheel_geo"].ParentBone.Index].Translation, map,PSType.wheel);
         }
 
         private bool CollisionBetweenTanks(Model enemyModel,Matrix[] enemyMatrix)
@@ -259,9 +260,6 @@ namespace TrabalhoFinal
             direction.Normalize();
 
             Vector3 crossVector = Vector3.Cross(direction, dir);
-            Console.WriteLine(direction);
-            Console.WriteLine(dir);
-            Console.WriteLine(crossVector);
             if (crossVector.X <= 0 && crossVector.Z <= 0)
             {
                 if(steerRotation <= 0.85f)
