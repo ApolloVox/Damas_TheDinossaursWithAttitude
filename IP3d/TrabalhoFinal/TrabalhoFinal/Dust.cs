@@ -11,17 +11,15 @@ namespace TrabalhoFinal
     class Dust
     {            
         Vector3 pos, dir,randomSpawn;
-        float larrgura, gravity = 0.1f, height,timer = 0f;
+        float timer = 0f;
 
-        public Dust(Vector3 tankPos,Vector3 tankDIr,float largura,Random rnd)
+        public Dust(Vector3 tankPos,Random rnd)
         {
-            this.larrgura = largura;
+            //randomSpawn = PerpendicularVector(dir,rnd);
 
-            randomSpawn = PerpendicularVector(dir,rnd);
-
-            pos = new Vector3(tankPos.X+randomSpawn.X,
+            pos = new Vector3(tankPos.X,
                 tankPos.Y, 
-                tankPos.Z+randomSpawn.Z);
+                tankPos.Z);
             dir = new Vector3(dir.X + (float)rnd.NextDouble()*0.05f,
                 dir.Y+(float)rnd.NextDouble()*0.1f,
                 dir.Z + (float)rnd.NextDouble()*0.05f);
@@ -36,13 +34,13 @@ namespace TrabalhoFinal
             }
         }
 
-        private Vector3 PerpendicularVector(Vector3 direction,Random rnd)
+       /* private Vector3 PerpendicularVector(Vector3 direction,Random rnd)
         {
             if(rnd.NextDouble() % 2 == 0)
-                return new Vector3(direction.Z + (float)rnd.NextDouble() * 0.1f, direction.Y, -direction.X + (float)rnd.NextDouble() * 0.1f);
+                return new Vector3(direction.Z + (float)rnd.NextDouble() * 0.05f, direction.Y, -direction.X + (float)rnd.NextDouble() * 0.05f);
             else
-                return new Vector3(-direction.Z + (float)rnd.NextDouble() * 0.1f, direction.Y, direction.X + (float)rnd.NextDouble() * 0.1f);
-        }
+                return new Vector3(-direction.Z + (float)rnd.NextDouble() * 0.05f, direction.Y, direction.X + (float)rnd.NextDouble() * 0.05f);
+        }*/
 
         public Vector3 Position
         {

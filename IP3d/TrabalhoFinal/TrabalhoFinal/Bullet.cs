@@ -16,7 +16,8 @@ namespace TrabalhoFinal
         Model bullet;
         float velocity,gravity,angle,time,scale,yaw,pitch;
         Matrix r,world;
-        bool isALive = false,Collision = false;
+        bool isALive = false, Collision = false, CollisionGround = false;
+        String modelHit;
 
         public Bullet(GraphicsDevice device,ContentManager content, Vector3 startPos,float cannonYaw,float cannonPitch,float _yaw)
         {
@@ -48,6 +49,7 @@ namespace TrabalhoFinal
             {
                 isALive = false;
                 Collision = false;
+                CollisionGround = true;
             }
             if (isALive)
             {
@@ -67,7 +69,7 @@ namespace TrabalhoFinal
             }
         }
 
-        public bool CollisionDectection(Vector3 enemyPos,Model enemyModel,Matrix[] enemyWorldMatrix)
+        private bool CollisionDectection(Vector3 enemyPos,Model enemyModel,Matrix[] enemyWorldMatrix)
         {
             //(P1-P2).Length < r1+r2
             BoundingSphere bulletSphere = bullet.Meshes[0].BoundingSphere;
@@ -88,18 +90,15 @@ namespace TrabalhoFinal
 
                 if (d < sphere.Radius)
                 {
-                    Console.WriteLine(position);
-                    Console.WriteLine(sphere.Radius);
-                    Console.WriteLine(sphere.Center);
-                    Console.WriteLine("HIT!!!!");
                     position = enemyPos;
+                    modelHit = enemyModel.Meshes[i].Name;
                     return true;
                 }
             }
             return false;
         }
 
-        public void Draw(GraphicsDevice device,ClsCamera camera,float yaw, Mapa map)
+        public void Draw(GraphicsDevice device,ClsCamera camera, Mapa map)
         {
             if (isALive)
             {
@@ -138,6 +137,46 @@ namespace TrabalhoFinal
                     mesh.Draw();
                 }
                 Collision = false;
+            }
+        }
+
+        public String ModelHit
+        {
+            get
+            {
+                return modelHit;
+            }
+        }
+
+        public Boolean CollisionHit
+        {
+            get
+            {
+                return Collision;
+            }
+        }
+
+        public Boolean Ground
+        {
+            get
+            {
+                return CollisionGround;
+            }
+        }
+
+        public Vector3 BulletPos
+        {
+            get
+            {
+                return position;
+            }
+        }
+
+        public Boolean Life
+        {
+            get
+            {
+                return isALive;
             }
         }
     }

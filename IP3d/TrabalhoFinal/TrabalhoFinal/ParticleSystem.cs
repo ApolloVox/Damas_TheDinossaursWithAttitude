@@ -8,12 +8,6 @@ using System.Threading.Tasks;
 
 namespace TrabalhoFinal
 {
-    enum PSType
-    {
-        wheel,
-        explosion
-    };
-
     class ParticleSystem
     {
         BasicEffect effect;
@@ -25,8 +19,8 @@ namespace TrabalhoFinal
         Random rnd;
         bool isMoving = false;
         Tank tank;
-        PSType active;
-        VertexPositionColor[] verticesPoeira;
+        VertexPositionColor[] verticesPoeira,verticesExplosion;
+        Vector3 explosionLocation;
 
         public ParticleSystem(GraphicsDevice device, ClsCamera camera, Tank tank)
         {
@@ -52,49 +46,77 @@ namespace TrabalhoFinal
 
         }
 
-        public void Update(GameTime gameTime, Vector3 Pos, Mapa map,PSType _PsType)
+        public void UpdatePoeira(GameTime gameTime, Vector3 Pos, Mapa map)
         {
-            active = _PsType;
-            switch (_PsType)
+            int total;
+
+            if (isMoving)
             {
-                case PSType.wheel:
-                    if (isMoving)
+                total = 10;
+                for (int i = 0; i < total; i++)
+                {
+                    if (poeira.Count < numberParticles)
                     {
-                        int total = 10;
-                        for (int i = 0; i < total; i++)
-                        {
-                            if (poeira.Count < numberParticles)
-                            {
-                                poeira.Add(new Dust(map.GetHeight(Pos), tank.TankDirection, 1f, rnd));
-                            }
-                            else
-                                break;
-                        }
-                        for (int i = 0; i < poeira.Count; i++)
-                        {
-                            //if(i == 5)
-                            // Console.WriteLine(poeira[i].Position);
-                            if (poeira[i].LifeTimer > 0.4f)
-                            {
-                                poeira.RemoveAt(i);
-                                i--;
-                            }
-                            else
-                                poeira[i].Update(gameTime, map, isMoving);
-                        }
+                        poeira.Add(new Dust(map.GetHeight(Pos), rnd));
                     }
-
-                    verticesPoeira = new VertexPositionColor[poeira.Count * 2];
-
-                    for (int i = 0; i < poeira.Count; i++)
+                    else
+                        break;
+                }
+                for (int i = 0; i < poeira.Count; i++)
+                {
+                    if (poeira[i].LifeTimer > 0.4f)
                     {
-                        verticesPoeira[i * 2] = new VertexPositionColor(poeira[i].Position, Color.GreenYellow);
-                        verticesPoeira[i * 2 + 1] = new VertexPositionColor(poeira[i].Position + new Vector3(0.01f, 0.0f, 0.01f), Color.Green);
+                        poeira.RemoveAt(i);
+                        i--;
                     }
-                    break;
+                    else
+                        poeira[i].Update(gameTime, map, isMoving);
+                }
+            }
 
-                case PSType.explosion:
+            verticesPoeira = new VertexPositionColor[poeira.Count * 2];
 
+            for (int i = 0; i < poeira.Count; i++)
+            {
+                verticesPoeira[i * 2] = new VertexPositionColor(poeira[i].Position, Color.GreenYellow);
+                verticesPoeira[i * 2 + 1] = new VertexPositionColor(poeira[i].Position + new Vector3(0.01f, 0.0f, 0.01f), Color.Green);
+            }
+        }
+
+
+        public void UpdateExplosion(GameTime gameTime,Mapa map)
+        {
+            for (int i = 0; i < explosion.Count; i++)
+            {
+                if (explosion[i].LifeTimer > 1.5f)
+                {
+                    explosion.RemoveAt(i);
+                    i--;
+                }
+                else
+                    explosion[i].Update(gameTime, map);
+            }
+
+            verticesExplosion = new VertexPositionColor[explosion.Count * 2];
+
+            for(int i = 0;i< explosion.Count;i++)
+            {
+                verticesExplosion[i * 2] = new VertexPositionColor(explosion[i].Position, Color.Red);
+                verticesExplosion[i * 2 + 1] = new VertexPositionColor(explosion[i].Position + new Vector3(0.01f, 0.0f, 0.01f), Color.Yellow);
+            }
+        }
+
+        public void AddParticlesExplosion(Vector3 pos)
+        {
+            explosionLocation = pos;
+            int total = 1000;
+            for (int i = 0; i < total; i++)
+            {
+                if (explosion.Count < numberParticles)
+                {
+                    explosion.Add(new Explosion(explosionLocation, rnd));
+                }
+                else
                     break;
             }
         }
@@ -107,14 +129,20 @@ namespace TrabalhoFinal
 
             effect.CurrentTechnique.Passes[0].Apply();
 
-            switch (active)
-            {
-                case PSType.wheel:
-                    device.DrawUserPrimitives(PrimitiveType.LineList, verticesPoeira, 0, poeira.Count);
-                    break;
-                case PSType.explosion:
-                    break;
-            }
+            if (poeira.Count != 0)
+                device.DrawUserPrimitives(PrimitiveType.LineList, verticesPoeira, 0, poeira.Count);
+        }
+
+        public void DrawExplosion()
+        {
+            effect.World = Matrix.Identity;
+            effect.View = camera.ViewMatrixCamera;
+            effect.Projection = camera.ProjectionMatrixCamera;
+
+            effect.CurrentTechnique.Passes[0].Apply();
+
+            if(explosion.Count != 0)
+            device.DrawUserPrimitives(PrimitiveType.LineList, verticesExplosion, 0, explosion.Count);
         }
 
         public Boolean Moving
