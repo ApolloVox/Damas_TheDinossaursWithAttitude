@@ -12,7 +12,7 @@ namespace TrabalhoFinal
     {
         BasicEffect effect;
         GraphicsDevice device;
-        int numberParticles;
+        int numberParticlesPoeira, numberParticlesExplosion;
         List<Dust> poeira;
         List<Explosion> explosion;
         ClsCamera camera;
@@ -33,7 +33,8 @@ namespace TrabalhoFinal
 
             this.map = map;
 
-            numberParticles = 200;
+            numberParticlesPoeira = 1500;
+            numberParticlesExplosion = 20000;
 
             this.camera = camera;
             this.device = device;
@@ -49,10 +50,10 @@ namespace TrabalhoFinal
 
             if (isMoving)
             {
-                total = 10;
+                total = 100;
                 for (int i = 0; i < total; i++)
                 {
-                    if (poeira.Count < numberParticles)
+                    if (poeira.Count < numberParticlesPoeira)
                     {
                         poeira.Add(new Dust(map.GetHeight(Pos), rnd));
                     }
@@ -85,7 +86,10 @@ namespace TrabalhoFinal
         {
             for (int i = 0; i < explosion.Count; i++)
             {
-                if (explosion[i].LifeTimer > 1.5f)
+                if (explosion[i].LifeTimer > 1.2f || explosion[i].Position.X <=0 
+                    || explosion[i].Position.Z <= 0 
+                    || explosion[i].Position.X >=127
+                    || explosion[i].Position.Z >= 127)
                 {
                     explosion.RemoveAt(i);
                     i--;
@@ -107,12 +111,29 @@ namespace TrabalhoFinal
         {
             Vector3 normalDir = map.InterpolyNormals(pos);
             explosionLocation = pos;
-            int total = 1000;
+            int total = 500;
             for (int i = 0; i < total; i++)
             {
-                if (explosion.Count < numberParticles)
+                if (explosion.Count < numberParticlesExplosion)
                 {
-                    explosion.Add(new Explosion(explosionLocation,normalDir, rnd));
+                    explosion.Add(new Explosion(explosionLocation,normalDir, rnd,1));
+                }
+                else
+                    break;
+            }
+        }
+
+        public void AddParticlesExplosionCannon(Vector3 pos,float cannonPitch,float cannonYaw,float yaw)
+        {
+            Vector3 direction = new Vector3((float)Math.Cos(yaw - cannonYaw), cannonPitch-0.07f, (float)Math.Sin(yaw - cannonYaw));
+            direction.Normalize();
+            int total = 100;
+
+            for(int i = 0;i< total;i++)
+            {
+                if (explosion.Count < numberParticlesExplosion)
+                {
+                    explosion.Add(new Explosion(pos - direction/10f, -direction, rnd,2));
                 }
                 else
                     break;

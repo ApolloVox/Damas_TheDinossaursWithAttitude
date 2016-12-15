@@ -15,6 +15,7 @@ namespace TrabalhoFinal
         Texture2D mapaImagem,texture;
         Matrix worldMatrix;
         Color[] pixeis;
+        GraphicsDevice device;
 
         VertexPositionNormalTexture[] vertices;
         short[] verIndex;
@@ -24,6 +25,7 @@ namespace TrabalhoFinal
 
         public Mapa(GraphicsDevice device, ContentManager Content)
         {
+            this.device = device;
             effect = new BasicEffect(device);
             worldMatrix = Matrix.Identity;
             mapaImagem = Content.Load<Texture2D>("lh3d1");
@@ -319,6 +321,116 @@ namespace TrabalhoFinal
             position.Y = Y;
 
             return position;
+        }
+
+        public void RecalculateHeight(Vector3 position)
+        {
+            Vector3[] verticesNewNormals = new Vector3[4];
+            mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Position.Y -= 0.5f;
+            mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Position.Y -= 0.5f;
+            mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position.Y -= 0.5f;
+            mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position.Y -= 0.5f;
+
+            verticesNewNormals[0] = mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[1] = mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[2] = mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[3] = mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position;
+
+            RecalculateNormals(verticesNewNormals);
+
+            vertexBuffer = new VertexBuffer(device,
+            typeof(VertexPositionNormalTexture),
+            vertices.Length,
+             BufferUsage.None);
+
+            vertexBuffer.SetData<VertexPositionNormalTexture>(vertices);
+
+            indexBuffer = new IndexBuffer(device,
+                typeof(short),
+                verIndex.Length,
+                BufferUsage.None);
+
+            indexBuffer.SetData(verIndex);
+        }
+
+        private void RecalculateNormals(Vector3[] vectorsNormals)
+        {
+            for(int j = 0;j<vectorsNormals.Length;j++)
+            {
+                //Produto externo (V0 - p) * (V1-p)
+                Vector3[] normais = new Vector3[8];
+                int contador = 0;
+                int x = (int)vectorsNormals[j].X;
+                int z = (int)vectorsNormals[j].Z;
+
+                //Left Up
+                if (x - 1 >= 0 && z - 1 >= 0)
+                {
+                    normais[contador] = Vector3.Subtract(vertices[x - 1 + (z - 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                    contador++;
+                }
+                //Center Up
+                if (z - 1 >= 0)
+                {
+                    normais[contador] = Vector3.Subtract(vertices[x + (z - 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                    contador++;
+                }
+                //Right Up
+                if (x + 1 < maxHeight && z - 1 >= 0)
+                {
+                    normais[contador] = Vector3.Subtract(vertices[x + 1 + (z - 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                    contador++;
+                }
+                //Right
+                if (x + 1 < maxHeight)
+                {
+                    normais[contador] = Vector3.Subtract(vertices[x + 1 + z * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                    contador++;
+                }
+                //Down Right
+                if (x + 1 < mapaImagem.Width && z + 1 < maxHeight)
+                {
+                    normais[contador] = Vector3.Subtract(vertices[x + 1 + (z + 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                    contador++;
+                }
+                //Down Center
+                if (z + 1 < maxHeight)
+                {
+                    normais[contador] = Vector3.Subtract(vertices[x + (z + 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                    contador++;
+                }
+                //Down Left
+                if (x - 1 >= 0 && z + 1 < maxHeight)
+                {
+                    normais[contador] = Vector3.Subtract(vertices[x - 1 + (z + 1) * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                    contador++;
+                }
+                //Left
+                if (x - 1 >= 0)
+                {
+                    normais[contador] = Vector3.Subtract(vertices[x - 1 + z * (int)maxHeight].Position, vertices[x + z * (int)maxHeight].Position);
+                    contador++;
+                }
+
+                //Cálculo final das normais
+                for (int i = contador - 1; i >= 1; i--)
+                {
+                    normais[i] = -Vector3.Cross(normais[i - 1], normais[i]);
+
+                }
+
+                //Obtenção da media das normais e atribuindo ao vertice central
+                // a normal correspondente
+                Vector3 media = Vector3.Zero;
+                for (int i = 0; i < contador; i++)
+                {
+                    media += normais[i];
+                }
+
+                media /= (float)contador;
+                media.Normalize();
+                vertices[x + z * (int)maxHeight].Normal = media;
+            }
         }
     }
 }

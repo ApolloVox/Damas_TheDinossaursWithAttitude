@@ -29,12 +29,11 @@ namespace TrabalhoFinal
             gravity = 9.8f;
             time = 0;
             scale = 0.03f;
-            yaw = cannonYaw;
             pitch = cannonPitch;
             angle = -cannonPitch;
             isALive = true;
 
-            direction = new Vector3((float)Math.Cos(_yaw - yaw), 0, (float)Math.Sin(_yaw - yaw));
+            direction = new Vector3((float)Math.Cos(_yaw - cannonYaw), 0, (float)Math.Sin(_yaw - cannonYaw));
 
             direction.Normalize();
         }
@@ -44,12 +43,20 @@ namespace TrabalhoFinal
             //P = P+v*t
             //V = V+A*t
             oldPos = position;
-            if (map.GetHeight(position).Y >= position.Y)
+            if (position.X <= 0 || position.Z <= 0 || position.X >= 127 || position.Z >= 127)
             {
                 isALive = false;
                 Collision = false;
                 CollisionGround = true;
             }
+            else if (map.GetHeight(position).Y >= position.Y)
+            {
+                map.RecalculateHeight(position);
+                isALive = false;
+                Collision = false;
+                CollisionGround = true;
+            }
+
             if (isALive)
             {
                 float velocityY = velocity * (float)Math.Sin(angle) - (gravity * (time * time) / 2f);
@@ -127,7 +134,7 @@ namespace TrabalhoFinal
                 {
                     foreach (BasicEffect effect in mesh.Effects)
                     {
-                        world = Matrix.CreateScale(scale) * r * Matrix.CreateRotationY(-MathHelper.PiOver2) * Matrix.CreateTranslation(position);
+                        world = Matrix.CreateScale(scale) * r * Matrix.CreateRotationY(-MathHelper.PiOver2)*Matrix.CreateFromYawPitchRoll(0,-pitch,0) * Matrix.CreateTranslation(position);
                         effect.World = world;
                         effect.View = camera.ViewMatrixCamera;
                         effect.Projection = camera.ProjectionMatrixCamera;

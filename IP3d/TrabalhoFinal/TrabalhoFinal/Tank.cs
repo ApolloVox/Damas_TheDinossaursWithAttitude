@@ -110,12 +110,17 @@ namespace TrabalhoFinal
             //Lista que obtem informação sobre as balas de canhao
             fireTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (player == TankNumber.Tank1)
+            {
                 if (keys.IsKeyDown(Keys.Space) && fireTimer > fireRate)
                 {
                     //creação de uma bala mas ainda sem movimento
                     ammoList.Add(new Bullet(device, content, boneTransforms[tankModel.Meshes["canon_geo"].ParentBone.Index].Translation, cannonYaw, cannonPitch, yaw));
                     fireTimer = 0;
+                    particleSystem.AddParticlesExplosionCannon(boneTransforms[tankModel.Meshes["canon_geo"].ParentBone.Index].Translation, cannonPitch, cannonYaw, yaw);
                 }
+
+                particleSystem.UpdateExplosion(gameTime);
+            }
 
             //Impedir que saia do terreno de jogo
             if (player == TankNumber.Tank1)
@@ -275,6 +280,7 @@ namespace TrabalhoFinal
 
                 tankPos.X -= dir.X * speed;
                 tankPos.Z -= dir.Z * speed;
+                wheelRotation += 0.05f;
             }
             else
                 switch (CalculateSteerMoviment(angle, direction))
@@ -285,6 +291,7 @@ namespace TrabalhoFinal
 
                         tankPos.X -= dir.X * speed;
                         tankPos.Z -= dir.Z * speed;
+                        wheelRotation += 0.05f;
                         yaw -= MathHelper.ToRadians(steerRotation);
                         break;
 
@@ -294,12 +301,14 @@ namespace TrabalhoFinal
 
                         tankPos.X -= dir.X * speed;
                         tankPos.Z -= dir.Z * speed;
+                        wheelRotation += 0.05f;
                         yaw -= MathHelper.ToRadians(steerRotation);
                         break;
 
                     case 0:
                         tankPos.X -= dir.X * speed;
                         tankPos.Z -= dir.Z * speed;
+                        wheelRotation += 0.05f;
                         yaw -= MathHelper.ToRadians(steerRotation);
                         break;
                 }
