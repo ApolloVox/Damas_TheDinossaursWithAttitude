@@ -12,13 +12,13 @@ namespace TrabalhoFinal
         Vector3 pos, dir;
         float timer = 0,speed = 0.05f;
 
-        public Explosion(Vector3 position,Random rnd)
+        public Explosion(Vector3 position,Vector3 direction,Random rnd)
         {
             pos = position;
 
-            dir = new Vector3((float)rnd.NextDouble() * 0.4f,
-                (float)rnd.NextDouble() * 0.8f,
-                (float)rnd.NextDouble() * 0.4f);
+            dir = new Vector3(direction.X + (float)rnd.NextDouble() * 0.4f-0.2f,
+                direction.Y + (float)rnd.NextDouble() * 0.8f-0.4f,
+                direction.Z + (float)rnd.NextDouble() * 0.4f-0.2f);
         }
 
         public void Update(GameTime gametime, Mapa map)

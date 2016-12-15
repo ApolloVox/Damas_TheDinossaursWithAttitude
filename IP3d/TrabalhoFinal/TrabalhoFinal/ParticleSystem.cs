@@ -21,8 +21,9 @@ namespace TrabalhoFinal
         Tank tank;
         VertexPositionColor[] verticesPoeira,verticesExplosion;
         Vector3 explosionLocation;
+        Mapa map;
 
-        public ParticleSystem(GraphicsDevice device, ClsCamera camera, Tank tank)
+        public ParticleSystem(GraphicsDevice device, ClsCamera camera, Tank tank,Mapa map)
         {
             poeira = new List<Dust>();
             explosion = new List<Explosion>();
@@ -30,11 +31,7 @@ namespace TrabalhoFinal
             effect = new BasicEffect(device);
             effect.VertexColorEnabled = true;
 
-            //fogOn
-            effect.FogEnabled = true;
-            effect.FogColor = Color.Black.ToVector3(); // For best results, ake this color whatever your background is.
-            effect.FogStart = 20f;
-            effect.FogEnd = 100f;
+            this.map = map;
 
             numberParticles = 200;
 
@@ -46,7 +43,7 @@ namespace TrabalhoFinal
 
         }
 
-        public void UpdatePoeira(GameTime gameTime, Vector3 Pos, Mapa map)
+        public void UpdatePoeira(GameTime gameTime, Vector3 Pos)
         {
             int total;
 
@@ -84,7 +81,7 @@ namespace TrabalhoFinal
         }
 
 
-        public void UpdateExplosion(GameTime gameTime,Mapa map)
+        public void UpdateExplosion(GameTime gameTime)
         {
             for (int i = 0; i < explosion.Count; i++)
             {
@@ -108,13 +105,14 @@ namespace TrabalhoFinal
 
         public void AddParticlesExplosion(Vector3 pos)
         {
+            Vector3 normalDir = map.InterpolyNormals(pos);
             explosionLocation = pos;
             int total = 1000;
             for (int i = 0; i < total; i++)
             {
                 if (explosion.Count < numberParticles)
                 {
-                    explosion.Add(new Explosion(explosionLocation, rnd));
+                    explosion.Add(new Explosion(explosionLocation,normalDir, rnd));
                 }
                 else
                     break;

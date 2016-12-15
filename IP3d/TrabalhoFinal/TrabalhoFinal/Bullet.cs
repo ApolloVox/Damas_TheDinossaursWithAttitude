@@ -24,7 +24,6 @@ namespace TrabalhoFinal
             bullet = content.Load<Model>("projektil FBX");
             position = startPos;
             start = startPos;
-            position.Y = position.Y + 0.3f;
 
             velocity = 0.4f;
             gravity = 9.8f;
@@ -80,8 +79,21 @@ namespace TrabalhoFinal
                 BoundingSphere sphere = enemyModel.Meshes[i].BoundingSphere;
                 sphere = sphere.Transform(enemyWorldMatrix[i]);
 
-                //HERON'S FORMULA
-                float a = (sphere.Center - position).Length();
+                if ((sphere.Center - bulletSphere.Center).Length() < sphere.Radius + bulletSphere.Radius)
+                {
+                    position = enemyPos;
+                    modelHit = enemyModel.Meshes[i].Name;
+                    return true;
+                }
+            }
+
+            for (int i = 0; i < enemyModel.Meshes.Count; i++)
+            {
+                BoundingSphere sphere = enemyModel.Meshes[i].BoundingSphere;
+                sphere = sphere.Transform(enemyWorldMatrix[i]);
+
+            //HERON'S FORMULA
+            float a = (sphere.Center - position).Length();
                 float b = (sphere.Center - oldPos).Length();
                 float c = (oldPos - position).Length();
                 float sp = (a + b + c) / 2f;
