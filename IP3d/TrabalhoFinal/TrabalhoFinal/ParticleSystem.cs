@@ -33,8 +33,8 @@ namespace TrabalhoFinal
 
             this.map = map;
 
-            numberParticlesPoeira = 1500;
-            numberParticlesExplosion = 20000;
+            numberParticlesPoeira = 10000;
+            numberParticlesExplosion = 200000;
 
             this.camera = camera;
             this.device = device;
@@ -111,7 +111,7 @@ namespace TrabalhoFinal
         {
             Vector3 normalDir = map.InterpolyNormals(pos);
             explosionLocation = pos;
-            int total = 500;
+            int total = 750;
             for (int i = 0; i < total; i++)
             {
                 if (explosion.Count < numberParticlesExplosion)
@@ -123,17 +123,15 @@ namespace TrabalhoFinal
             }
         }
 
-        public void AddParticlesExplosionCannon(Vector3 pos,float cannonPitch,float cannonYaw,float yaw)
+        public void AddParticlesExplosionCannon(Vector3 pos,Vector3 dir)
         {
-            Vector3 direction = new Vector3((float)Math.Cos(yaw - cannonYaw), cannonPitch-0.07f, (float)Math.Sin(yaw - cannonYaw));
-            direction.Normalize();
             int total = 100;
 
             for(int i = 0;i< total;i++)
             {
                 if (explosion.Count < numberParticlesExplosion)
                 {
-                    explosion.Add(new Explosion(pos - direction/10f, -direction, rnd,2));
+                    explosion.Add(new Explosion(pos - dir/10f, -dir, rnd,2));
                 }
                 else
                     break;

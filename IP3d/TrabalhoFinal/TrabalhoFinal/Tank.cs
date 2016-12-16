@@ -33,6 +33,11 @@ namespace TrabalhoFinal
         ContentManager content;
         GraphicsDevice device;
         TankNumber player;
+        Vector3 tankfront, tankright, tankNormal;
+        Boolean bot = true, path = false;
+        Vector3[] pathList;
+        Random rnd;
+        int index;
 
         ParticleSystem particleSystem;
 
@@ -78,8 +83,7 @@ namespace TrabalhoFinal
             if (player == TankNumber.Tank1)
                 tankPos = new Vector3(20f, 15f, 20f);
             else
-                //tankPos = new Vector3(70f, 15f, 70f);
-                tankPos = new Vector3(30f, 15f, 40f);
+                tankPos = new Vector3(70f, 15f, 70f);
 
             dir = new Vector3(0, 0, 0);
 
@@ -92,6 +96,14 @@ namespace TrabalhoFinal
             ammoList = new List<Bullet>();
 
             particleSystem = new ParticleSystem(device, camera, this,mapa);
+
+            rnd = new Random();
+            pathList = new Vector3[5];
+            pathList[0] = map.GetHeight(new Vector3(100, 0, 100));
+            pathList[1] = map.GetHeight(new Vector3(20, 0, 20));
+            pathList[2] = map.GetHeight(new Vector3(100, 0, 20));
+            pathList[3] = map.GetHeight(new Vector3(20, 0, 100));
+            pathList[4] = map.GetHeight(new Vector3(63, 0, 63));
         }
 
         public void Update(GameTime gameTime, Vector3 enemyPos, Model enemyModel, Matrix[] enemyWordlMatrix)
@@ -103,9 +115,30 @@ namespace TrabalhoFinal
             if (player == TankNumber.Tank1)
                 Move(keys);
             else if (player == TankNumber.Tank2)
-                FollowPlayer(enemyPos, keys);
+            {
+                if ((tankPos - enemyPos).Length() > 30f)
+                {
+                    if (!path)
+                    {
+                        index = (int)rnd.Next(0, 5);
+                        path = true;
+                    }
+                    else
+                    {
+                        FollowPlayer(pathList[index], keys);
+                        if ((tankPos - pathList[index]).Length() < 3f)
+                            path = false;
+                    }
+                }
+                else
+                    FollowPlayer(enemyPos, keys);
+            }
 
             tankPos.Y = map.GetHeight(tankPos).Y;
+
+            //direcção da bala
+            Vector3 bulletDir = Vector3.Transform(tankfront, Matrix.CreateFromAxisAngle(tankright, cannonPitch) * Matrix.CreateFromAxisAngle(tankNormal, cannonYaw));
+            bulletDir.Normalize();
 
             //Lista que obtem informação sobre as balas de canhao
             fireTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -113,10 +146,10 @@ namespace TrabalhoFinal
             {
                 if (keys.IsKeyDown(Keys.Space) && fireTimer > fireRate)
                 {
-                    //creação de uma bala mas ainda sem movimento
-                    ammoList.Add(new Bullet(device, content, boneTransforms[tankModel.Meshes["canon_geo"].ParentBone.Index].Translation, cannonYaw, cannonPitch, yaw));
+                    //creação de uma bala 
+                    ammoList.Add(new Bullet(device, content, boneTransforms[tankModel.Meshes["canon_geo"].ParentBone.Index].Translation,  cannonPitch,bulletDir));
                     fireTimer = 0;
-                    particleSystem.AddParticlesExplosionCannon(boneTransforms[tankModel.Meshes["canon_geo"].ParentBone.Index].Translation, cannonPitch, cannonYaw, yaw);
+                    particleSystem.AddParticlesExplosionCannon(boneTransforms[tankModel.Meshes["canon_geo"].ParentBone.Index].Translation, bulletDir);
                 }
 
                 particleSystem.UpdateExplosion(gameTime);
@@ -131,24 +164,36 @@ namespace TrabalhoFinal
                     tankPos = oldPos;
             }
 
+            //Impedir que o Jogador2 ou Bot saiam de jogo
             if (player == TankNumber.Tank2)
             {
+                //Se a distância entra o jogador e bot for menos que 5f
+                //entao aponta o canhão
+                if (bot)
+                {
+                    if ((tankPos - enemyPos).Length() < 5f)
+                    {
+                        if (!AimCannon(enemyPos))
+                        {
+                            tankPos = oldPos;
+                            FollowPlayer(enemyPos, keys);
+                        }
+                        else
+                        {
+
+                            tankPos = oldPos;
+                            yaw = oldyaw;
+                        }
+                    }
+                }
+
                 if ((tankPos.X < 0 || tankPos.Z < 0) || CollisionBetweenTanks(enemyModel, enemyWordlMatrix))
                     tankPos = oldPos;
                 if ((tankPos.X > 127 || tankPos.Z > 127) || CollisionBetweenTanks(enemyModel, enemyWordlMatrix))
                     tankPos = oldPos;
-                if ((tankPos - enemyPos).Length() < 5f)
-                {
-                    if (!AimCannon(enemyPos))
-                        FollowPlayer(enemyPos, keys);
-                    else
-                    {
-                        tankPos = oldPos;
-                        yaw = oldyaw;
-                    }
-                }
             }
 
+            //Para efeitos de Draw das particulas
             if (tankPos != oldPos)
                 particleSystem.Moving = true;
             else
@@ -159,10 +204,24 @@ namespace TrabalhoFinal
             dir.Z = (float)Math.Sin(yaw);
             dir.Y = 0;
 
+            //Update do bullet do jogador
             if (player == TankNumber.Tank1)
                 foreach (Bullet bullet in ammoList)
                 {
-                    bullet.Update(map, enemyPos, enemyModel, enemyWordlMatrix);
+                    bullet.Update(gameTime,map, enemyPos, enemyModel, enemyWordlMatrix);
+                    if (bullet.CollisionHit)
+                    {
+                        particleSystem.AddParticlesExplosion(enemyWordlMatrix[enemyModel.Meshes[bullet.ModelHit].ParentBone.Index].Translation);
+                    }
+                    else if (bullet.Ground)
+                    {
+                        particleSystem.AddParticlesExplosion(map.GetHeight(bullet.BulletPos));
+                    }
+                }
+            else if(player == TankNumber.Tank2)
+                foreach (Bullet bullet in ammoList)
+                {
+                    bullet.Update(gameTime, map, enemyPos, enemyModel, enemyWordlMatrix);
                     if (bullet.CollisionHit)
                     {
                         particleSystem.AddParticlesExplosion(enemyWordlMatrix[enemyModel.Meshes[bullet.ModelHit].ParentBone.Index].Translation);
@@ -173,12 +232,14 @@ namespace TrabalhoFinal
                     }
                 }
 
+            //Update das particulas
             particleSystem.UpdateExplosion(gameTime);
             particleSystem.UpdatePoeira(gameTime, boneTransforms[tankModel.Meshes["l_back_wheel_geo"].ParentBone.Index].Translation);
             particleSystem.UpdatePoeira(gameTime, boneTransforms[tankModel.Meshes["r_back_wheel_geo"].ParentBone.Index].Translation);
 
         }
 
+        //Função que permite indicar se houve colisão ou nao com os tanks
         private bool CollisionBetweenTanks(Model enemyModel, Matrix[] enemyMatrix)
         {
             for (int i = 0; i < tankModel.Meshes.Count; i++)
@@ -203,6 +264,7 @@ namespace TrabalhoFinal
             return false;
         }
 
+        //Função que Trata do movimento do tank do player 1
         public void Move(KeyboardState keys)
         {
             //Movimento do tank de acorod com o yaw do steerRotation
@@ -255,87 +317,104 @@ namespace TrabalhoFinal
 
         }
 
+        //função que trata do movimento do jogador 2 ou do bot
         private void FollowPlayer(Vector3 tankTarget, KeyboardState keys)
         {
-            Vector3 direction = tankPos - tankTarget;
-            direction.Normalize();
-
-            float angle = (float)Math.Acos(Vector2.Dot(new Vector2(dir.X, dir.Z), new Vector2(direction.X, direction.Z)));
-
-            if ((dir.X - 0.05f < direction.X) && (dir.X + 0.05f > direction.X) && (dir.Z - 0.05f < direction.Z) && (dir.Z + 0.05f > direction.Z))
+            if (keys.IsKeyDown(Keys.F6))
             {
-                if (steerRotation > 0.1f)
+                Console.WriteLine("Bot Offline!");
+                bot = false;
+            }
+            if (keys.IsKeyDown(Keys.F7))
+            {
+                Console.WriteLine("Bot Online!");
+                bot = true;
+            }
+
+            if (bot)
+            {
+                Vector3 direction = tankPos - tankTarget;
+                direction.Normalize();
+
+                float angle = (float)Math.Acos(Vector2.Dot(new Vector2(dir.X, dir.Z), new Vector2(direction.X, direction.Z)));
+
+                if ((dir.X - 0.05f < direction.X) && (dir.X + 0.05f > direction.X) && (dir.Z - 0.05f < direction.Z) && (dir.Z + 0.05f > direction.Z))
                 {
-                    steerRotation -= 0.1f;
-                    //yaw += MathHelper.ToRadians(steerRotation);
-                }
-                else if (steerRotation < -0.1f)
-                {
-                    steerRotation += 0.1f;
+                    if (steerRotation > 0.1f)
+                    {
+                        steerRotation -= 0.1f;
+                        //yaw += MathHelper.ToRadians(steerRotation);
+                    }
+                    else if (steerRotation < -0.1f)
+                    {
+                        steerRotation += 0.1f;
+                    }
+                    else
+                    {
+                        yaw += MathHelper.ToRadians(steerRotation);
+                    }
+
+                    tankPos.X -= dir.X * speed;
+                    tankPos.Z -= dir.Z * speed;
+                    wheelRotation += 0.05f;
                 }
                 else
-                {
-                    yaw += MathHelper.ToRadians(steerRotation);
-                }
+                    switch (CalculateSteerMoviment(angle, direction))
+                    {
+                        case 1:
+                            if (steerRotation <= 0.85f)
+                                steerRotation += 0.03f;
 
-                tankPos.X -= dir.X * speed;
-                tankPos.Z -= dir.Z * speed;
-                wheelRotation += 0.05f;
+                            tankPos.X -= dir.X * speed;
+                            tankPos.Z -= dir.Z * speed;
+                            wheelRotation += 0.05f;
+                            yaw -= MathHelper.ToRadians(steerRotation);
+                            break;
+
+                        case -1:
+                            if (steerRotation >= -0.85f)
+                                steerRotation -= 0.03f;
+
+                            tankPos.X -= dir.X * speed;
+                            tankPos.Z -= dir.Z * speed;
+                            wheelRotation += 0.05f;
+                            yaw -= MathHelper.ToRadians(steerRotation);
+                            break;
+
+                        case 0:
+                            tankPos.X -= dir.X * speed;
+                            tankPos.Z -= dir.Z * speed;
+                            wheelRotation += 0.05f;
+                            yaw -= MathHelper.ToRadians(steerRotation);
+                            break;
+                    }
             }
             else
-                switch (CalculateSteerMoviment(angle, direction))
+            {
+                if (keys.IsKeyDown(Keys.K))
                 {
-                    case 1:
-                        if (steerRotation <= 0.85f)
-                            steerRotation += 0.03f;
-
-                        tankPos.X -= dir.X * speed;
-                        tankPos.Z -= dir.Z * speed;
-                        wheelRotation += 0.05f;
-                        yaw -= MathHelper.ToRadians(steerRotation);
-                        break;
-
-                    case -1:
-                        if (steerRotation >= -0.85f)
-                            steerRotation -= 0.03f;
-
-                        tankPos.X -= dir.X * speed;
-                        tankPos.Z -= dir.Z * speed;
-                        wheelRotation += 0.05f;
-                        yaw -= MathHelper.ToRadians(steerRotation);
-                        break;
-
-                    case 0:
-                        tankPos.X -= dir.X * speed;
-                        tankPos.Z -= dir.Z * speed;
-                        wheelRotation += 0.05f;
-                        yaw -= MathHelper.ToRadians(steerRotation);
-                        break;
+                    tankPos.X += dir.X * speed;
+                    tankPos.Z += dir.Z * speed;
+                    wheelRotation -= 0.05f;
+                    yaw += MathHelper.ToRadians(steerRotation);
                 }
-
-            if (keys.IsKeyDown(Keys.K))
-            {
-                tankPos.X += dir.X * speed;
-                tankPos.Z += dir.Z * speed;
-                wheelRotation -= 0.05f;
-                yaw += MathHelper.ToRadians(steerRotation);
-            }
-            if (keys.IsKeyDown(Keys.I))
-            {
-                tankPos.X -= dir.X * speed;
-                tankPos.Z -= dir.Z * speed;
-                wheelRotation += 0.05f;
-                yaw -= MathHelper.ToRadians(steerRotation);
-            }
-            if (keys.IsKeyDown(Keys.J))
-            {
-                if (steerRotation <= 0.85f)
-                    steerRotation += 0.03f;
-            }
-            if (keys.IsKeyDown(Keys.L))
-            {
-                if (steerRotation >= -0.85f)
-                    steerRotation -= 0.03f;
+                if (keys.IsKeyDown(Keys.I))
+                {
+                    tankPos.X -= dir.X * speed;
+                    tankPos.Z -= dir.Z * speed;
+                    wheelRotation += 0.05f;
+                    yaw -= MathHelper.ToRadians(steerRotation);
+                }
+                if (keys.IsKeyDown(Keys.J))
+                {
+                    if (steerRotation <= 0.85f)
+                        steerRotation += 0.03f;
+                }
+                if (keys.IsKeyDown(Keys.L))
+                {
+                    if (steerRotation >= -0.85f)
+                        steerRotation -= 0.03f;
+                }
             }
         }
 
@@ -357,6 +436,20 @@ namespace TrabalhoFinal
             float cosino = Vector3.Dot(direction, test) / (direction.Length() * test.Length());
             float cosino2 = Vector3.Dot(direction, test2) / (direction.Length() * test2.Length());
 
+            if (fireTimer > fireRate)
+            {
+                if (cosino >= 1 - 0.001f || cosino2 >= 1 - 0.001f)
+                {
+                    Vector3 bulletDir = Vector3.Transform(tankfront, Matrix.CreateFromAxisAngle(tankright, cannonPitch) * Matrix.CreateFromAxisAngle(tankNormal, cannonYaw));
+                    bulletDir.Normalize();
+
+                    ammoList.Add(new Bullet(device, content, boneTransforms[tankModel.Meshes["canon_geo"].ParentBone.Index].Translation, cannonPitch, bulletDir));
+                    fireTimer = 0;
+                    particleSystem.AddParticlesExplosionCannon(boneTransforms[tankModel.Meshes["canon_geo"].ParentBone.Index].Translation, bulletDir);
+
+                }
+            }
+
             if (cosino > cosino2)
             {
                 if (cannonYaw <= MathHelper.Pi / 3f + MathHelper.PiOver2)
@@ -371,6 +464,7 @@ namespace TrabalhoFinal
                 else
                     return false;
             }
+
             return true;
         }
 
@@ -403,13 +497,17 @@ namespace TrabalhoFinal
         {
             //Calculo da matriz rotação com a normal do terreno
             Vector3 N = map.InterpolyNormals(tankPos);
-            Vector3 right = Vector3.Cross(new Vector3(dir.X, 0, dir.Z), N);
+            Vector3 right = Vector3.Cross(new Vector3(dir.X, dir.Y, dir.Z), N);
             Vector3 d = Vector3.Cross(N, right);
 
             r = Matrix.Identity;
             r.Forward = d;
             r.Up = N;
             r.Right = right;
+
+            tankNormal = N;
+            tankfront = r.Forward;
+            tankright = r.Right;
 
             //Deslocaçoes dos varios bones do tank
             tankModel.Root.Transform = Matrix.CreateScale(scale) * r * Matrix.CreateTranslation(tankPos);

@@ -14,31 +14,27 @@ namespace TrabalhoFinal
         Vector3 position,start,direction,oldPos;
         BoundingSphere sphere;
         Model bullet;
-        float velocity,gravity,angle,time,scale,yaw,pitch;
+        float time,scale, pitch,velocity;
         Matrix r,world;
         bool isALive = false, Collision = false, CollisionGround = false;
         String modelHit;
 
-        public Bullet(GraphicsDevice device,ContentManager content, Vector3 startPos,float cannonYaw,float cannonPitch,float _yaw)
+        public Bullet(GraphicsDevice device,ContentManager content, Vector3 startPos,float cannonPitch,Vector3 dir)
         {
             bullet = content.Load<Model>("projektil FBX");
             position = startPos;
             start = startPos;
 
-            velocity = 0.4f;
-            gravity = 9.8f;
+            velocity = 0.3f;
             time = 0;
             scale = 0.03f;
             pitch = cannonPitch;
-            angle = -cannonPitch;
             isALive = true;
-
-            direction = new Vector3((float)Math.Cos(_yaw - cannonYaw), 0, (float)Math.Sin(_yaw - cannonYaw));
-
+            direction = new Vector3(dir.X, dir.Y, dir.Z);
             direction.Normalize();
         }
 
-        public void Update(Mapa map,Vector3 enemyPos,Model enemyModel,Matrix[] enemyWorldMatrix)
+        public void Update(GameTime gametime, Mapa map,Vector3 enemyPos,Model enemyModel,Matrix[] enemyWorldMatrix)
         {
             //P = P+v*t
             //V = V+A*t
@@ -59,10 +55,9 @@ namespace TrabalhoFinal
 
             if (isALive)
             {
-                float velocityY = velocity * (float)Math.Sin(angle) - (gravity * (time * time) / 2f);
                 position.X += -direction.X * velocity;
                 position.Z += -direction.Z * velocity;
-                position.Y += velocityY;
+                position.Y += -direction.Y * velocity - time;
 
                 time += 0.01f;
                 if (CollisionDectection(enemyPos, enemyModel, enemyWorldMatrix))
@@ -134,7 +129,9 @@ namespace TrabalhoFinal
                 {
                     foreach (BasicEffect effect in mesh.Effects)
                     {
-                        world = Matrix.CreateScale(scale) * r * Matrix.CreateRotationY(-MathHelper.PiOver2)*Matrix.CreateFromYawPitchRoll(0,-pitch,0) * Matrix.CreateTranslation(position);
+                        world = Matrix.CreateScale(scale) * r * 
+                            Matrix.CreateRotationY(-MathHelper.PiOver2)*
+                            Matrix.CreateFromYawPitchRoll(-direction.X * velocity, -direction.Y * velocity - time, -direction.Z * velocity) * Matrix.CreateTranslation(position);
                         effect.World = world;
                         effect.View = camera.ViewMatrixCamera;
                         effect.Projection = camera.ProjectionMatrixCamera;

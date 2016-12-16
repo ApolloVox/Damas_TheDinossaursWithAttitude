@@ -322,19 +322,38 @@ namespace TrabalhoFinal
 
             return position;
         }
-
+        
+        //Após contacto com a bala, descer a altura do terreno mas
+        //só nos vertices afectados
         public void RecalculateHeight(Vector3 position)
         {
-            Vector3[] verticesNewNormals = new Vector3[4];
-            mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Position.Y -= 0.5f;
-            mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Position.Y -= 0.5f;
-            mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position.Y -= 0.5f;
-            mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position.Y -= 0.5f;
+            Vector3[] verticesNewNormals = new Vector3[16];
+            if(mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Position.Y - 0.5f > 0)
+                mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Position.Y -= 0.5f;
+            if (mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Position.Y - 0.5f > 0)
+                mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Position.Y -= 0.5f;
+            if (mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position.Y - 0.5f > 0)
+                mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position.Y -= 0.5f;
+            if (mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position.Y - 0.5f > 0)
+                mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position.Y -= 0.5f;
 
-            verticesNewNormals[0] = mapVertices[(int)(position.X) + (int)position.Z * (int)MapBoundariesHeight].Position;
-            verticesNewNormals[1] = mapVertices[(int)(position.X + 1) + (int)position.Z * (int)MapBoundariesHeight].Position;
-            verticesNewNormals[2] = mapVertices[(int)(position.X) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position;
-            verticesNewNormals[3] = mapVertices[(int)(position.X + 1) + (int)(position.Z + 1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[0] = mapVertices[(int)(position.X-1) + (int)(position.Z-1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[1] = mapVertices[(int)(position.X) + (int)(position.Z - 1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[2] = mapVertices[(int)(position.X+1) + (int)(position.Z - 1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[3] = mapVertices[(int)(position.X+2) + (int)(position.Z - 1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[4] = mapVertices[(int)(position.X - 1) + (int)(position.Z) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[5] = mapVertices[(int)(position.X) + (int)(position.Z) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[6] = mapVertices[(int)(position.X + 1) + (int)(position.Z) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[7] = mapVertices[(int)(position.X + 2) + (int)(position.Z) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[8] = mapVertices[(int)(position.X - 1) + (int)(position.Z+1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[9] = mapVertices[(int)(position.X) + (int)(position.Z+1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[10] = mapVertices[(int)(position.X + 1) + (int)(position.Z+1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[11] = mapVertices[(int)(position.X + 2) + (int)(position.Z+1) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[12] = mapVertices[(int)(position.X - 1) + (int)(position.Z + 2) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[13] = mapVertices[(int)(position.X) + (int)(position.Z + 2) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[14] = mapVertices[(int)(position.X + 1) + (int)(position.Z + 2) * (int)MapBoundariesHeight].Position;
+            verticesNewNormals[15] = mapVertices[(int)(position.X + 2) + (int)(position.Z + 2) * (int)MapBoundariesHeight].Position;
+
 
             RecalculateNormals(verticesNewNormals);
 
@@ -353,6 +372,7 @@ namespace TrabalhoFinal
             indexBuffer.SetData(verIndex);
         }
 
+        //Recalcular as normais dos vertices onde a altura foi afectada
         private void RecalculateNormals(Vector3[] vectorsNormals)
         {
             for(int j = 0;j<vectorsNormals.Length;j++)

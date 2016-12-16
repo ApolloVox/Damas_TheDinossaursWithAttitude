@@ -245,7 +245,7 @@ namespace TrabalhoFinal
             Vector3 dirFollow = new Vector3(tankPos.X * (float)Math.Cos(yaw), 1f, tankPos.Z * (float)Math.Sin(yaw));
             dirFollow.Normalize();
             position = tankPos + dirFollow*2f;
-            position.Y += 0.5f;
+            position.Y += 1.5f;
             dir = tankPos;
             dir.Y = (float)Math.Sin(pitch) + position.Y;
 
