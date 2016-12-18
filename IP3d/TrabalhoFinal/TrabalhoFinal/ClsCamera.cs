@@ -29,7 +29,7 @@ namespace TrabalhoFinal
         Mapa map;
         CameraSelect camState;
 
-        public ClsCamera(GraphicsDevice device, Vector3 startPos,Mapa map)
+        public ClsCamera(GraphicsDevice device,Mapa map)
         {
             camState = CameraSelect.Surface;
 
@@ -42,6 +42,7 @@ namespace TrabalhoFinal
 
             dir = Vector3.Zero - position;
             dir.Normalize();
+
             effect = new BasicEffect(device);
             float aspectRatio = (float)(width /
                 height);
@@ -49,6 +50,7 @@ namespace TrabalhoFinal
                 position,
                 dir,
                 Vector3.Up);
+
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
                 MathHelper.ToRadians(45.0f),
                 aspectRatio, 0.5f, 100.0f);
@@ -145,7 +147,7 @@ namespace TrabalhoFinal
 
                     break;
             }
-           
+
             //actualizar viewMatriz da camera
             viewMatrix = Matrix.CreateLookAt(position, dir, Vector3.Up);
             Mouse.SetPosition((int)(width / 2), (int)(height / 2));
@@ -245,7 +247,7 @@ namespace TrabalhoFinal
             Vector3 dirFollow = new Vector3(tankPos.X * (float)Math.Cos(yaw), 1f, tankPos.Z * (float)Math.Sin(yaw));
             dirFollow.Normalize();
             position = tankPos + dirFollow*2f;
-            position.Y += 1.5f;
+            position.Y += 1f;
             dir = tankPos;
             dir.Y = (float)Math.Sin(pitch) + position.Y;
 
